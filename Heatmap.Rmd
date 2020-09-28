@@ -1,0 +1,136 @@
+---
+title: "Heatmap"
+output: html_notebook
+---
+
+
+After determining the unique clusters generated from each algorithm, create a distribution table of the frequencies of each possible pair of labels: 
+
+```{r}
+
+distribution_table <- function(uniqueclusters1, uniqueclusters2, data) {
+  distribution_table[] <- 0
+  for (cluster1 in 1:nrow(uniqueclusters1)) {
+    for (cluster2 in 1:nrow(uniqueclusters2)) {
+      for (row in 1:nrow(data)) {
+        if ((data[row,2] == uniqueclusters1[cluster1,]) & (data[row,3] == uniqueclusters2[cluster2,])) {
+          distribution_table[cluster1, cluster2] <- distribution_table[cluster1, cluster2] + 1
+        }
+      }
+    }
+  }
+  return(distribution_table)
+}
+
+```
+
+
+Turn the distribution table into the desired heatmap
+
+```{r}
+
+heatmap <- function(uniqueclusters1, uniqueclusters2, distribution_table) {
+  proportions1 <- prop.table(distribution_table,1)
+  proportions2 <- prop.table(distribution_table,2)
+  
+  labels1 <- uniqueclusters1
+  labels2 <- uniqueclusters2 
+  
+  data1 <- expand.grid(X=labels1,Y=labels2)
+  data1$Proportions <- as.vector(proportions1)
+  data2 <- expand.grid(X=labels2,Y=labels1)
+  data2$Proportions <- as.vector(proportions2)
+  
+  df1 <- as.data.frame(proportions1)
+  df2 <- as.data.frame(proportions2)
+  
+  ggplot1 <- ggplot(data1, aes(X, Y, fill=Proportion)) + geom_tile() + scale_fill_gradient(low = "black", high = "steelblue") + labs(x="", y="") + theme(axis.text.x = element_text(angle=90, hjust=1, vjust=0.5))
+  ggplot2 <- ggplot(data2, aes(X, Y, fill=Proportion)) + geom_tile() + scale_fill_gradient(low = "black", high = "steelblue") + labs(x="", y="") + theme(axis.text.x = element_text(angle=90, hjust=1, vjust=0.5))
+  
+  par(mfrow=c(1,2))
+  print(ggplot1)
+  print(ggplot2)
+}
+
+```
+
+
+Overall function:
+
+```{r}
+
+create_heatmap <- function(data) {
+  uniqueclusters1 <- as.matrix(unique(data[,2]))
+  uniqueclusters2 <- as.matrix(unique(data[,3]))
+  
+  distribution_table <- distribution_table(uniqueclusters1, uniqueclusters2, data)
+  heatmap <- heatmap(uniqueclusters1, uniqueclusters2, distribution_table)
+}
+
+```
+
+
+
+
+
+Current heatmap created:
+
+```{r}
+
+## newdata looks like this: 
+## CELL NAME        METADATA CLASSIFICATION     SEURAT CLASSIFICATION
+## bcc.su001......  CD8_ex_T_cells              0   
+## bcc.su001......  Tregs                       2
+## etc.             etc.                        etc. 
+
+
+uniqueclusters1 <- as.matrix(unique(newdata[,2]))
+uniqueclusters2 <- as.matrix(unique(newdata[,3]))
+newdata <- as.matrix(newdata)
+
+distributions1 <- matrix(, nrow = nrow(uniqueclusters1), ncol = nrow(uniqueclusters2))
+distributions2 <- matrix(, nrow = nrow(uniqueclusters2), ncol = nrow(uniqueclusters1))
+
+
+distribution_table <- function(uniqueclusters1, uniqueclusters2, newdata) {
+  distributions1[] <- 0
+  for (cluster1 in 1:nrow(uniqueclusters1)) {
+    for (cluster2 in 1:nrow(uniqueclusters2)) {
+      for (row in 1:nrow(newdata)) {
+        if ((newdata[row,2] == uniqueclusters1[cluster1,]) & (newdata[row,3] == uniqueclusters2[cluster2,])) {
+          distributions1[cluster1, cluster2] <- distributions1[cluster1, cluster2] + 1
+        }
+      }
+    }
+  }
+  return(distributions1)
+}
+
+distributions1 <- matrix(c(3687, 11937, 4420, 7542, 17, 947, 2, 4154, 28, 27, 27, 4, 4, 4, 6, 0, 1, 18, 1, 46, 52, 95, 151, 826, 14, 4, 37, 0, 0, 1, 0, 1, 0, 0, 0, 1, 0, 0, 0, 1, 1, 2, 4, 0, 0, 1, 2, 0, 0, 0, 0, 0, 0, 0, 204, 0, 0, 0, 1, 2, 0, 0, 52, 5816, 3, 0, 0, 0, 0, 0, 0, 0, 194, 0, 0, 0, 2, 11, 15, 46, 0, 23, 1, 2, 3053, 942, 1, 465, 0, 0, 0, 0, 0, 0, 0, 0, 4, 2, 14, 4, 0, 4, 1, 6, 2, 2616, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 2, 2, 5, 2, 0, 0, 2, 2, 1, 0, 1060, 0, 371, 0, 0, 0, 0, 1, 0, 0, 2, 0, 1, 1, 0, 2, 1, 0, 0, 0, 467, 0, 0, 0, 0, 0, 0, 1, 3, 5, 1, 2, 1, 0, 0, 5, 1, 0, 1, 0, 1, 0, 0, 2432, 4, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 12, 1084), nrow = 19, ncol = 10)
+
+proportions1 <- prop.table(distributions1,1)
+proportions2 <- prop.table(distributions1,2)
+
+labels1 <- c("CD4+ T Cells", "CD19+ B cells", "Macrophages", "Plasma cells?", "Malignant cells?", "Fibroblasts", "Lymphoblasts?", "Epithelial cells?", "Cardiac myocytes", "???")
+
+
+labels2 <- c("1", "2", "3", "4", "5", "6", "7", "8", "9", "10", "11", "12", "13", "14", "15", "16", "17", "18", "19")
+
+data1 <- expand.grid(X=labels1, Y=labels2)
+data1$Proportion <- as.vector(proportions1)
+
+data2 <- expand.grid(X=labels2, Y=labels1)
+data2$Proportion <- as.vector(proportions2)
+
+df1 <- as.data.frame(proportions1)
+df2 <- as.data.frame(proportions2)
+
+ggplot1 <- ggplot(data1, aes(X, Y, fill=Proportion)) + geom_tile() + scale_fill_gradient(low = "black", high = "steelblue") + labs(x="", y="") + theme(axis.text.x = element_text(angle=90, hjust=1, vjust=0.5))
+ggplot2 <- ggplot(data2, aes(X, Y, fill=Proportion)) + geom_tile() + scale_fill_gradient(low = "black", high = "steelblue") + labs(x="", y="") + theme(axis.text.x = element_text(angle=90, hjust=1, vjust=0.5))
+
+par(mfrow=c(1,2))
+print(ggplot1)
+print(ggplot2)
+
+```
+

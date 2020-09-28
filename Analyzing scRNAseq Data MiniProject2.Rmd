@@ -1,0 +1,167 @@
+---
+title: "R Notebook"
+output:
+  pdf_document: default
+  html_notebook: default
+---
+
+Try executing this chunk by clicking the *Run* button within the chunk or by placing your cursor inside it and pressing *Ctrl+Shift+Enter*. `
+
+Add a new chunk by clicking the *Insert Chunk* button on the toolbar or by pressing *Ctrl+Alt+I*.
+
+The preview shows you a rendered HTML copy of the contents of the editor. Consequently, unlike *Knit*, *Preview* does not run any R code chunks. Instead, the output of the chunk when it was last run in the editor is displayed.
+
+When you save the notebook, an HTML file containing the code and output will be saved alongside it (click the *Preview* button or press *Ctrl+Shift+K* to preview the HTML file).
+
+```{r}
+## Load packages
+library(dplyr)
+library(Seurat)
+library(patchwork)
+library(ggplot2)
+```
+
+
+Read data from GSE123813 (pape: clonal replacement of tumor-specific T cells following PD-1 blockade)
+https://www.ncbi.nlm.nih.gov/geo/query/acc.cgi?acc=GSE123813
+
+```{r}
+## Read data
+BCCIO.read <- read.table("C:\\Users\\Ryan\\Downloads\\GSE 123813\\bcc_scRNA_counts.txt", row.names = 1, sep="\t", as.is=T)
+
+## Read metadata
+BCCIO.meta.data.readall <- read.table("C:\\Users\\Ryan\\Downloads\\GSE 123813\\bcc_all_metadata.txt", row.names = 1, sep="\t", as.is=T)
+
+## Format metadata
+BCCIO.meta.data.read_colnamesall <- BCCIO.meta.data.readall[1,] # Store column names 
+
+BCCIO.meta.data.read_colnames <- BCCIO.meta.data.read_colnamesall[,1:3] # Keep only patient, treatment and sort columns
+
+BCCIO.meta.data <- BCCIO.meta.data.readall[2:nrow(BCCIO.meta.data.readall),1:3] # Get rid of column names (first row) and the columns I don't want
+
+names(BCCIO.meta.data) <- BCCIO.meta.data.read_colnames # Change the column names
+```
+
+
+Create Seurat object
+
+```{r}
+memory.limit(size = 16000000) #Increase memory limit for vector sizes 
+BCCIO <- CreateSeuratObject(counts = BCCIO.read, project = "BCCIO", min.cells = 3, min.features = 200, meta.data = BCCIO.meta.data)
+```
+
+
+Pre-processing workflow
+
+```{r}
+BCCIO[["percent.mt"]] <- PercentageFeatureSet(BCCIO, pattern = "^MT-") # Store mitochondrial QC metrics in an additional column
+BCCIO <- NormalizeData(BCCIO, normalization.method= "LogNormalize", scale.factor = 10000) # Normalize feature expression 
+
+BCCIO <- FindVariableFeatures(BCCIO, selection.method = "vst", nfeatures = 2000) # Feature selection (highly variable features)
+
+all.genes <- rownames(BCCIO)
+BCCIO <- ScaleData(BCCIO, features = all.genes) # Scale data in preparation for PCA 
+BCCIO <- RunPCA(BCCIO, features = VariableFeatures(object = BCCIO)) # Perform PCA
+```
+
+
+Checkpoint (Save Work Here)
+
+```{r}
+save(BCCIO, file="C:\\Users\\Ryan\\Downloads\\GSE 123813\\BCCIO")
+save(BCCIO.meta.data,BCCIO.read, file = "C:\\Users\\Ryan\\Downloads\\GSE 123813\\BCCIOrawdata")
+```
+
+
+Test out Clustering (Varying Resolution Levels)
+-- Higher resolution = greater clustering --> 
+
+```{r}
+
+BCCIO <- FindNeighbors(BCCIO, dims = 1:10)
+
+## Start with r = 0.3 (overclustered)
+
+BCCIO <- FindClusters(BCCIO, resolution = 0.3, algorithm = 3)
+BCCIO.markers <- FindAllMarkers(BCCIO, test.use = 'wilcox', min.pct = 0.25, logfc.threshold = 0.50, max.cells.per.ident = 500)
+top5 <- BCCIO.markers %>% group_by(cluster) %>% top_n(n=5, wt=avg_logFC)
+DoHeatmap(BCCIO,features = top5$gene, size = 3)
+
+## Try r = 0.2 (overclustered)
+
+BCCIO <- FindClusters(BCCIO, resolution = 0.2, algorithm = 3)
+BCCIO.markers <- FindAllMarkers(BCCIO, test.use = 'wilcox', min.pct = 0.25, logfc.threshold = 0.50, max.cells.per.ident = 500)
+top5 <- BCCIO.markers %>% group_by(cluster) %>% top_n(n=5, wt=avg_logFC)
+DoHeatmap(BCCIO,features = top5$gene, size = 3)
+
+## Try r = 0.1 (overclustered)
+
+BCCIO <- FindClusters(BCCIO, resolution = 0.1, algorithm = 3)
+BCCIO.markers <- FindAllMarkers(BCCIO, test.use = 'wilcox', min.pct = 0.25, logfc.threshold = 0.50, max.cells.per.ident = 500)
+top5 <- BCCIO.markers %>% group_by(cluster) %>% top_n(n=5, wt=avg_logFC)
+DoHeatmap(BCCIO,features = top5$gene, size = 3)
+
+## Try r = 0.05 (looks okay)
+
+BCCIO <- FindClusters(BCCIO, resolution = 0.05, algorithm = 3)
+BCCIO.markers <- FindAllMarkers(BCCIO, test.use = 'wilcox', min.pct = 0.25, logfc.threshold = 0.50, max.cells.per.ident = 500)
+top5 <- BCCIO.markers %>% group_by(cluster) %>% top_n(n=5, wt=avg_logFC)
+DoHeatmap(BCCIO,features = top5$gene, size = 3)
+
+## Try r = 0.03 (around the same as 0.05)
+
+BCCIO <- FindClusters(BCCIO, resolution = 0.04, algorithm = 3)
+BCCIO.markers <- FindAllMarkers(BCCIO, test.use = 'wilcox', min.pct = 0.25, logfc.threshold = 0.50, max.cells.per.ident = 500)
+top5 <- BCCIO.markers %>% group_by(cluster) %>% top_n(n=5, wt=avg_logFC)
+DoHeatmap(BCCIO,features = top5$gene, size = 3)
+
+## Try r = 0.3, bimod test (much better)
+
+BCCIO <- FindClusters(BCCIO, resolution = 0.3, algorithm = 3)
+BCCIO.markers <- FindAllMarkers(BCCIO, test.use = 'bimod', min.pct = 0.25, logfc.threshold = 0.50, max.cells.per.ident = 500)
+top5 <- BCCIO.markers %>% group_by(cluster) %>% top_n(n=5, wt=avg_logFC)
+DoHeatmap(BCCIO,features = top5$gene, size = 3)
+
+## Try r = 0.3, roc test (error)
+
+BCCIO <- FindClusters(BCCIO, resolution = 0.3, algorithm = 3)
+BCCIO.markers <- FindAllMarkers(BCCIO, test.use = 'roc', min.pct = 0.25, logfc.threshold = 0.50, max.cells.per.ident = 500)
+top5 <- BCCIO.markers %>% group_by(cluster) %>% top_n(n=5, wt=avg_logFC)
+DoHeatmap(BCCIO,features = top5$gene, size = 3)
+
+## Try r = 0.3, t test (roughly the same as bimod)
+
+BCCIO <- FindClusters(BCCIO, resolution = 0.3, algorithm = 3)
+BCCIO.markers <- FindAllMarkers(BCCIO, test.use = 't', min.pct = 0.25, logfc.threshold = 0.50, max.cells.per.ident = 500)
+top5 <- BCCIO.markers %>% group_by(cluster) %>% top_n(n=5, wt=avg_logFC)
+DoHeatmap(BCCIO,features = top5$gene, size = 3)
+
+## Try r = 0.3, LR test (roughly the same as bimod)
+
+BCCIO <- FindClusters(BCCIO, resolution = 0.3, algorithm = 3)
+BCCIO.markers <- FindAllMarkers(BCCIO, test.use = 'LR', min.pct = 0.25, logfc.threshold = 0.50, max.cells.per.ident = 500)
+top5 <- BCCIO.markers %>% group_by(cluster) %>% top_n(n=5, wt=avg_logFC)
+DoHeatmap(BCCIO,features = top5$gene, size = 3)
+
+```
+
+Full DE Testing (UMAP) for r=0.5, test=wilcox
+
+```{r}
+
+BCCIO <- FindClusters(BCCIO, resolution = 0.5, algorithm = 3) ## Set r = 0.05
+BCCIO.markers <- FindAllMarkers(BCCIO, test.use = 'wilcox', min.pct = 0.25, logfc.threshold = 0.50, max.cells.per.ident = Inf) ## Run through all cells
+top5 <- BCCIO.markers %>% group_by(cluster) %>% top_n(n=5, wt=avg_logFC)
+DoHeatmap(BCCIO,features = top5$gene, size = 3) ## Heatmap with all cells
+
+top25 <- BCCIO.markers %>% group_by(cluster) %>% top_n(n=25, wt=avg_logFC) ## top 25 markers per cluster for UMAP labeling
+
+labels <- c("CD4+ T Cells", "CD19+ B Cells", "Smooth Muscle 1", "Small Intestine", "Bronchial Epithelial Cells", "Smooth Muscle 2", "721 B Lymphocytes", "Tongue", "Cardiac Myocytes") ## Lables found using Human Gene Atlas on Enrichr
+
+names(labels) <- levels(BCCIO)
+BCCIO <- RenameIdents(BCCIO, labels)
+
+BCCIO <- RunUMAP(BCCIO, dims = 1:10)
+DimPlot(BCCIO, reduction="umap", label=TRUE) ## Create labeled UMAP
+
+```

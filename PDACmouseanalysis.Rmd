@@ -1,0 +1,136 @@
+---
+title: "R Notebook"
+output: html_notebook
+---
+
+This is an [R Markdown](http://rmarkdown.rstudio.com) Notebook. When you execute code within the notebook, the results appear beneath the code. 
+
+Try executing this chunk by clicking the *Run* button within the chunk or by placing your cursor inside it and pressing *Ctrl+Shift+Enter*. 
+
+```{r}
+## Load packages
+library(dplyr)
+library(Seurat)
+library(patchwork)
+library(ggplot2)
+```
+
+Create Seurat object
+
+```{r}
+pdac.read <- read.table("C:\\Users\\Ryan\\Downloads\\GSE129455\\GSE129455_All_Viable_expression.csv", row.names = 1, sep = ",", as.is=1) ## Read data
+
+pdac.read <- pdac.read[-c(1),]
+## Delete line with gene? codes
+
+pdac <- CreateSeuratObject(counts=pdac.read, project="PDAC", min.cells=3, min.features=200)
+## Create Seurat Object with remaining lines 
+```
+
+
+
+Data processing
+
+```{r}
+
+## Normalization already performed 
+## pdac <- NormalizeData(pdac, normalization.method= "LogNormalize", scale.factor = 10000) # Normalize feature expression 
+
+pdac <- FindVariableFeatures(pdac, selection.method = "vst", nfeatures = 2000) # Feature selection (highly variable)
+
+all.genes <- rownames(pdac)
+pdac <- ScaleData(pdac, features = all.genes) # Scale data in preparation for PCA 
+pdac <- RunPCA(pdac, features = VariableFeatures(object = pdac)) # Perform PCA
+
+```
+
+Checkpoint (save data)
+
+```{r}
+
+save(pdac, file="C:\\Users\\Ryan\\Downloads\\GSE129455\\pdac")
+save(pdac.read, file = "C:\\Users\\Ryan\\Downloads\\GSE 123813\\pdac_read")
+
+```
+
+Determine PCs for Clustering
+
+```{r}
+ElbowPlot(pdac, ndims=50)
+DimHeatmap(pdac, dims = 1:15, cells = 500, balanced = TRUE)
+DimHeatmap(pdac, dims = 16:30, cells = 500, balanced = TRUE)
+## Choose 25 PCs
+```
+
+Determining resolution for clustering
+
+```{r}
+
+## 20 PCs
+pdac <- FindNeighbors(pdac, dims = 1:20)
+
+## Start with r = 0.3 (pretty good)
+
+pdac <- FindClusters(pdac, resolution = 0.3, algorithm = 3)
+pdac.markers <- FindAllMarkers(pdac, test.use = 'wilcox', min.pct = 0.25, logfc.threshold = 0.50, max.cells.per.ident = 500)
+top5 <- pdac.markers %>% group_by(cluster) %>% top_n(n=5, wt=avg_logFC)
+DoHeatmap(pdac,features = top5$gene, size = 3)
+
+
+## Try r = 0.2 (looks the same)
+
+pdac <- FindClusters(pdac, resolution = 0.2, algorithm = 3)
+pdac.markers <- FindAllMarkers(pdac, test.use = 'wilcox', min.pct = 0.25, logfc.threshold = 0.50, max.cells.per.ident = 500)
+top5 <- pdac.markers %>% group_by(cluster) %>% top_n(n=5, wt=avg_logFC)
+DoHeatmap(pdac,features = top5$gene, size = 3)
+
+## Try r = 0.5 (looks overclustered)
+
+pdac <- FindClusters(pdac, resolution = 0.5, algorithm = 3)
+pdac.markers <- FindAllMarkers(pdac, test.use = 'wilcox', min.pct = 0.25, logfc.threshold = 0.50, max.cells.per.ident = 500)
+top5 <- pdac.markers %>% group_by(cluster) %>% top_n(n=5, wt=avg_logFC)
+DoHeatmap(pdac,features = top5$gene, size = 3)
+
+## Uee r = 0.3
+
+```
+
+```{r}
+
+pdac <- FindClusters(pdac, resolution = 0.3, algorithm = 3)
+pdac.markers <- FindAllMarkers(pdac, test.use = 'wilcox', min.pct = 0.25, logfc.threshold = 0.50, max.cells.per.ident = Inf)
+top25 <- pdac.markers %>% group_by(cluster) %>% top_n(n=25, wt=avg_logFC)
+DoHeatmap(pdac,features = top25$gene, size = 3)
+
+pdac <- RunUMAP(pdac, dims = 1:20)
+DimPlot(pdac, reduction="umap", label=TRUE, pt.size = 0.1) + NoLegend()
+
+saveRDS(pdac, file = "C:\\Users\\Ryan\\Downloads\\GSE 123813\\pdac.rds")
+
+```
+
+Subset dataset to refine labels
+
+```{r}
+
+## Subset data from two clearly distinct clusters
+
+SubsetData(pdac, ident.use("0", "15"))
+
+
+
+```
+
+
+
+
+
+
+
+
+
+
+
+
+
+
