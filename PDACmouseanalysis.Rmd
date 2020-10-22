@@ -13,20 +13,20 @@ library(dplyr)
 library(Seurat)
 library(patchwork)
 library(ggplot2)
+library(cowplot)
 ```
 
-Create Seurat object
+Create Seurat object for GSE129455
 
 ```{r}
 pdac.read <- read.table("C:\\Users\\Ryan\\Downloads\\GSE129455\\GSE129455_All_Viable_expression.csv", row.names = 1, sep = ",", as.is=1) ## Read data
 
-pdac.read <- pdac.read[-c(1),]
-## Delete line with gene? codes
+names(pdac.read) <- lapply(pdac.read[1,], as.character) ## Column names are stored in the first row of the dataset
+pdac.read <- pdac.read[-1,] ## Delete extra colnames vector
 
 pdac <- CreateSeuratObject(counts=pdac.read, project="PDAC", min.cells=3, min.features=200)
 ## Create Seurat Object with remaining lines 
 ```
-
 
 
 Data processing
@@ -113,10 +113,19 @@ Subset dataset to refine labels
 
 ```{r}
 
-## Subset data from two clearly distinct clusters
+head(pdac@meta.data) ## View metadata
 
-SubsetData(pdac, ident.use("0", "15"))
+## Create subsets
+pdac.subset.0.1.2.3.4.7 <- subset(pdac, seurat_clusters=="0" | seurat_clusters=="1" | seurat_clusters=="2" | seurat_clusters=="4" | seurat_clusters=="7")
+clustering(pdac.subset.0.1.2.4.7, cells=Inf)
 
+## 0: microglia; 1: microglia; 2: CD33+ myeloid / CD14+ monocytes; 3: Follicular B / Lymphoid CD8A; 4: CD14+ monocytes
+
+
+pdac.subset.0.3.6 <- subset(pdac, seurat_clusters=="0" | seurat_clusters=="3" | seurat_clusters=="6")
+clustering(pdac.subset.0.3.6, cells=Inf)
+
+## 0: follicular B / CD14+; 1: macrophage bone marrow; 2: Bone marrow; 3: trachea/stomach; 4: CD33+ myeloid; 5: microglia
 
 
 ```
@@ -125,8 +134,78 @@ SubsetData(pdac, ident.use("0", "15"))
 
 
 
+Analyze GSE 111672 Datasets
+
+```{r}
+
+pdac1.read <- read.table("C:\\Users\\Ryan\\Documents\\Nie Research Project\\GSE111672\\GSE111672_PDAC-A-indrop-filtered-expMat.txt", sep = "\t", as.is = 1)
+pdac1.read <- pdac1.read[-c(9946, 9947), ] ## Duplicates of 1-Mar and 2-Mar genes (excel error??)
+rownames(pdac1.read) <- pdac1.read$V1 ## Rownames are stored in the first column of the dataset
+pdac1.read <- pdac1.read[, -c(1)] ## Delete extra rownames vector
+names(pdac1.read) <- lapply(pdac1.read[1,], as.character) ## Column names are stored in the first row of the dataset
+pdac1.read <- pdac1.read[-1,] ## Delete extra colnames vector
+
+pdac2.read <- read.table("C:\\Users\\Ryan\\Documents\\Nie Research Project\\GSE111672\\GSE111672_PDAC-B-indrop-filtered-expMat.txt", sep = "\t", header = TRUE, as.is = 1)
+pdac2.read <- pdac1.read[-c(9945, 9946), ] ## Duplicates of 1-Mar and 2-Mar genes (excel error??)
 
 
+pdac1 <- CreateSeuratObject(counts=pdac1.read, project="PDAC1", min.cells=3, min.features=200)
+pdac2 <- CreateSeuratObject(counts=pdac2.read, project="PDAC2", min.cells=3, min.features=200)
+
+pdac1 <- preprocessing(pdac1, heatmap=TRUE)
+## Choose 13 PCs
+pdac2 <- preprocessing(pdac2, heatmap=TRUE)
+## Choose 14 PCs
+
+pdac1.umap <- clustering(pdac1, PCs=50)
+pdac2.umap <- clustering(pdac2, PCs=50)
+
+```
+
+Combined analysis of pdac datasets
+
+```{r}
+
+## Merge datasets 
+pdac.combined <- merge(pdac1, y=pdac2, add.cell.ids=c("Patient 1", "Patient 2"))
+
+pdac.combined <- preprocessing(pdac.combined)
+pdac.combined.umap <- clustering(pdac.combined, PCs=50)
+
+pdac.list <- SplitObject(pdac.combined, split.by="orig.ident")
+pdac.anchors <- FindIntegrationAnchors(object.list = pdac.list, dims = 1:20)
+pdac.combined <- IntegrateData(anchorset=pdac.anchors, dims=1:20)
+
+pdac.combined <- ScaleData(pdac.combined.test)
+pdac.combined <- RunPCA(pdac.combined.test, npcs=50)
+
+clustering(pdac.combined)
+
+pdac.combined <- RunUMAP(pdac.combined.test, reduction="pca", dims=1:50)
+pdac.combined <- FindNeighbors(pdac.combined.test, reduction="pca", dims=1:50)
+pdac.combined <- FindClusters(pdac.combined.test, resolution=0.5)
+
+p1 <- DimPlot(pdac.combined, reduction="umap", group.by="orig.ident")
+p2 <- DimPlot(pdac.combined, reduction="umap", label=TRUE)
+plot_grid(p1, p2)
+
+DimPlot(pdac.combined, reduction="umap", split.by="orig.ident")
+```
+
+
+
+Identify clusters
+
+
+```{r}
+
+features = c("IL7R", "CCR7", "S100A4", "CD14", "LYZ", "MS4A1", "CD8A", "FCGR3A", "MS4A7", "GNLY", "NKG7", "FCER1A", "CST3", "PPBP")
+
+FeaturePlot(pdac.combined, features=features)
+DotPlot(pdac.combined, features=features) + RotatedAxis()
+RidgePlot(pdac.combined, features=features, ncol=6)
+DoHeatmap(subset(pdac.combined, downsample=100), features=features)
+```
 
 
 

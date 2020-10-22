@@ -26,6 +26,8 @@ preprocessing <- function(dataset, normalize = TRUE, scale = TRUE, pca = TRUE, h
   if (isTRUE(heatmap)) {
     DimHeatmap(dataset, dims = 1:24, cells = 500, balanced = TRUE)
   }
+  
+  return(dataset)
 }
 
 
