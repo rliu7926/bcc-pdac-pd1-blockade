@@ -35,11 +35,9 @@ BCCIO.meta.data.readall <- read.table("C:\\Users\\Ryan\\Downloads\\GSE 123813\\b
 ## Format metadata
 BCCIO.meta.data.read_colnamesall <- BCCIO.meta.data.readall[1,] # Store column names 
 
-BCCIO.meta.data.read_colnames <- BCCIO.meta.data.read_colnamesall[,1:3] # Keep only patient, treatment and sort columns
+BCCIO.meta.data <- BCCIO.meta.data.readall[2:nrow(BCCIO.meta.data.readall),] # Get rid of column names (first row)
 
-BCCIO.meta.data <- BCCIO.meta.data.readall[2:nrow(BCCIO.meta.data.readall),1:3] # Get rid of column names (first row) and the columns I don't want
-
-names(BCCIO.meta.data) <- BCCIO.meta.data.read_colnames # Change the column names
+names(BCCIO.meta.data) <- BCCIO.meta.data.read_colnamesall # Change the column names
 ```
 
 
@@ -54,7 +52,7 @@ BCCIO <- CreateSeuratObject(counts = BCCIO.read, project = "BCCIO", min.cells = 
 Pre-processing workflow
 
 ```{r}
-BCCIO[["percent.mt"]] <- PercentageFeatureSet(BCCIO, pattern = "^MT-") # Store mitochondrial QC metrics in an additional column
+
 BCCIO <- NormalizeData(BCCIO, normalization.method= "LogNormalize", scale.factor = 10000) # Normalize feature expression 
 
 BCCIO <- FindVariableFeatures(BCCIO, selection.method = "vst", nfeatures = 2000) # Feature selection (highly variable features)
@@ -68,22 +66,22 @@ BCCIO <- RunPCA(BCCIO, features = VariableFeatures(object = BCCIO)) # Perform PC
 Checkpoint (Save Work Here)
 
 ```{r}
+
 save(BCCIO, file="C:\\Users\\Ryan\\Downloads\\GSE 123813\\BCCIO")
 save(BCCIO.meta.data,BCCIO.read, file = "C:\\Users\\Ryan\\Downloads\\GSE 123813\\BCCIOrawdata")
 
-
 ## To load data use load(filelocation) function
+
 ```
 
 
 Elbow Plot (Determine # of PCs to consider)
 
 ```{r}
-ElbowPlot(BCCIO, ndims=50)
-```
 
-```{r}
+ElbowPlot(BCCIO, ndims=50)
 DimHeatmap(BCCIO, dims = 1:24, cells = 500, balanced = TRUE)
+
 ```
 
 
@@ -171,6 +169,7 @@ Full DE Testing (UMAP) for r=0.4, test=wilcox
 
 ```{r}
 
+BCCIO <- FindNeighbors(BCCIO, dims = 1:15)
 BCCIO <- FindClusters(BCCIO, resolution = 0.4, algorithm = 3) ## Set r = 0.05
 BCCIO.markers <- FindAllMarkers(BCCIO, test.use = 'wilcox', min.pct = 0.25, logfc.threshold = 0.25, max.cells.per.ident = 500) ## Run through all cells
 top5 <- BCCIO.markers %>% group_by(cluster) %>% top_n(n=5, wt=avg_logFC)
@@ -182,14 +181,64 @@ BCCIO.top25genes <- top25[c(6,7)]
 top2 <- BCCIO.markers %>% group_by(cluster) %>% top_n(n=2, wt=avg_logFC)
 BCCIO.geneslist <- unique(unlist(top2[7]))
 
+labels <- c("CD56+ NK 1", "CD4+ T 1", "CD19+ B 1", "CD56+ NK 2", "CD4+ T 2", "CD33+ Myeloid", "BDCA4+ Dendritic 1", "??1", "CD4+ T 3", "721 B Lymphoblasts", "BDCA4+ Dendritic 2", "??2", "??3", "??4", "??5", "??6", "??7", "??8", "CD34+", "CD19+ B 2")
 
+names(labels) <- levels(BCCIO)
+BCCIO <- RenameIdents(BCCIO, labels)
 
-Idents(BCCIO) <- c("CD56+ NK 1", "CD4+ T 1", "CD19+ B 1", "CD56+ NK 2", "CD4+ T 2", "CD33+ Myeloid", "BDCA4+ Dendritic 1", "??1", "CD4+ T 3", "721 B Lymphoblasts", "BDCA4+ Dendritic 2", "??2", "??3", "??4", "??5", "??6", "??7", "??8", "CD34+", "CD19+ B 2")
+new_idents <- rep(c("0", "1", "2", "3", "4", "5", "6", "7", "8", "9", "10", "11", "12", "13", "14", "15", "16", "17", "18", "19"), times=c("CD56+ NK 1", "CD4+ T 1", "CD19+ B 1", "CD56+ NK 2", "CD4+ T 2", "CD33+ Myeloid", "BDCA4+ Dendritic 1", "??1", "CD4+ T 3", "721 B Lymphoblasts", "BDCA4+ Dendritic 2", "??2", "??3", "??4", "??5", "??6", "??7", "??8", "CD34+", "CD19+ B 2"))
+
 
 BCCIO <- RunUMAP(BCCIO, dims = 1:15)
-DimPlot(BCCIO, reduction="umap", label=TRUE, pt.size = 0.1) ## Create labeled UMAP
+DimPlot(BCCIO, reduction="umap", label=TRUE, pt.size = 0.1) + NoLegend() ## Create labeled UMAP
 
 ```
+
+Clustering Comparison Heatmap 
+
+```{r}
+
+BCCIO.meta.data1 <- BCCIO.meta.data[order(BCCIO.meta.data[, "sort"], -xtfrm(BCCIO.meta.data[, "treatment"])),]
+BCCIO.meta.data2 <- BCCIO@meta.data[order(BCCIO@meta.data[, "sort"]),]
+
+BCCIO.meta.data1["rownames"] <- rownames(BCCIO.meta.data1)
+BCCIO.meta.data2["rownames"] <- rownames(BCCIO.meta.data2)
+
+BCCIO.meta.data.merge <- merge(BCCIO.meta.data1, BCCIO.meta.data2, by.x=c("rownames"), by.y=c("rownames"))
+BCCIO.clustering.comparison <- BCCIO.meta.data.merge[c("cluster", "seurat_clusters")]
+
+uniqueclusters1 <- as.matrix(unique(BCCIO.clustering.comparison[,1]))
+uniqueclusters2 <- as.matrix(unique(BCCIO.clustering.comparison[,2]))
+
+BCCIO.distribution.table <- data.frame(matrix(0, nrow=nrow(uniqueclusters1), ncol=nrow(uniqueclusters2)))
+for (cluster1 in 1:nrow(uniqueclusters1)) {
+  for (cluster2 in 1:nrow(uniqueclusters2)) {
+    for (row in 1001:53029) {
+      if ((BCCIO.clustering.comparison[row,1] == uniqueclusters1[cluster1,]) & (BCCIO.clustering.comparison[row,2] == uniqueclusters2[cluster2,])) {
+        BCCIO.distribution.table[cluster1, cluster2] <- BCCIO.distribution.table[cluster1, cluster2] + 1
+      }
+    }
+  }
+}
+
+rownames(BCCIO.distribution.table) <- uniqueclusters1
+colnames(BCCIO.distribution.table) <- uniqueclusters2
+BCCIO.distribution.table <- cbind(cluster=rownames(BCCIO.distribution.table), BCCIO.distribution.table)
+BCCIO.distribution.table <- subset(BCCIO.distribution.table, select = -c(cluster))
+BCCIO.distribution.table <- mapply(BCCIO.distribution.table, FUN=as.numeric)
+BCCIO.distribution.table <- matrix(data=BCCIO.distribution.table, ncol=20, nrow=19)
+colnames(BCCIO.distribution.table) <- c("CD56+ NK1", "CD4+ T1", "CD4+ T2", "721 B Lymphoblasts", "CD34+", "CD4+ T3", "CD56+ NK2", "CD19+ B1", "CD33+ Myeloid", "BDCA4+ Dendritic2", "BDCA4+ Dendritic1", "??5", "CD19+ B2", "??3", "??4", "??6", "??8", "??1", "??2", "??7")
+
+BCCIO.proportions.table <- prop.table(BCCIO.distribution.table,1)
+
+BCCIO.proportions.table <- melt(BCCIO.proportions.table)
+BCCIO.clustering.heatmap <- ggplot(BCCIO.proportions.table, aes(X2, X1, fill=value)) + geom_tile() + scale_fill_distiller(palette = "Spectral") + theme(axis.text.x = element_text(angle=45, hjust=1)) + labs(x="My Clustering", y="Metadata Clustering")
+BCCIO.clustering.heatmap
+```
+
+
+
+
 
 Comparison of Pre- and Post-Treatment
 
@@ -198,6 +247,8 @@ Comparison of Pre- and Post-Treatment
 DimPlot(BCCIO, reduction="umap", split.by="treatment")
 
 DotPlot(BCCIO, features=rev(BCCIO.geneslist), cols=c("blue", "red"), dot.scale=8, split.by="treatment") + RotatedAxis()
+
+DimPlot(BCCIO, reduction="umap", split.by="patient")
 
 
 
