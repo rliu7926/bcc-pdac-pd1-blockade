@@ -122,7 +122,7 @@ clustering(pdac.subset.0.1.2.4.7, cells=Inf)
 ## 0: microglia; 1: microglia; 2: CD33+ myeloid / CD14+ monocytes; 3: Follicular B / Lymphoid CD8A; 4: CD14+ monocytes
 
 
-pdac.subset.0.3.6 <- subset(pdac, seurat_clusters=="0" | seurat_clusters=="3" | seurat_clusters=="6")
+pdac.subset.0.3.6 <- subset(pdac, seurat_clusters=="0" | seurat_clusters=="3" | seurat_clust ers=="6")
 clustering(pdac.subset.0.3.6, cells=Inf)
 
 ## 0: follicular B / CD14+; 1: macrophage bone marrow; 2: Bone marrow; 3: trachea/stomach; 4: CD33+ myeloid; 5: microglia
@@ -146,19 +146,27 @@ names(pdac1.read) <- lapply(pdac1.read[1,], as.character) ## Column names are st
 pdac1.read <- pdac1.read[-1,] ## Delete extra colnames vector
 
 pdac2.read <- read.table("C:\\Users\\Ryan\\Documents\\Nie Research Project\\GSE111672\\GSE111672_PDAC-B-indrop-filtered-expMat.txt", sep = "\t", header = TRUE, as.is = 1)
-pdac2.read <- pdac1.read[-c(9945, 9946), ] ## Duplicates of 1-Mar and 2-Mar genes (excel error??)
+pdac2.read <- pdac2.read[-c(9945, 9946), ] ## Duplicates of 1-Mar and 2-Mar genes (excel error??)
 
 
 pdac1 <- CreateSeuratObject(counts=pdac1.read, project="PDAC1", min.cells=3, min.features=200)
 pdac2 <- CreateSeuratObject(counts=pdac2.read, project="PDAC2", min.cells=3, min.features=200)
 
 pdac1 <- preprocessing(pdac1, heatmap=TRUE)
-## Choose 13 PCs
 pdac2 <- preprocessing(pdac2, heatmap=TRUE)
-## Choose 14 PCs
 
-pdac1.umap <- clustering(pdac1, PCs=50)
-pdac2.umap <- clustering(pdac2, PCs=50)
+pdac1 <- clustering(pdac1, UMAP=FALSE)
+pdac2 <- clustering(pdac2, UMAP=FALSE)
+
+pdac1 <- RunUMAP(pdac1, dims=1:50)
+pdac1.umap <- DimPlot(pdac1, reduction="umap", label=TRUE, pt.size=0.1) + NoLegend()
+FeaturePlot(pdac1, features = c("S100A4", "KRT19"), reduction="umap", cols=c("lightgrey", "darkred"))
+
+pdac2 <- RunUMAP(pdac2, dims=1:50)
+pdac2.umap <- DimPlot(pdac2, reduction="umap", label=TRUE, pt.size=0.1) + NoLegend()
+FeaturePlot(pdac2, features = c("S100A4", "KRT19"), reduction="umap", cols=c("lightgrey", "darkred"))
+
+pdac1.umap + pdac2.umap
 
 ```
 
@@ -166,30 +174,48 @@ Combined analysis of pdac datasets
 
 ```{r}
 
-## Merge datasets 
-pdac.combined <- merge(pdac1, y=pdac2, add.cell.ids=c("Patient 1", "Patient 2"))
-
+## Merge and process datasets 
+pdac.combined <- merge(pdac1, y=pdac2, add.cell.ids=c("Patient 1", "Patient 2"), project="Merged PDAC")
 pdac.combined <- preprocessing(pdac.combined)
-pdac.combined.umap <- clustering(pdac.combined, PCs=50)
+pdac.combined <- clustering(pdac.combined)
+pdac.combined <- RunUMAP(pdac.combined, dims=1:50)
+
+## Create UMAPS
+pdac.combined.umap <- DimPlot(pdac.combined, reduction="umap")
+pdac.combined.identsep.umap <- DimPlot(pdac.combined, reduction="umap", group.by="orig.ident")
+pdac.combined.umap + pdac.combined.identsep.umap
+
+DimPlot(pdac.combined, reduction = "umap", split.by="orig.ident")
+
+## Check feature expression 
+
+
+
+```
+
+Batch-corrected analysis
+
+```{r}
 
 pdac.list <- SplitObject(pdac.combined, split.by="orig.ident")
 pdac.anchors <- FindIntegrationAnchors(object.list = pdac.list, dims = 1:20)
-pdac.combined <- IntegrateData(anchorset=pdac.anchors, dims=1:20)
+pdac.combined.batch <- IntegrateData(anchorset=pdac.anchors, dims=1:20)
 
-pdac.combined <- ScaleData(pdac.combined.test)
-pdac.combined <- RunPCA(pdac.combined.test, npcs=50)
+pdac.combined.batch <- ScaleData(pdac.combined)
+pdac.combined.batch <- RunPCA(pdac.combined, npcs=50)
 
-clustering(pdac.combined)
+pdac.combined.batch <- clustering(pdac.combined.batch)
 
-pdac.combined <- RunUMAP(pdac.combined.test, reduction="pca", dims=1:50)
-pdac.combined <- FindNeighbors(pdac.combined.test, reduction="pca", dims=1:50)
-pdac.combined <- FindClusters(pdac.combined.test, resolution=0.5)
+pdac.combined.batch <- RunUMAP(pdac.combined.test, dims=1:50)
+pdac.combined.batch <- FindNeighbors(pdac.combined.test, reduction="pca", dims=1:50)
+pdac.combined.batch <- FindClusters(pdac.combined.test, resolution=0.5)
 
-p1 <- DimPlot(pdac.combined, reduction="umap", group.by="orig.ident")
-p2 <- DimPlot(pdac.combined, reduction="umap", label=TRUE)
+p1 <- DimPlot(pdac.combined.batch, reduction="umap", group.by="orig.ident")
+p2 <- DimPlot(pdac.combined.batch, reduction="umap", label=TRUE)
 plot_grid(p1, p2)
 
-DimPlot(pdac.combined, reduction="umap", split.by="orig.ident")
+DimPlot(pdac.combined.batch, reduction="umap", split.by="orig.ident")
+
 ```
 
 
@@ -205,6 +231,9 @@ FeaturePlot(pdac.combined, features=features)
 DotPlot(pdac.combined, features=features) + RotatedAxis()
 RidgePlot(pdac.combined, features=features, ncol=6)
 DoHeatmap(subset(pdac.combined, downsample=100), features=features)
+
+FeaturePlot(pdac.combined, features="PTPRC")
+
 ```
 
 

@@ -9,11 +9,11 @@ After determining the unique clusters generated from each algorithm, create a di
 ```{r}
 
 distribution_table <- function(uniqueclusters1, uniqueclusters2, data) {
-  distribution_table[] <- 0
+  distribution_table <- data.frame(matrix(0, nrow=nrow(uniqueclusters1), ncol=nrow(uniqueclusters2)))
   for (cluster1 in 1:nrow(uniqueclusters1)) {
     for (cluster2 in 1:nrow(uniqueclusters2)) {
       for (row in 1:nrow(data)) {
-        if ((data[row,2] == uniqueclusters1[cluster1,]) & (data[row,3] == uniqueclusters2[cluster2,])) {
+        if ((data[row,1] == uniqueclusters1[cluster1,]) & (data[row,2] == uniqueclusters2[cluster2,])) {
           distribution_table[cluster1, cluster2] <- distribution_table[cluster1, cluster2] + 1
         }
       }
