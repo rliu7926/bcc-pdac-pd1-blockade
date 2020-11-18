@@ -1,0 +1,160 @@
+---
+title: "GSE111672 PDAC Analysis"
+output: html_notebook
+---
+
+This is an [R Markdown](http://rmarkdown.rstudio.com) Notebook. When you execute code within the notebook, the results appear beneath the code. 
+
+Try executing this chunk by clicking the *Run* button within the chunk or by placing your cursor inside it and pressing *Ctrl+Shift+Enter*. 
+
+```{r}
+## Load packages
+library(dplyr)
+library(Seurat)
+library(patchwork)
+library(ggplot2)
+library(cowplot)
+library(pracma)
+```
+
+
+
+Analyze GSE 111672 Datasets
+
+```{r}
+pdac1.read <- read.table("C:\\Users\\Ryan\\Documents\\Nie Research Project\\GSE111672\\GSE111672_PDAC-A-indrop-filtered-expMat.txt", sep = "\t", as.is = 1)
+pdac1.read <- pdac1.read[-c(9946, 9947), ] ## Duplicates of 1-Mar and 2-Mar genes (excel error??)
+rownames(pdac1.read) <- pdac1.read$V1 ## Rownames are stored in the first column of the dataset
+pdac1.read <- pdac1.read[, -c(1)] ## Delete extra rownames vector
+names(pdac1.read) <- lapply(pdac1.read[1,], as.character) ## Column names are stored in the first row of the dataset
+pdac1.read <- pdac1.read[-1,] ## Delete extra colnames vector
+
+pdac2.read <- read.table("C:\\Users\\Ryan\\Documents\\Nie Research Project\\GSE111672\\GSE111672_PDAC-B-indrop-filtered-expMat.txt", sep = "\t", header = TRUE, as.is = 1)
+pdac2.read <- pdac2.read[-c(9946, 9947), ]
+rownames(pdac2.read) <- pdac2.read$Genes
+pdac2.read <- pdac2.read[, -c(1)]
+
+pdac1 <- CreateSeuratObject(counts=pdac1.read, project="PDAC1", min.cells=1, min.features=1)
+pdac2 <- CreateSeuratObject(counts=pdac2.read, project="PDAC2", min.cells=1, min.features=1)
+```
+
+
+
+Initial PDAC Datasets Clustering
+
+```{r}
+pdac1 <- preprocessing(pdac1, heatmap=FALSE)
+pdac2 <- preprocessing(pdac2, heatmap=FALSE)
+pdac1 <- clustering(pdac1, PCs=50, resolution=0.5)
+pdac2 <- clustering(pdac2, PCs=50, resolution=0.5)
+
+
+pdac1.umap <- DimPlot(pdac1, reduction="umap", label=TRUE, pt.size=0.3) + NoLegend()
+pdac2.umap <- DimPlot(pdac2, reduction="umap", label=TRUE, pt.size=0.3) + NoLegend()
+pdac1.umap + pdac2.umap
+
+```
+
+
+
+PDAC Datasets Clustering Comparison 
+
+```{r}
+
+pdac1.read.cell.labels <- read.table("C:\\Users\\rliu0\\Downloads\\Nie Research\\GSE111672_PDAC-A-indrop-filtered-expMat.txt", nrows=1, header=FALSE, sep = "\t", as.is = 1)
+pdac1.read.cell.labels <- t(pdac1.read.cell.labels)
+pdac1.read.cell.labels <- pdac1.read.cell.labels[-c(1),]
+pdac1@meta.data$orig_clusters <- pdac1.read.cell.labels
+
+pdac2.read.cell.labels <- read.table("C:\\Users\\rliu0\\Downloads\\Nie Research\\GSE111672_PDAC-B-indrop-filtered-expMat.txt", nrows=1, header=FALSE, sep = "\t", as.is = 1)
+pdac2.read.cell.labels <- t(pdac2.read.cell.labels)
+pdac2.read.cell.labels <- pdac2.read.cell.labels[-c(1),]
+pdac2@meta.data$orig_clusters <- pdac2.read.cell.labels
+
+
+pdac1.umap.orig <- DimPlot(pdac1, group.by = "orig_clusters", label=TRUE, pt.size=0.2)
+pdac2.umap.orig <- DimPlot(pdac2, group.by = "orig_clusters", label=TRUE, pt.size=0.2) 
+
+pdac1.umap.orig + pdac2.umap.orig
+
+pdac1.idents <- c("Ductal 1", "Ductal 2", "Ductal 3", "Cancer clone B", "Macrophages", "Cancer clone A", "Ductal 4", "T & NK", "Tuft", "Endocrine & RBCs", "Acinar", "Endothelial")
+
+pdac2.idents <- c("Ductal 1", "Ductal 2", "Cancer clone A", "Ductal 3", "Endothelial", "Macrophages", "Ductal 4", "Tuft & Endocrine", "Acinar")
+
+names(pdac1.idents) <- levels(pdac1)
+pdac1 <- RenameIdents(pdac1, pdac1.idents)
+
+names(pdac2.idents) <- levels(pdac2)
+pdac2 <- RenameIdents(pdac2, pdac2.idents)
+
+
+
+```
+
+
+
+
+```{r}
+
+pdac1 <- FindNeighbors(pdac1, dims = 1:50)
+pdac1 <- FindClusters(pdac1, resolution = 0.5, algorithm = 3)
+pdac1.markers <- FindAllMarkers(pdac1, test.use = 'wilcox', min.pct = 0.25, logfc.threshold = 0.50, max.cells.per.ident = 500)
+pdac1.top25 <- pdac1.markers %>% group_by(cluster) %>% top_n(n=25, wt=avg_logFC)
+View(pdac1.top25[7])
+
+
+
+
+pdac2 <- FindNeighbors(pdac2, dims = 1:50)
+pdac2 <- FindClusters(pdac2, resolution = 0.5, algorithm = 3)
+pdac2.markers <- FindAllMarkers(pdac2, test.use = 'wilcox', min.pct = 0.25, logfc.threshold = 0.50, max.cells.per.ident = 500)
+pdac2.top25 <- pdac2.markers %>% group_by(cluster) %>% top_n(n=25, wt=avg_logFC)
+View(pdac2.top25[7])
+
+
+```
+
+
+
+Combined analysis of pdac datasets
+
+```{r}
+## Merge and process datasets 
+pdac.combined <- merge(pdac1, y=pdac2, add.cell.ids=c("Patient 1", "Patient 2"), project="Merged PDAC")
+pdac.combined <- preprocessing(pdac.combined)
+pdac.combined <- clustering(pdac.combined)
+pdac.combined <- RunUMAP(pdac.combined, dims=1:50)
+## Create UMAPS
+pdac.combined.umap <- DimPlot(pdac.combined, reduction="umap")
+pdac.combined.identsep.umap <- DimPlot(pdac.combined, reduction="umap", group.by="orig.ident")
+pdac.combined.umap + pdac.combined.identsep.umap
+DimPlot(pdac.combined, reduction = "umap", split.by="orig.ident")
+## Check feature expression 
+```
+
+Heatmap Comparison 
+
+```{r}
+
+pdac.distribution.table <- dist_table(pdac.combined.merged, uniqueclusters1, uniqueclusters2, 6, 12)
+
+pdac.proportions.table <- prop_table(pdac.distribution.table, uniqueclusters1, uniqueclusters2)
+
+uniqueclusters2 <- c("Acinar", "Cancer clone A", "Ductal 4", "Cancer clone B", "Ductal 3", "Ductal 1", "Ductal 2", "Tuft", "T & NK", "Endothelial", "Macrophages", "Endocrine & RBCs", "B_Acinar", "B_Cancer clone A", "B_Ductal 4", "B_Ductal 3", "B_Ductal 2", "B_Tuft & Endocrine", "B_Macrophages", "B_Ductal 1", "B_Endothelial")
+
+pdac.comparison.heatmap <- ggplot_heatmap(pdac.proportions.table, uniqueclusters1, uniqueclusters2, c("RdGy"), c("Merged Clustering"), c("Individual Clustering"))
+
+pdac.comparison.heatmap
+
+```
+
+Identify clusters
+
+
+```{r}
+features = c("IL7R", "CCR7", "S100A4", "CD14", "LYZ", "MS4A1", "CD8A", "FCGR3A", "MS4A7", "GNLY", "NKG7", "FCER1A", "CST3", "PPBP")
+FeaturePlot(pdac.combined, features=features)
+DotPlot(pdac.combined, features=features) + RotatedAxis()
+RidgePlot(pdac.combined, features=features, ncol=6)
+DoHeatmap(subset(pdac.combined, downsample=100), features=features)
+```

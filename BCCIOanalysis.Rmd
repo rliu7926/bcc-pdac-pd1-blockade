@@ -71,7 +71,7 @@ save(BCCIO, file="C:\\Users\\Ryan\\Downloads\\GSE 123813\\BCCIO")
 save(BCCIO.meta.data,BCCIO.read, file = "C:\\Users\\Ryan\\Downloads\\GSE 123813\\BCCIOrawdata")
 
 ## To load data use load(filelocation) function
-
+load("C:\\Users\\Ryan\\Downloads\\GSE 123813\\BCCIO")
 ```
 
 
@@ -169,8 +169,8 @@ Full DE Testing (UMAP) for r=0.4, test=wilcox
 
 ```{r}
 
-BCCIO <- FindNeighbors(BCCIO, dims = 1:15)
-BCCIO <- FindClusters(BCCIO, resolution = 0.4, algorithm = 3) ## Set r = 0.05
+BCCIO <- FindNeighbors(BCCIO, dims = 1:50)
+BCCIO <- FindClusters(BCCIO, resolution = 0.4, algorithm = 3) ## Set r = 0.3
 BCCIO.markers <- FindAllMarkers(BCCIO, test.use = 'wilcox', min.pct = 0.25, logfc.threshold = 0.25, max.cells.per.ident = 500) ## Run through all cells
 top5 <- BCCIO.markers %>% group_by(cluster) %>% top_n(n=5, wt=avg_logFC)
 DoHeatmap(BCCIO,features = top5$gene, size = 3) ## Heatmap with all cells
@@ -178,7 +178,7 @@ DoHeatmap(BCCIO,features = top5$gene, size = 3) ## Heatmap with all cells
 top25 <- BCCIO.markers %>% group_by(cluster) %>% top_n(n=25, wt=avg_logFC)
 BCCIO.top25genes <- top25[c(6,7)]
 
-top2 <- BCCIO.markers %>% group_by(cluster) %>% top_n(n=2, wt=avg_logFC)
+BCCIO.top2genes <- BCCIO.markers %>% group_by(cluster) %>% top_n(n=2, wt=avg_logFC)
 BCCIO.geneslist <- unique(unlist(top2[7]))
 
 labels <- c("CD56+ NK 1", "CD4+ T 1", "CD19+ B 1", "CD56+ NK 2", "CD4+ T 2", "CD33+ Myeloid", "BDCA4+ Dendritic 1", "??1", "CD4+ T 3", "721 B Lymphoblasts", "BDCA4+ Dendritic 2", "??2", "??3", "??4", "??5", "??6", "??7", "??8", "CD34+", "CD19+ B 2")
@@ -189,7 +189,7 @@ BCCIO <- RenameIdents(BCCIO, labels)
 new_idents <- rep(c("0", "1", "2", "3", "4", "5", "6", "7", "8", "9", "10", "11", "12", "13", "14", "15", "16", "17", "18", "19"), times=c("CD56+ NK 1", "CD4+ T 1", "CD19+ B 1", "CD56+ NK 2", "CD4+ T 2", "CD33+ Myeloid", "BDCA4+ Dendritic 1", "??1", "CD4+ T 3", "721 B Lymphoblasts", "BDCA4+ Dendritic 2", "??2", "??3", "??4", "??5", "??6", "??7", "??8", "CD34+", "CD19+ B 2"))
 
 
-BCCIO <- RunUMAP(BCCIO, dims = 1:15)
+BCCIO <- RunUMAP(BCCIO, dims = 1:50)
 DimPlot(BCCIO, reduction="umap", label=TRUE, pt.size = 0.1) + NoLegend() ## Create labeled UMAP
 
 ```
@@ -213,7 +213,7 @@ uniqueclusters2 <- as.matrix(unique(BCCIO.clustering.comparison[,2]))
 BCCIO.distribution.table <- data.frame(matrix(0, nrow=nrow(uniqueclusters1), ncol=nrow(uniqueclusters2)))
 for (cluster1 in 1:nrow(uniqueclusters1)) {
   for (cluster2 in 1:nrow(uniqueclusters2)) {
-    for (row in 1001:53029) {
+    for (row in 1:53029) {
       if ((BCCIO.clustering.comparison[row,1] == uniqueclusters1[cluster1,]) & (BCCIO.clustering.comparison[row,2] == uniqueclusters2[cluster2,])) {
         BCCIO.distribution.table[cluster1, cluster2] <- BCCIO.distribution.table[cluster1, cluster2] + 1
       }
@@ -221,19 +221,31 @@ for (cluster1 in 1:nrow(uniqueclusters1)) {
   }
 }
 
+BCCIO.distribution.table <- as.data.frame(BCCIO.distribution.table)
+BCCIO.distribution.table <- as.matrix(BCCIO.distribution.table)
+
+
 rownames(BCCIO.distribution.table) <- uniqueclusters1
 colnames(BCCIO.distribution.table) <- uniqueclusters2
-BCCIO.distribution.table <- cbind(cluster=rownames(BCCIO.distribution.table), BCCIO.distribution.table)
-BCCIO.distribution.table <- subset(BCCIO.distribution.table, select = -c(cluster))
+
 BCCIO.distribution.table <- mapply(BCCIO.distribution.table, FUN=as.numeric)
-BCCIO.distribution.table <- matrix(data=BCCIO.distribution.table, ncol=20, nrow=19)
-colnames(BCCIO.distribution.table) <- c("CD56+ NK1", "CD4+ T1", "CD4+ T2", "721 B Lymphoblasts", "CD34+", "CD4+ T3", "CD56+ NK2", "CD19+ B1", "CD33+ Myeloid", "BDCA4+ Dendritic2", "BDCA4+ Dendritic1", "??5", "CD19+ B2", "??3", "??4", "??6", "??8", "??1", "??2", "??7")
+
+colnames(BCCIO.distribution.table) <- c("CD56+ NK1", "CD4+ T1", "CD4+ T2", "721 B Lymphoblasts", "CD34+", "CD4+ T3", "CD56+ NK2", "CD19+ B1", "CD33+ Myeloid", "BDCA4+ Dendritic2", "BDCA4+ Dendritic1", "??5", "CD19+ B2", "CAFs", "Endothelial", "Myofibroblasts", "??8", "Tumor1", "Tumor2", "Melanocytes")
 
 BCCIO.proportions.table <- prop.table(BCCIO.distribution.table,1)
+BCCIO.proportions.table <- unlist(BCCIO.proportions.table)
+BCCIO.proportions.table <- as.data.frame(BCCIO.proportions.table)
 
-BCCIO.proportions.table <- melt(BCCIO.proportions.table)
-BCCIO.clustering.heatmap <- ggplot(BCCIO.proportions.table, aes(X2, X1, fill=value)) + geom_tile() + scale_fill_distiller(palette = "Spectral") + theme(axis.text.x = element_text(angle=45, hjust=1)) + labs(x="My Clustering", y="Metadata Clustering")
+BCCIO.clustering.heatmap <- ggplot(BCCIO.proportions.table, aes(uniqueclusters2, uniqueclusters1, fill=Proportion)) + geom_tile() + scale_fill_distiller(palette = "Spectral") + theme(axis.text.x = element_text(angle=45, hjust=1)) + labs(x="My Clustering", y="Metadata Clustering")
 BCCIO.clustering.heatmap
+
+x <- uniqueclusters1
+y <- uniqueclusters2
+data <- expand.grid(X=x, Y=y)
+data$Z <- BCCIO.proportions.table
+BCCIO.clustering.heatmap <- ggplot(data, aes(X, Y, fill=Z)) + geom_tile() + scale_fill_distiller(palette="Spectral") + theme(axis.text.x = element_text(angle=45, hjust=1)) + labs(x="My Clustering", y="Metadata Clustering")
+BCCIO.clustering.heatmap
+
 ```
 
 
@@ -275,7 +287,7 @@ DimPlot(BCCIO, reduction="umap", split.by="patient")
 
 
 
-UMAP Clustering (Following Paper)
+UMAP Clustering (Following Paper) (not used anymore)
 
 ```{r}
 

@@ -11,7 +11,7 @@
 
 
 
-<title>R Notebook</title>
+<title>GSE111672 PDAC Analysis</title>
 
 <script>/*! jQuery v1.11.3 | (c) 2005, 2015 jQuery Foundation, Inc. | jquery.org/license */
 !function(a,b){"object"==typeof module&&"object"==typeof module.exports?module.exports=a.document?b(a,!0):function(a){if(!a.document)throw new Error("jQuery requires a window with a document");return b(a)}:b(a)}("undefined"!=typeof window?window:this,function(a,b){var c=[],d=c.slice,e=c.concat,f=c.push,g=c.indexOf,h={},i=h.toString,j=h.hasOwnProperty,k={},l="1.11.3",m=function(a,b){return new m.fn.init(a,b)},n=/^[\s\uFEFF\xA0]+|[\s\uFEFF\xA0]+$/g,o=/^-ms-/,p=/-([\da-z])/gi,q=function(a,b){return b.toUpperCase()};m.fn=m.prototype={jquery:l,constructor:m,selector:"",length:0,toArray:function(){return d.call(this)},get:function(a){return null!=a?0>a?this[a+this.length]:this[a]:d.call(this)},pushStack:function(a){var b=m.merge(this.constructor(),a);return b.prevObject=this,b.context=this.context,b},each:function(a,b){return m.each(this,a,b)},map:function(a){return this.pushStack(m.map(this,function(b,c){return a.call(b,c,b)}))},slice:function(){return this.pushStack(d.apply(this,arguments))},first:function(){return this.eq(0)},last:function(){return this.eq(-1)},eq:function(a){var b=this.length,c=+a+(0>a?b:0);return this.pushStack(c>=0&&b>c?[this[c]]:[])},end:function(){return this.prevObject||this.constructor(null)},push:f,sort:c.sort,splice:c.splice},m.extend=m.fn.extend=function(){var a,b,c,d,e,f,g=arguments[0]||{},h=1,i=arguments.length,j=!1;for("boolean"==typeof g&&(j=g,g=arguments[h]||{},h++),"object"==typeof g||m.isFunction(g)||(g={}),h===i&&(g=this,h--);i>h;h++)if(null!=(e=arguments[h]))for(d in e)a=g[d],c=e[d],g!==c&&(j&&c&&(m.isPlainObject(c)||(b=m.isArray(c)))?(b?(b=!1,f=a&&m.isArray(a)?a:[]):f=a&&m.isPlainObject(a)?a:{},g[d]=m.extend(j,f,c)):void 0!==c&&(g[d]=c));return g},m.extend({expando:"jQuery"+(l+Math.random()).replace(/\D/g,""),isReady:!0,error:function(a){throw new Error(a)},noop:function(){},isFunction:function(a){return"function"===m.type(a)},isArray:Array.isArray||function(a){return"array"===m.type(a)},isWindow:function(a){return null!=a&&a==a.window},isNumeric:function(a){return!m.isArray(a)&&a-parseFloat(a)+1>=0},isEmptyObject:function(a){var b;for(b in a)return!1;return!0},isPlainObject:function(a){var b;if(!a||"object"!==m.type(a)||a.nodeType||m.isWindow(a))return!1;try{if(a.constructor&&!j.call(a,"constructor")&&!j.call(a.constructor.prototype,"isPrototypeOf"))return!1}catch(c){return!1}if(k.ownLast)for(b in a)return j.call(a,b);for(b in a);return void 0===b||j.call(a,b)},type:function(a){return null==a?a+"":"object"==typeof a||"function"==typeof a?h[i.call(a)]||"object":typeof a},globalEval:function(b){b&&m.trim(b)&&(a.execScript||function(b){a.eval.call(a,b)})(b)},camelCase:function(a){return a.replace(o,"ms-").replace(p,q)},nodeName:function(a,b){return a.nodeName&&a.nodeName.toLowerCase()===b.toLowerCase()},each:function(a,b,c){var d,e=0,f=a.length,g=r(a);if(c){if(g){for(;f>e;e++)if(d=b.apply(a[e],c),d===!1)break}else for(e in a)if(d=b.apply(a[e],c),d===!1)break}else if(g){for(;f>e;e++)if(d=b.call(a[e],e,a[e]),d===!1)break}else for(e in a)if(d=b.call(a[e],e,a[e]),d===!1)break;return a},trim:function(a){return null==a?"":(a+"").replace(n,"")},makeArray:function(a,b){var c=b||[];return null!=a&&(r(Object(a))?m.merge(c,"string"==typeof a?[a]:a):f.call(c,a)),c},inArray:function(a,b,c){var d;if(b){if(g)return g.call(b,a,c);for(d=b.length,c=c?0>c?Math.max(0,d+c):c:0;d>c;c++)if(c in b&&b[c]===a)return c}return-1},merge:function(a,b){var c=+b.length,d=0,e=a.length;while(c>d)a[e++]=b[d++];if(c!==c)while(void 0!==b[d])a[e++]=b[d++];return a.length=e,a},grep:function(a,b,c){for(var d,e=[],f=0,g=a.length,h=!c;g>f;f++)d=!b(a[f],f),d!==h&&e.push(a[f]);return e},map:function(a,b,c){var d,f=0,g=a.length,h=r(a),i=[];if(h)for(;g>f;f++)d=b(a[f],f,c),null!=d&&i.push(d);else for(f in a)d=b(a[f],f,c),null!=d&&i.push(d);return e.apply([],i)},guid:1,proxy:function(a,b){var c,e,f;return"string"==typeof b&&(f=a[b],b=a,a=f),m.isFunction(a)?(c=d.call(arguments,2),e=function(){return a.apply(b||this,c.concat(d.call(arguments)))},e.guid=a.guid=a.guid||m.guid++,e):void 0},now:function(){return+new Date},support:k}),m.each("Boolean Number String Function Array Date RegExp Object Error".split(" "),function(a,b){h["[object "+b+"]"]=b.toLowerCase()});function r(a){var b="length"in a&&a.length,c=m.type(a);return"function"===c||m.isWindow(a)?!1:1===a.nodeType&&b?!0:"array"===c||0===b||"number"==typeof b&&b>0&&b-1 in a}var s=function(a){var b,c,d,e,f,g,h,i,j,k,l,m,n,o,p,q,r,s,t,u="sizzle"+1*new Date,v=a.document,w=0,x=0,y=ha(),z=ha(),A=ha(),B=function(a,b){return a===b&&(l=!0),0},C=1<<31,D={}.hasOwnProperty,E=[],F=E.pop,G=E.push,H=E.push,I=E.slice,J=function(a,b){for(var c=0,d=a.length;d>c;c++)if(a[c]===b)return c;return-1},K="checked|selected|async|autofocus|autoplay|controls|defer|disabled|hidden|ismap|loop|multiple|open|readonly|required|scoped",L="[\\x20\\t\\r\\n\\f]",M="(?:\\\\.|[\\w-]|[^\\x00-\\xa0])+",N=M.replace("w","w#"),O="\\["+L+"*("+M+")(?:"+L+"*([*^$|!~]?=)"+L+"*(?:'((?:\\\\.|[^\\\\'])*)'|\"((?:\\\\.|[^\\\\\"])*)\"|("+N+"))|)"+L+"*\\]",P=":("+M+")(?:\\((('((?:\\\\.|[^\\\\'])*)'|\"((?:\\\\.|[^\\\\\"])*)\")|((?:\\\\.|[^\\\\()[\\]]|"+O+")*)|.*)\\)|)",Q=new RegExp(L+"+","g"),R=new RegExp("^"+L+"+|((?:^|[^\\\\])(?:\\\\.)*)"+L+"+$","g"),S=new RegExp("^"+L+"*,"+L+"*"),T=new RegExp("^"+L+"*([>+~]|"+L+")"+L+"*"),U=new RegExp("="+L+"*([^\\]'\"]*?)"+L+"*\\]","g"),V=new RegExp(P),W=new RegExp("^"+N+"$"),X={ID:new RegExp("^#("+M+")"),CLASS:new RegExp("^\\.("+M+")"),TAG:new RegExp("^("+M.replace("w","w*")+")"),ATTR:new RegExp("^"+O),PSEUDO:new RegExp("^"+P),CHILD:new RegExp("^:(only|first|last|nth|nth-last)-(child|of-type)(?:\\("+L+"*(even|odd|(([+-]|)(\\d*)n|)"+L+"*(?:([+-]|)"+L+"*(\\d+)|))"+L+"*\\)|)","i"),bool:new RegExp("^(?:"+K+")$","i"),needsContext:new RegExp("^"+L+"*[>+~]|:(even|odd|eq|gt|lt|nth|first|last)(?:\\("+L+"*((?:-\\d)?\\d*)"+L+"*\\)|)(?=[^-]|$)","i")},Y=/^(?:input|select|textarea|button)$/i,Z=/^h\d$/i,$=/^[^{]+\{\s*\[native \w/,_=/^(?:#([\w-]+)|(\w+)|\.([\w-]+))$/,aa=/[+~]/,ba=/'|\\/g,ca=new RegExp("\\\\([\\da-f]{1,6}"+L+"?|("+L+")|.)","ig"),da=function(a,b,c){var d="0x"+b-65536;return d!==d||c?b:0>d?String.fromCharCode(d+65536):String.fromCharCode(d>>10|55296,1023&d|56320)},ea=function(){m()};try{H.apply(E=I.call(v.childNodes),v.childNodes),E[v.childNodes.length].nodeType}catch(fa){H={apply:E.length?function(a,b){G.apply(a,I.call(b))}:function(a,b){var c=a.length,d=0;while(a[c++]=b[d++]);a.length=c-1}}}function ga(a,b,d,e){var f,h,j,k,l,o,r,s,w,x;if((b?b.ownerDocument||b:v)!==n&&m(b),b=b||n,d=d||[],k=b.nodeType,"string"!=typeof a||!a||1!==k&&9!==k&&11!==k)return d;if(!e&&p){if(11!==k&&(f=_.exec(a)))if(j=f[1]){if(9===k){if(h=b.getElementById(j),!h||!h.parentNode)return d;if(h.id===j)return d.push(h),d}else if(b.ownerDocument&&(h=b.ownerDocument.getElementById(j))&&t(b,h)&&h.id===j)return d.push(h),d}else{if(f[2])return H.apply(d,b.getElementsByTagName(a)),d;if((j=f[3])&&c.getElementsByClassName)return H.apply(d,b.getElementsByClassName(j)),d}if(c.qsa&&(!q||!q.test(a))){if(s=r=u,w=b,x=1!==k&&a,1===k&&"object"!==b.nodeName.toLowerCase()){o=g(a),(r=b.getAttribute("id"))?s=r.replace(ba,"\\$&"):b.setAttribute("id",s),s="[id='"+s+"'] ",l=o.length;while(l--)o[l]=s+ra(o[l]);w=aa.test(a)&&pa(b.parentNode)||b,x=o.join(",")}if(x)try{return H.apply(d,w.querySelectorAll(x)),d}catch(y){}finally{r||b.removeAttribute("id")}}}return i(a.replace(R,"$1"),b,d,e)}function ha(){var a=[];function b(c,e){return a.push(c+" ")>d.cacheLength&&delete b[a.shift()],b[c+" "]=e}return b}function ia(a){return a[u]=!0,a}function ja(a){var b=n.createElement("div");try{return!!a(b)}catch(c){return!1}finally{b.parentNode&&b.parentNode.removeChild(b),b=null}}function ka(a,b){var c=a.split("|"),e=a.length;while(e--)d.attrHandle[c[e]]=b}function la(a,b){var c=b&&a,d=c&&1===a.nodeType&&1===b.nodeType&&(~b.sourceIndex||C)-(~a.sourceIndex||C);if(d)return d;if(c)while(c=c.nextSibling)if(c===b)return-1;return a?1:-1}function ma(a){return function(b){var c=b.nodeName.toLowerCase();return"input"===c&&b.type===a}}function na(a){return function(b){var c=b.nodeName.toLowerCase();return("input"===c||"button"===c)&&b.type===a}}function oa(a){return ia(function(b){return b=+b,ia(function(c,d){var e,f=a([],c.length,b),g=f.length;while(g--)c[e=f[g]]&&(c[e]=!(d[e]=c[e]))})})}function pa(a){return a&&"undefined"!=typeof a.getElementsByTagName&&a}c=ga.support={},f=ga.isXML=function(a){var b=a&&(a.ownerDocument||a).documentElement;return b?"HTML"!==b.nodeName:!1},m=ga.setDocument=function(a){var b,e,g=a?a.ownerDocument||a:v;return g!==n&&9===g.nodeType&&g.documentElement?(n=g,o=g.documentElement,e=g.defaultView,e&&e!==e.top&&(e.addEventListener?e.addEventListener("unload",ea,!1):e.attachEvent&&e.attachEvent("onunload",ea)),p=!f(g),c.attributes=ja(function(a){return a.className="i",!a.getAttribute("className")}),c.getElementsByTagName=ja(function(a){return a.appendChild(g.createComment("")),!a.getElementsByTagName("*").length}),c.getElementsByClassName=$.test(g.getElementsByClassName),c.getById=ja(function(a){return o.appendChild(a).id=u,!g.getElementsByName||!g.getElementsByName(u).length}),c.getById?(d.find.ID=function(a,b){if("undefined"!=typeof b.getElementById&&p){var c=b.getElementById(a);return c&&c.parentNode?[c]:[]}},d.filter.ID=function(a){var b=a.replace(ca,da);return function(a){return a.getAttribute("id")===b}}):(delete d.find.ID,d.filter.ID=function(a){var b=a.replace(ca,da);return function(a){var c="undefined"!=typeof a.getAttributeNode&&a.getAttributeNode("id");return c&&c.value===b}}),d.find.TAG=c.getElementsByTagName?function(a,b){return"undefined"!=typeof b.getElementsByTagName?b.getElementsByTagName(a):c.qsa?b.querySelectorAll(a):void 0}:function(a,b){var c,d=[],e=0,f=b.getElementsByTagName(a);if("*"===a){while(c=f[e++])1===c.nodeType&&d.push(c);return d}return f},d.find.CLASS=c.getElementsByClassName&&function(a,b){return p?b.getElementsByClassName(a):void 0},r=[],q=[],(c.qsa=$.test(g.querySelectorAll))&&(ja(function(a){o.appendChild(a).innerHTML="<a id='"+u+"'></a><select id='"+u+"-\f]' msallowcapture=''><option selected=''></option></select>",a.querySelectorAll("[msallowcapture^='']").length&&q.push("[*^$]="+L+"*(?:''|\"\")"),a.querySelectorAll("[selected]").length||q.push("\\["+L+"*(?:value|"+K+")"),a.querySelectorAll("[id~="+u+"-]").length||q.push("~="),a.querySelectorAll(":checked").length||q.push(":checked"),a.querySelectorAll("a#"+u+"+*").length||q.push(".#.+[+~]")}),ja(function(a){var b=g.createElement("input");b.setAttribute("type","hidden"),a.appendChild(b).setAttribute("name","D"),a.querySelectorAll("[name=d]").length&&q.push("name"+L+"*[*^$|!~]?="),a.querySelectorAll(":enabled").length||q.push(":enabled",":disabled"),a.querySelectorAll("*,:x"),q.push(",.*:")})),(c.matchesSelector=$.test(s=o.matches||o.webkitMatchesSelector||o.mozMatchesSelector||o.oMatchesSelector||o.msMatchesSelector))&&ja(function(a){c.disconnectedMatch=s.call(a,"div"),s.call(a,"[s!='']:x"),r.push("!=",P)}),q=q.length&&new RegExp(q.join("|")),r=r.length&&new RegExp(r.join("|")),b=$.test(o.compareDocumentPosition),t=b||$.test(o.contains)?function(a,b){var c=9===a.nodeType?a.documentElement:a,d=b&&b.parentNode;return a===d||!(!d||1!==d.nodeType||!(c.contains?c.contains(d):a.compareDocumentPosition&&16&a.compareDocumentPosition(d)))}:function(a,b){if(b)while(b=b.parentNode)if(b===a)return!0;return!1},B=b?function(a,b){if(a===b)return l=!0,0;var d=!a.compareDocumentPosition-!b.compareDocumentPosition;return d?d:(d=(a.ownerDocument||a)===(b.ownerDocument||b)?a.compareDocumentPosition(b):1,1&d||!c.sortDetached&&b.compareDocumentPosition(a)===d?a===g||a.ownerDocument===v&&t(v,a)?-1:b===g||b.ownerDocument===v&&t(v,b)?1:k?J(k,a)-J(k,b):0:4&d?-1:1)}:function(a,b){if(a===b)return l=!0,0;var c,d=0,e=a.parentNode,f=b.parentNode,h=[a],i=[b];if(!e||!f)return a===g?-1:b===g?1:e?-1:f?1:k?J(k,a)-J(k,b):0;if(e===f)return la(a,b);c=a;while(c=c.parentNode)h.unshift(c);c=b;while(c=c.parentNode)i.unshift(c);while(h[d]===i[d])d++;return d?la(h[d],i[d]):h[d]===v?-1:i[d]===v?1:0},g):n},ga.matches=function(a,b){return ga(a,null,null,b)},ga.matchesSelector=function(a,b){if((a.ownerDocument||a)!==n&&m(a),b=b.replace(U,"='$1']"),!(!c.matchesSelector||!p||r&&r.test(b)||q&&q.test(b)))try{var d=s.call(a,b);if(d||c.disconnectedMatch||a.document&&11!==a.document.nodeType)return d}catch(e){}return ga(b,n,null,[a]).length>0},ga.contains=function(a,b){return(a.ownerDocument||a)!==n&&m(a),t(a,b)},ga.attr=function(a,b){(a.ownerDocument||a)!==n&&m(a);var e=d.attrHandle[b.toLowerCase()],f=e&&D.call(d.attrHandle,b.toLowerCase())?e(a,b,!p):void 0;return void 0!==f?f:c.attributes||!p?a.getAttribute(b):(f=a.getAttributeNode(b))&&f.specified?f.value:null},ga.error=function(a){throw new Error("Syntax error, unrecognized expression: "+a)},ga.uniqueSort=function(a){var b,d=[],e=0,f=0;if(l=!c.detectDuplicates,k=!c.sortStable&&a.slice(0),a.sort(B),l){while(b=a[f++])b===a[f]&&(e=d.push(f));while(e--)a.splice(d[e],1)}return k=null,a},e=ga.getText=function(a){var b,c="",d=0,f=a.nodeType;if(f){if(1===f||9===f||11===f){if("string"==typeof a.textContent)return a.textContent;for(a=a.firstChild;a;a=a.nextSibling)c+=e(a)}else if(3===f||4===f)return a.nodeValue}else while(b=a[d++])c+=e(b);return c},d=ga.selectors={cacheLength:50,createPseudo:ia,match:X,attrHandle:{},find:{},relative:{">":{dir:"parentNode",first:!0}," ":{dir:"parentNode"},"+":{dir:"previousSibling",first:!0},"~":{dir:"previousSibling"}},preFilter:{ATTR:function(a){return a[1]=a[1].replace(ca,da),a[3]=(a[3]||a[4]||a[5]||"").replace(ca,da),"~="===a[2]&&(a[3]=" "+a[3]+" "),a.slice(0,4)},CHILD:function(a){return a[1]=a[1].toLowerCase(),"nth"===a[1].slice(0,3)?(a[3]||ga.error(a[0]),a[4]=+(a[4]?a[5]+(a[6]||1):2*("even"===a[3]||"odd"===a[3])),a[5]=+(a[7]+a[8]||"odd"===a[3])):a[3]&&ga.error(a[0]),a},PSEUDO:function(a){var b,c=!a[6]&&a[2];return X.CHILD.test(a[0])?null:(a[3]?a[2]=a[4]||a[5]||"":c&&V.test(c)&&(b=g(c,!0))&&(b=c.indexOf(")",c.length-b)-c.length)&&(a[0]=a[0].slice(0,b),a[2]=c.slice(0,b)),a.slice(0,3))}},filter:{TAG:function(a){var b=a.replace(ca,da).toLowerCase();return"*"===a?function(){return!0}:function(a){return a.nodeName&&a.nodeName.toLowerCase()===b}},CLASS:function(a){var b=y[a+" "];return b||(b=new RegExp("(^|"+L+")"+a+"("+L+"|$)"))&&y(a,function(a){return b.test("string"==typeof a.className&&a.className||"undefined"!=typeof a.getAttribute&&a.getAttribute("class")||"")})},ATTR:function(a,b,c){return function(d){var e=ga.attr(d,a);return null==e?"!="===b:b?(e+="","="===b?e===c:"!="===b?e!==c:"^="===b?c&&0===e.indexOf(c):"*="===b?c&&e.indexOf(c)>-1:"$="===b?c&&e.slice(-c.length)===c:"~="===b?(" "+e.replace(Q," ")+" ").indexOf(c)>-1:"|="===b?e===c||e.slice(0,c.length+1)===c+"-":!1):!0}},CHILD:function(a,b,c,d,e){var f="nth"!==a.slice(0,3),g="last"!==a.slice(-4),h="of-type"===b;return 1===d&&0===e?function(a){return!!a.parentNode}:function(b,c,i){var j,k,l,m,n,o,p=f!==g?"nextSibling":"previousSibling",q=b.parentNode,r=h&&b.nodeName.toLowerCase(),s=!i&&!h;if(q){if(f){while(p){l=b;while(l=l[p])if(h?l.nodeName.toLowerCase()===r:1===l.nodeType)return!1;o=p="only"===a&&!o&&"nextSibling"}return!0}if(o=[g?q.firstChild:q.lastChild],g&&s){k=q[u]||(q[u]={}),j=k[a]||[],n=j[0]===w&&j[1],m=j[0]===w&&j[2],l=n&&q.childNodes[n];while(l=++n&&l&&l[p]||(m=n=0)||o.pop())if(1===l.nodeType&&++m&&l===b){k[a]=[w,n,m];break}}else if(s&&(j=(b[u]||(b[u]={}))[a])&&j[0]===w)m=j[1];else while(l=++n&&l&&l[p]||(m=n=0)||o.pop())if((h?l.nodeName.toLowerCase()===r:1===l.nodeType)&&++m&&(s&&((l[u]||(l[u]={}))[a]=[w,m]),l===b))break;return m-=e,m===d||m%d===0&&m/d>=0}}},PSEUDO:function(a,b){var c,e=d.pseudos[a]||d.setFilters[a.toLowerCase()]||ga.error("unsupported pseudo: "+a);return e[u]?e(b):e.length>1?(c=[a,a,"",b],d.setFilters.hasOwnProperty(a.toLowerCase())?ia(function(a,c){var d,f=e(a,b),g=f.length;while(g--)d=J(a,f[g]),a[d]=!(c[d]=f[g])}):function(a){return e(a,0,c)}):e}},pseudos:{not:ia(function(a){var b=[],c=[],d=h(a.replace(R,"$1"));return d[u]?ia(function(a,b,c,e){var f,g=d(a,null,e,[]),h=a.length;while(h--)(f=g[h])&&(a[h]=!(b[h]=f))}):function(a,e,f){return b[0]=a,d(b,null,f,c),b[0]=null,!c.pop()}}),has:ia(function(a){return function(b){return ga(a,b).length>0}}),contains:ia(function(a){return a=a.replace(ca,da),function(b){return(b.textContent||b.innerText||e(b)).indexOf(a)>-1}}),lang:ia(function(a){return W.test(a||"")||ga.error("unsupported lang: "+a),a=a.replace(ca,da).toLowerCase(),function(b){var c;do if(c=p?b.lang:b.getAttribute("xml:lang")||b.getAttribute("lang"))return c=c.toLowerCase(),c===a||0===c.indexOf(a+"-");while((b=b.parentNode)&&1===b.nodeType);return!1}}),target:function(b){var c=a.location&&a.location.hash;return c&&c.slice(1)===b.id},root:function(a){return a===o},focus:function(a){return a===n.activeElement&&(!n.hasFocus||n.hasFocus())&&!!(a.type||a.href||~a.tabIndex)},enabled:function(a){return a.disabled===!1},disabled:function(a){return a.disabled===!0},checked:function(a){var b=a.nodeName.toLowerCase();return"input"===b&&!!a.checked||"option"===b&&!!a.selected},selected:function(a){return a.parentNode&&a.parentNode.selectedIndex,a.selected===!0},empty:function(a){for(a=a.firstChild;a;a=a.nextSibling)if(a.nodeType<6)return!1;return!0},parent:function(a){return!d.pseudos.empty(a)},header:function(a){return Z.test(a.nodeName)},input:function(a){return Y.test(a.nodeName)},button:function(a){var b=a.nodeName.toLowerCase();return"input"===b&&"button"===a.type||"button"===b},text:function(a){var b;return"input"===a.nodeName.toLowerCase()&&"text"===a.type&&(null==(b=a.getAttribute("type"))||"text"===b.toLowerCase())},first:oa(function(){return[0]}),last:oa(function(a,b){return[b-1]}),eq:oa(function(a,b,c){return[0>c?c+b:c]}),even:oa(function(a,b){for(var c=0;b>c;c+=2)a.push(c);return a}),odd:oa(function(a,b){for(var c=1;b>c;c+=2)a.push(c);return a}),lt:oa(function(a,b,c){for(var d=0>c?c+b:c;--d>=0;)a.push(d);return a}),gt:oa(function(a,b,c){for(var d=0>c?c+b:c;++d<b;)a.push(d);return a})}},d.pseudos.nth=d.pseudos.eq;for(b in{radio:!0,checkbox:!0,file:!0,password:!0,image:!0})d.pseudos[b]=ma(b);for(b in{submit:!0,reset:!0})d.pseudos[b]=na(b);function qa(){}qa.prototype=d.filters=d.pseudos,d.setFilters=new qa,g=ga.tokenize=function(a,b){var c,e,f,g,h,i,j,k=z[a+" "];if(k)return b?0:k.slice(0);h=a,i=[],j=d.preFilter;while(h){(!c||(e=S.exec(h)))&&(e&&(h=h.slice(e[0].length)||h),i.push(f=[])),c=!1,(e=T.exec(h))&&(c=e.shift(),f.push({value:c,type:e[0].replace(R," ")}),h=h.slice(c.length));for(g in d.filter)!(e=X[g].exec(h))||j[g]&&!(e=j[g](e))||(c=e.shift(),f.push({value:c,type:g,matches:e}),h=h.slice(c.length));if(!c)break}return b?h.length:h?ga.error(a):z(a,i).slice(0)};function ra(a){for(var b=0,c=a.length,d="";c>b;b++)d+=a[b].value;return d}function sa(a,b,c){var d=b.dir,e=c&&"parentNode"===d,f=x++;return b.first?function(b,c,f){while(b=b[d])if(1===b.nodeType||e)return a(b,c,f)}:function(b,c,g){var h,i,j=[w,f];if(g){while(b=b[d])if((1===b.nodeType||e)&&a(b,c,g))return!0}else while(b=b[d])if(1===b.nodeType||e){if(i=b[u]||(b[u]={}),(h=i[d])&&h[0]===w&&h[1]===f)return j[2]=h[2];if(i[d]=j,j[2]=a(b,c,g))return!0}}}function ta(a){return a.length>1?function(b,c,d){var e=a.length;while(e--)if(!a[e](b,c,d))return!1;return!0}:a[0]}function ua(a,b,c){for(var d=0,e=b.length;e>d;d++)ga(a,b[d],c);return c}function va(a,b,c,d,e){for(var f,g=[],h=0,i=a.length,j=null!=b;i>h;h++)(f=a[h])&&(!c||c(f,d,e))&&(g.push(f),j&&b.push(h));return g}function wa(a,b,c,d,e,f){return d&&!d[u]&&(d=wa(d)),e&&!e[u]&&(e=wa(e,f)),ia(function(f,g,h,i){var j,k,l,m=[],n=[],o=g.length,p=f||ua(b||"*",h.nodeType?[h]:h,[]),q=!a||!f&&b?p:va(p,m,a,h,i),r=c?e||(f?a:o||d)?[]:g:q;if(c&&c(q,r,h,i),d){j=va(r,n),d(j,[],h,i),k=j.length;while(k--)(l=j[k])&&(r[n[k]]=!(q[n[k]]=l))}if(f){if(e||a){if(e){j=[],k=r.length;while(k--)(l=r[k])&&j.push(q[k]=l);e(null,r=[],j,i)}k=r.length;while(k--)(l=r[k])&&(j=e?J(f,l):m[k])>-1&&(f[j]=!(g[j]=l))}}else r=va(r===g?r.splice(o,r.length):r),e?e(null,g,r,i):H.apply(g,r)})}function xa(a){for(var b,c,e,f=a.length,g=d.relative[a[0].type],h=g||d.relative[" "],i=g?1:0,k=sa(function(a){return a===b},h,!0),l=sa(function(a){return J(b,a)>-1},h,!0),m=[function(a,c,d){var e=!g&&(d||c!==j)||((b=c).nodeType?k(a,c,d):l(a,c,d));return b=null,e}];f>i;i++)if(c=d.relative[a[i].type])m=[sa(ta(m),c)];else{if(c=d.filter[a[i].type].apply(null,a[i].matches),c[u]){for(e=++i;f>e;e++)if(d.relative[a[e].type])break;return wa(i>1&&ta(m),i>1&&ra(a.slice(0,i-1).concat({value:" "===a[i-2].type?"*":""})).replace(R,"$1"),c,e>i&&xa(a.slice(i,e)),f>e&&xa(a=a.slice(e)),f>e&&ra(a))}m.push(c)}return ta(m)}function ya(a,b){var c=b.length>0,e=a.length>0,f=function(f,g,h,i,k){var l,m,o,p=0,q="0",r=f&&[],s=[],t=j,u=f||e&&d.find.TAG("*",k),v=w+=null==t?1:Math.random()||.1,x=u.length;for(k&&(j=g!==n&&g);q!==x&&null!=(l=u[q]);q++){if(e&&l){m=0;while(o=a[m++])if(o(l,g,h)){i.push(l);break}k&&(w=v)}c&&((l=!o&&l)&&p--,f&&r.push(l))}if(p+=q,c&&q!==p){m=0;while(o=b[m++])o(r,s,g,h);if(f){if(p>0)while(q--)r[q]||s[q]||(s[q]=F.call(i));s=va(s)}H.apply(i,s),k&&!f&&s.length>0&&p+b.length>1&&ga.uniqueSort(i)}return k&&(w=v,j=t),r};return c?ia(f):f}return h=ga.compile=function(a,b){var c,d=[],e=[],f=A[a+" "];if(!f){b||(b=g(a)),c=b.length;while(c--)f=xa(b[c]),f[u]?d.push(f):e.push(f);f=A(a,ya(e,d)),f.selector=a}return f},i=ga.select=function(a,b,e,f){var i,j,k,l,m,n="function"==typeof a&&a,o=!f&&g(a=n.selector||a);if(e=e||[],1===o.length){if(j=o[0]=o[0].slice(0),j.length>2&&"ID"===(k=j[0]).type&&c.getById&&9===b.nodeType&&p&&d.relative[j[1].type]){if(b=(d.find.ID(k.matches[0].replace(ca,da),b)||[])[0],!b)return e;n&&(b=b.parentNode),a=a.slice(j.shift().value.length)}i=X.needsContext.test(a)?0:j.length;while(i--){if(k=j[i],d.relative[l=k.type])break;if((m=d.find[l])&&(f=m(k.matches[0].replace(ca,da),aa.test(j[0].type)&&pa(b.parentNode)||b))){if(j.splice(i,1),a=f.length&&ra(j),!a)return H.apply(e,f),e;break}}}return(n||h(a,o))(f,b,!p,e,aa.test(a)&&pa(b.parentNode)||b),e},c.sortStable=u.split("").sort(B).join("")===u,c.detectDuplicates=!!l,m(),c.sortDetached=ja(function(a){return 1&a.compareDocumentPosition(n.createElement("div"))}),ja(function(a){return a.innerHTML="<a href='#'></a>","#"===a.firstChild.getAttribute("href")})||ka("type|href|height|width",function(a,b,c){return c?void 0:a.getAttribute(b,"type"===b.toLowerCase()?1:2)}),c.attributes&&ja(function(a){return a.innerHTML="<input/>",a.firstChild.setAttribute("value",""),""===a.firstChild.getAttribute("value")})||ka("value",function(a,b,c){return c||"input"!==a.nodeName.toLowerCase()?void 0:a.defaultValue}),ja(function(a){return null==a.getAttribute("disabled")})||ka(K,function(a,b,c){var d;return c?void 0:a[b]===!0?b.toLowerCase():(d=a.getAttributeNode(b))&&d.specified?d.value:null}),ga}(a);m.find=s,m.expr=s.selectors,m.expr[":"]=m.expr.pseudos,m.unique=s.uniqueSort,m.text=s.getText,m.isXMLDoc=s.isXML,m.contains=s.contains;var t=m.expr.match.needsContext,u=/^<(\w+)\s*\/?>(?:<\/\1>|)$/,v=/^.[^:#\[\.,]*$/;function w(a,b,c){if(m.isFunction(b))return m.grep(a,function(a,d){return!!b.call(a,d,a)!==c});if(b.nodeType)return m.grep(a,function(a){return a===b!==c});if("string"==typeof b){if(v.test(b))return m.filter(b,a,c);b=m.filter(b,a)}return m.grep(a,function(a){return m.inArray(a,b)>=0!==c})}m.filter=function(a,b,c){var d=b[0];return c&&(a=":not("+a+")"),1===b.length&&1===d.nodeType?m.find.matchesSelector(d,a)?[d]:[]:m.find.matches(a,m.grep(b,function(a){return 1===a.nodeType}))},m.fn.extend({find:function(a){var b,c=[],d=this,e=d.length;if("string"!=typeof a)return this.pushStack(m(a).filter(function(){for(b=0;e>b;b++)if(m.contains(d[b],this))return!0}));for(b=0;e>b;b++)m.find(a,d[b],c);return c=this.pushStack(e>1?m.unique(c):c),c.selector=this.selector?this.selector+" "+a:a,c},filter:function(a){return this.pushStack(w(this,a||[],!1))},not:function(a){return this.pushStack(w(this,a||[],!0))},is:function(a){return!!w(this,"string"==typeof a&&t.test(a)?m(a):a||[],!1).length}});var x,y=a.document,z=/^(?:\s*(<[\w\W]+>)[^>]*|#([\w-]*))$/,A=m.fn.init=function(a,b){var c,d;if(!a)return this;if("string"==typeof a){if(c="<"===a.charAt(0)&&">"===a.charAt(a.length-1)&&a.length>=3?[null,a,null]:z.exec(a),!c||!c[1]&&b)return!b||b.jquery?(b||x).find(a):this.constructor(b).find(a);if(c[1]){if(b=b instanceof m?b[0]:b,m.merge(this,m.parseHTML(c[1],b&&b.nodeType?b.ownerDocument||b:y,!0)),u.test(c[1])&&m.isPlainObject(b))for(c in b)m.isFunction(this[c])?this[c](b[c]):this.attr(c,b[c]);return this}if(d=y.getElementById(c[2]),d&&d.parentNode){if(d.id!==c[2])return x.find(a);this.length=1,this[0]=d}return this.context=y,this.selector=a,this}return a.nodeType?(this.context=this[0]=a,this.length=1,this):m.isFunction(a)?"undefined"!=typeof x.ready?x.ready(a):a(m):(void 0!==a.selector&&(this.selector=a.selector,this.context=a.context),m.makeArray(a,this))};A.prototype=m.fn,x=m(y);var B=/^(?:parents|prev(?:Until|All))/,C={children:!0,contents:!0,next:!0,prev:!0};m.extend({dir:function(a,b,c){var d=[],e=a[b];while(e&&9!==e.nodeType&&(void 0===c||1!==e.nodeType||!m(e).is(c)))1===e.nodeType&&d.push(e),e=e[b];return d},sibling:function(a,b){for(var c=[];a;a=a.nextSibling)1===a.nodeType&&a!==b&&c.push(a);return c}}),m.fn.extend({has:function(a){var b,c=m(a,this),d=c.length;return this.filter(function(){for(b=0;d>b;b++)if(m.contains(this,c[b]))return!0})},closest:function(a,b){for(var c,d=0,e=this.length,f=[],g=t.test(a)||"string"!=typeof a?m(a,b||this.context):0;e>d;d++)for(c=this[d];c&&c!==b;c=c.parentNode)if(c.nodeType<11&&(g?g.index(c)>-1:1===c.nodeType&&m.find.matchesSelector(c,a))){f.push(c);break}return this.pushStack(f.length>1?m.unique(f):f)},index:function(a){return a?"string"==typeof a?m.inArray(this[0],m(a)):m.inArray(a.jquery?a[0]:a,this):this[0]&&this[0].parentNode?this.first().prevAll().length:-1},add:function(a,b){return this.pushStack(m.unique(m.merge(this.get(),m(a,b))))},addBack:function(a){return this.add(null==a?this.prevObject:this.prevObject.filter(a))}});function D(a,b){do a=a[b];while(a&&1!==a.nodeType);return a}m.each({parent:function(a){var b=a.parentNode;return b&&11!==b.nodeType?b:null},parents:function(a){return m.dir(a,"parentNode")},parentsUntil:function(a,b,c){return m.dir(a,"parentNode",c)},next:function(a){return D(a,"nextSibling")},prev:function(a){return D(a,"previousSibling")},nextAll:function(a){return m.dir(a,"nextSibling")},prevAll:function(a){return m.dir(a,"previousSibling")},nextUntil:function(a,b,c){return m.dir(a,"nextSibling",c)},prevUntil:function(a,b,c){return m.dir(a,"previousSibling",c)},siblings:function(a){return m.sibling((a.parentNode||{}).firstChild,a)},children:function(a){return m.sibling(a.firstChild)},contents:function(a){return m.nodeName(a,"iframe")?a.contentDocument||a.contentWindow.document:m.merge([],a.childNodes)}},function(a,b){m.fn[a]=function(c,d){var e=m.map(this,b,c);return"Until"!==a.slice(-5)&&(d=c),d&&"string"==typeof d&&(e=m.filter(d,e)),this.length>1&&(C[a]||(e=m.unique(e)),B.test(a)&&(e=e.reverse())),this.pushStack(e)}});var E=/\S+/g,F={};function G(a){var b=F[a]={};return m.each(a.match(E)||[],function(a,c){b[c]=!0}),b}m.Callbacks=function(a){a="string"==typeof a?F[a]||G(a):m.extend({},a);var b,c,d,e,f,g,h=[],i=!a.once&&[],j=function(l){for(c=a.memory&&l,d=!0,f=g||0,g=0,e=h.length,b=!0;h&&e>f;f++)if(h[f].apply(l[0],l[1])===!1&&a.stopOnFalse){c=!1;break}b=!1,h&&(i?i.length&&j(i.shift()):c?h=[]:k.disable())},k={add:function(){if(h){var d=h.length;!function f(b){m.each(b,function(b,c){var d=m.type(c);"function"===d?a.unique&&k.has(c)||h.push(c):c&&c.length&&"string"!==d&&f(c)})}(arguments),b?e=h.length:c&&(g=d,j(c))}return this},remove:function(){return h&&m.each(arguments,function(a,c){var d;while((d=m.inArray(c,h,d))>-1)h.splice(d,1),b&&(e>=d&&e--,f>=d&&f--)}),this},has:function(a){return a?m.inArray(a,h)>-1:!(!h||!h.length)},empty:function(){return h=[],e=0,this},disable:function(){return h=i=c=void 0,this},disabled:function(){return!h},lock:function(){return i=void 0,c||k.disable(),this},locked:function(){return!i},fireWith:function(a,c){return!h||d&&!i||(c=c||[],c=[a,c.slice?c.slice():c],b?i.push(c):j(c)),this},fire:function(){return k.fireWith(this,arguments),this},fired:function(){return!!d}};return k},m.extend({Deferred:function(a){var b=[["resolve","done",m.Callbacks("once memory"),"resolved"],["reject","fail",m.Callbacks("once memory"),"rejected"],["notify","progress",m.Callbacks("memory")]],c="pending",d={state:function(){return c},always:function(){return e.done(arguments).fail(arguments),this},then:function(){var a=arguments;return m.Deferred(function(c){m.each(b,function(b,f){var g=m.isFunction(a[b])&&a[b];e[f[1]](function(){var a=g&&g.apply(this,arguments);a&&m.isFunction(a.promise)?a.promise().done(c.resolve).fail(c.reject).progress(c.notify):c[f[0]+"With"](this===d?c.promise():this,g?[a]:arguments)})}),a=null}).promise()},promise:function(a){return null!=a?m.extend(a,d):d}},e={};return d.pipe=d.then,m.each(b,function(a,f){var g=f[2],h=f[3];d[f[1]]=g.add,h&&g.add(function(){c=h},b[1^a][2].disable,b[2][2].lock),e[f[0]]=function(){return e[f[0]+"With"](this===e?d:this,arguments),this},e[f[0]+"With"]=g.fireWith}),d.promise(e),a&&a.call(e,e),e},when:function(a){var b=0,c=d.call(arguments),e=c.length,f=1!==e||a&&m.isFunction(a.promise)?e:0,g=1===f?a:m.Deferred(),h=function(a,b,c){return function(e){b[a]=this,c[a]=arguments.length>1?d.call(arguments):e,c===i?g.notifyWith(b,c):--f||g.resolveWith(b,c)}},i,j,k;if(e>1)for(i=new Array(e),j=new Array(e),k=new Array(e);e>b;b++)c[b]&&m.isFunction(c[b].promise)?c[b].promise().done(h(b,k,c)).fail(g.reject).progress(h(b,j,i)):--f;return f||g.resolveWith(k,c),g.promise()}});var H;m.fn.ready=function(a){return m.ready.promise().done(a),this},m.extend({isReady:!1,readyWait:1,holdReady:function(a){a?m.readyWait++:m.ready(!0)},ready:function(a){if(a===!0?!--m.readyWait:!m.isReady){if(!y.body)return setTimeout(m.ready);m.isReady=!0,a!==!0&&--m.readyWait>0||(H.resolveWith(y,[m]),m.fn.triggerHandler&&(m(y).triggerHandler("ready"),m(y).off("ready")))}}});function I(){y.addEventListener?(y.removeEventListener("DOMContentLoaded",J,!1),a.removeEventListener("load",J,!1)):(y.detachEvent("onreadystatechange",J),a.detachEvent("onload",J))}function J(){(y.addEventListener||"load"===event.type||"complete"===y.readyState)&&(I(),m.ready())}m.ready.promise=function(b){if(!H)if(H=m.Deferred(),"complete"===y.readyState)setTimeout(m.ready);else if(y.addEventListener)y.addEventListener("DOMContentLoaded",J,!1),a.addEventListener("load",J,!1);else{y.attachEvent("onreadystatechange",J),a.attachEvent("onload",J);var c=!1;try{c=null==a.frameElement&&y.documentElement}catch(d){}c&&c.doScroll&&!function e(){if(!m.isReady){try{c.doScroll("left")}catch(a){return setTimeout(e,50)}I(),m.ready()}}()}return H.promise(b)};var K="undefined",L;for(L in m(k))break;k.ownLast="0"!==L,k.inlineBlockNeedsLayout=!1,m(function(){var a,b,c,d;c=y.getElementsByTagName("body")[0],c&&c.style&&(b=y.createElement("div"),d=y.createElement("div"),d.style.cssText="position:absolute;border:0;width:0;height:0;top:0;left:-9999px",c.appendChild(d).appendChild(b),typeof b.style.zoom!==K&&(b.style.cssText="display:inline;margin:0;border:0;padding:1px;width:1px;zoom:1",k.inlineBlockNeedsLayout=a=3===b.offsetWidth,a&&(c.style.zoom=1)),c.removeChild(d))}),function(){var a=y.createElement("div");if(null==k.deleteExpando){k.deleteExpando=!0;try{delete a.test}catch(b){k.deleteExpando=!1}}a=null}(),m.acceptData=function(a){var b=m.noData[(a.nodeName+" ").toLowerCase()],c=+a.nodeType||1;return 1!==c&&9!==c?!1:!b||b!==!0&&a.getAttribute("classid")===b};var M=/^(?:\{[\w\W]*\}|\[[\w\W]*\])$/,N=/([A-Z])/g;function O(a,b,c){if(void 0===c&&1===a.nodeType){var d="data-"+b.replace(N,"-$1").toLowerCase();if(c=a.getAttribute(d),"string"==typeof c){try{c="true"===c?!0:"false"===c?!1:"null"===c?null:+c+""===c?+c:M.test(c)?m.parseJSON(c):c}catch(e){}m.data(a,b,c)}else c=void 0}return c}function P(a){var b;for(b in a)if(("data"!==b||!m.isEmptyObject(a[b]))&&"toJSON"!==b)return!1;
@@ -1743,105 +1743,693 @@ summary {
 
 
 
-<h1 class="title toc-ignore">R Notebook</h1>
+<h1 class="title toc-ignore">GSE111672 PDAC Analysis</h1>
 
 </div>
 
 
-<p>Try executing this chunk by clicking the <em>Run</em> button within the chunk or by placing your cursor inside it and pressing <em>Ctrl+Shift+Enter</em>. `</p>
-<p>Add a new chunk by clicking the <em>Insert Chunk</em> button on the toolbar or by pressing <em>Ctrl+Alt+I</em>.</p>
-<p>The preview shows you a rendered HTML copy of the contents of the editor. Consequently, unlike <em>Knit</em>, <em>Preview</em> does not run any R code chunks. Instead, the output of the chunk when it was last run in the editor is displayed.</p>
-<p>When you save the notebook, an HTML file containing the code and output will be saved alongside it (click the <em>Preview</em> button or press <em>Ctrl+Shift+K</em> to preview the HTML file).</p>
-<pre class="{r}"><code>## Load packages
+<!-- rnb-text-begin -->
+<p>This is an <a href="http://rmarkdown.rstudio.com">R Markdown</a> Notebook. When you execute code within the notebook, the results appear beneath the code.</p>
+<p>Try executing this chunk by clicking the <em>Run</em> button within the chunk or by placing your cursor inside it and pressing <em>Ctrl+Shift+Enter</em>.</p>
+<!-- rnb-text-end -->
+<!-- rnb-chunk-begin -->
+<!-- rnb-source-begin eyJkYXRhIjoiYGBgclxuIyMgTG9hZCBwYWNrYWdlc1xubGlicmFyeShkcGx5cilcbmxpYnJhcnkoU2V1cmF0KVxubGlicmFyeShwYXRjaHdvcmspXG5saWJyYXJ5KGdncGxvdDIpXG5saWJyYXJ5KGNvd3Bsb3QpXG5saWJyYXJ5KHByYWNtYSlcbmBgYCJ9 -->
+<pre class="r"><code>## Load packages
 library(dplyr)
 library(Seurat)
 library(patchwork)
-library(ggplot2)</code></pre>
-<p>Read data from GSE123813 (pape: clonal replacement of tumor-specific T cells following PD-1 blockade) <a href="https://www.ncbi.nlm.nih.gov/geo/query/acc.cgi?acc=GSE123813" class="uri">https://www.ncbi.nlm.nih.gov/geo/query/acc.cgi?acc=GSE123813</a></p>
-<pre class="{r}"><code>## Read data
-BCCIO.read &lt;- read.table(&quot;C:\\Users\\Ryan\\Downloads\\GSE 123813\\bcc_scRNA_counts.txt&quot;, row.names = 1, sep=&quot;\t&quot;, as.is=T)
+library(ggplot2)
+library(cowplot)
+library(pracma)</code></pre>
+<!-- rnb-source-end -->
+<!-- rnb-chunk-end -->
+<!-- rnb-text-begin -->
+<p>Analyze GSE 111672 Datasets</p>
+<!-- rnb-text-end -->
+<!-- rnb-chunk-begin -->
+<!-- rnb-source-begin eyJkYXRhIjoiYGBgclxucGRhYzEucmVhZCA8LSByZWFkLnRhYmxlKFwiQzpcXFxcVXNlcnNcXFxcUnlhblxcXFxEb2N1bWVudHNcXFxcTmllIFJlc2VhcmNoIFByb2plY3RcXFxcR1NFMTExNjcyXFxcXEdTRTExMTY3Ml9QREFDLUEtaW5kcm9wLWZpbHRlcmVkLWV4cE1hdC50eHRcIiwgc2VwID0gXCJcXHRcIiwgYXMuaXMgPSAxKVxucGRhYzEucmVhZCA8LSBwZGFjMS5yZWFkWy1jKDk5NDYsIDk5NDcpLCBdICMjIER1cGxpY2F0ZXMgb2YgMS1NYXIgYW5kIDItTWFyIGdlbmVzIChleGNlbCBlcnJvcj8/KVxucm93bmFtZXMocGRhYzEucmVhZCkgPC0gcGRhYzEucmVhZCRWMSAjIyBSb3duYW1lcyBhcmUgc3RvcmVkIGluIHRoZSBmaXJzdCBjb2x1bW4gb2YgdGhlIGRhdGFzZXRcbnBkYWMxLnJlYWQgPC0gcGRhYzEucmVhZFssIC1jKDEpXSAjIyBEZWxldGUgZXh0cmEgcm93bmFtZXMgdmVjdG9yXG5uYW1lcyhwZGFjMS5yZWFkKSA8LSBsYXBwbHkocGRhYzEucmVhZFsxLF0sIGFzLmNoYXJhY3RlcikgIyMgQ29sdW1uIG5hbWVzIGFyZSBzdG9yZWQgaW4gdGhlIGZpcnN0IHJvdyBvZiB0aGUgZGF0YXNldFxucGRhYzEucmVhZCA8LSBwZGFjMS5yZWFkWy0xLF0gIyMgRGVsZXRlIGV4dHJhIGNvbG5hbWVzIHZlY3RvclxuXG5wZGFjMi5yZWFkIDwtIHJlYWQudGFibGUoXCJDOlxcXFxVc2Vyc1xcXFxSeWFuXFxcXERvY3VtZW50c1xcXFxOaWUgUmVzZWFyY2ggUHJvamVjdFxcXFxHU0UxMTE2NzJcXFxcR1NFMTExNjcyX1BEQUMtQi1pbmRyb3AtZmlsdGVyZWQtZXhwTWF0LnR4dFwiLCBzZXAgPSBcIlxcdFwiLCBoZWFkZXIgPSBUUlVFLCBhcy5pcyA9IDEpXG5wZGFjMi5yZWFkIDwtIHBkYWMyLnJlYWRbLWMoOTk0NiwgOTk0NyksIF1cbnJvd25hbWVzKHBkYWMyLnJlYWQpIDwtIHBkYWMyLnJlYWQkR2VuZXNcbnBkYWMyLnJlYWQgPC0gcGRhYzIucmVhZFssIC1jKDEpXVxuXG5wZGFjMSA8LSBDcmVhdGVTZXVyYXRPYmplY3QoY291bnRzPXBkYWMxLnJlYWQsIHByb2plY3Q9XCJQREFDMVwiLCBtaW4uY2VsbHM9MSwgbWluLmZlYXR1cmVzPTEpXG5wZGFjMiA8LSBDcmVhdGVTZXVyYXRPYmplY3QoY291bnRzPXBkYWMyLnJlYWQsIHByb2plY3Q9XCJQREFDMlwiLCBtaW4uY2VsbHM9MSwgbWluLmZlYXR1cmVzPTEpXG5gYGAifQ== -->
+<pre class="r"><code>pdac1.read &lt;- read.table(&quot;C:\\Users\\Ryan\\Documents\\Nie Research Project\\GSE111672\\GSE111672_PDAC-A-indrop-filtered-expMat.txt&quot;, sep = &quot;\t&quot;, as.is = 1)
+pdac1.read &lt;- pdac1.read[-c(9946, 9947), ] ## Duplicates of 1-Mar and 2-Mar genes (excel error??)
+rownames(pdac1.read) &lt;- pdac1.read$V1 ## Rownames are stored in the first column of the dataset
+pdac1.read &lt;- pdac1.read[, -c(1)] ## Delete extra rownames vector
+names(pdac1.read) &lt;- lapply(pdac1.read[1,], as.character) ## Column names are stored in the first row of the dataset
+pdac1.read &lt;- pdac1.read[-1,] ## Delete extra colnames vector
 
-## Read metadata
-BCCIO.meta.data.readall &lt;- read.table(&quot;C:\\Users\\Ryan\\Downloads\\GSE 123813\\bcc_all_metadata.txt&quot;, row.names = 1, sep=&quot;\t&quot;, as.is=T)
+pdac2.read &lt;- read.table(&quot;C:\\Users\\Ryan\\Documents\\Nie Research Project\\GSE111672\\GSE111672_PDAC-B-indrop-filtered-expMat.txt&quot;, sep = &quot;\t&quot;, header = TRUE, as.is = 1)
+pdac2.read &lt;- pdac2.read[-c(9946, 9947), ]
+rownames(pdac2.read) &lt;- pdac2.read$Genes
+pdac2.read &lt;- pdac2.read[, -c(1)]
 
-## Format metadata
-BCCIO.meta.data.read_colnamesall &lt;- BCCIO.meta.data.readall[1,] # Store column names 
-
-BCCIO.meta.data.read_colnames &lt;- BCCIO.meta.data.read_colnamesall[,1:3] # Keep only patient, treatment and sort columns
-
-BCCIO.meta.data &lt;- BCCIO.meta.data.readall[2:nrow(BCCIO.meta.data.readall),1:3] # Get rid of column names (first row) and the columns I don&#39;t want
-
-names(BCCIO.meta.data) &lt;- BCCIO.meta.data.read_colnames # Change the column names</code></pre>
-<p>Create Seurat object</p>
-<pre class="{r}"><code>memory.limit(size = 16000000) #Increase memory limit for vector sizes 
-BCCIO &lt;- CreateSeuratObject(counts = BCCIO.read, project = &quot;BCCIO&quot;, min.cells = 3, min.features = 200, meta.data = BCCIO.meta.data)</code></pre>
-<p>Pre-processing workflow</p>
-<pre class="{r}"><code>BCCIO[[&quot;percent.mt&quot;]] &lt;- PercentageFeatureSet(BCCIO, pattern = &quot;^MT-&quot;) # Store mitochondrial QC metrics in an additional column
-BCCIO &lt;- NormalizeData(BCCIO, normalization.method= &quot;LogNormalize&quot;, scale.factor = 10000) # Normalize feature expression 
-
-BCCIO &lt;- FindVariableFeatures(BCCIO, selection.method = &quot;vst&quot;, nfeatures = 2000) # Feature selection (highly variable features)
-
-all.genes &lt;- rownames(BCCIO)
-BCCIO &lt;- ScaleData(BCCIO, features = all.genes) # Scale data in preparation for PCA 
-BCCIO &lt;- RunPCA(BCCIO, features = VariableFeatures(object = BCCIO)) # Perform PCA</code></pre>
-<p>Checkpoint (Save Work Here)</p>
-<pre class="{r}"><code>save(BCCIO, file=&quot;C:\\Users\\Ryan\\Downloads\\GSE 123813\\BCCIO&quot;)
-save(BCCIO.meta.data,BCCIO.read, file = &quot;C:\\Users\\Ryan\\Downloads\\GSE 123813\\BCCIOrawdata&quot;)</code></pre>
-<p>Test out Clustering (Varying Resolution Levels) – Higher resolution = greater clustering –&gt;</p>
-<pre class="{r}"><code>
-BCCIO &lt;- FindNeighbors(BCCIO, dims = 1:10)
-
-## Start with r = 0.3 (overclustered)
-
-BCCIO &lt;- FindClusters(BCCIO, resolution = 0.3, algorithm = 3)
-BCCIO.markers &lt;- FindAllMarkers(BCCIO, test.use = &#39;wilcox&#39;, min.pct = 0.25, logfc.threshold = 0.50, max.cells.per.ident = 500)
-top5 &lt;- BCCIO.markers %&gt;% group_by(cluster) %&gt;% top_n(n=5, wt=avg_logFC)
-DoHeatmap(BCCIO,features = top5$gene, size = 3)
-
-## Try r = 0.2 (overclustered)
-
-BCCIO &lt;- FindClusters(BCCIO, resolution = 0.2, algorithm = 3)
-BCCIO.markers &lt;- FindAllMarkers(BCCIO, test.use = &#39;wilcox&#39;, min.pct = 0.25, logfc.threshold = 0.50, max.cells.per.ident = 500)
-top5 &lt;- BCCIO.markers %&gt;% group_by(cluster) %&gt;% top_n(n=5, wt=avg_logFC)
-DoHeatmap(BCCIO,features = top5$gene, size = 3)
-
-## Try r = 0.1 (overclustered)
-
-BCCIO &lt;- FindClusters(BCCIO, resolution = 0.1, algorithm = 3)
-BCCIO.markers &lt;- FindAllMarkers(BCCIO, test.use = &#39;wilcox&#39;, min.pct = 0.25, logfc.threshold = 0.50, max.cells.per.ident = 500)
-top5 &lt;- BCCIO.markers %&gt;% group_by(cluster) %&gt;% top_n(n=5, wt=avg_logFC)
-DoHeatmap(BCCIO,features = top5$gene, size = 3)
-
-## Try r = 0.05 (looks okay)
-
-BCCIO &lt;- FindClusters(BCCIO, resolution = 0.05, algorithm = 3)
-BCCIO.markers &lt;- FindAllMarkers(BCCIO, test.use = &#39;wilcox&#39;, min.pct = 0.25, logfc.threshold = 0.50, max.cells.per.ident = 500)
-top5 &lt;- BCCIO.markers %&gt;% group_by(cluster) %&gt;% top_n(n=5, wt=avg_logFC)
-DoHeatmap(BCCIO,features = top5$gene, size = 3)
-
-## Try r = 0.03 (around the same as 0.05)
-
-BCCIO &lt;- FindClusters(BCCIO, resolution = 0.04, algorithm = 3)
-BCCIO.markers &lt;- FindAllMarkers(BCCIO, test.use = &#39;wilcox&#39;, min.pct = 0.25, logfc.threshold = 0.50, max.cells.per.ident = 500)
-top5 &lt;- BCCIO.markers %&gt;% group_by(cluster) %&gt;% top_n(n=5, wt=avg_logFC)
-DoHeatmap(BCCIO,features = top5$gene, size = 3)</code></pre>
-<p>Full DE Testing (UMAP)</p>
-<pre class="{r}"><code>
-BCCIO &lt;- FindClusters(BCCIO, resolution = 0.05, algorithm = 3) ## Set r = 0.05
-BCCIO.markers &lt;- FindAllMarkers(BCCIO, test.use = &#39;wilcox&#39;, min.pct = 0.25, logfc.threshold = 0.50, max.cells.per.ident = Inf) ## Run through all cells
-top5 &lt;- BCCIO.markers %&gt;% group_by(cluster) %&gt;% top_n(n=5, wt=avg_logFC)
-DoHeatmap(BCCIO,features = top5$gene, size = 3) ## Heatmap with all cells
-
-DimPlot(BCCIO, label = T)
-DimPlot(BCCIO, reduction= &quot;umap&quot;) ## Create UMAP
-
-labels &lt;- c(&quot;&quot;)
-BCCIO &lt;- RenameClusters(BCCIO, labels) 
-
-DimPlot(BCCIO, reduction=&quot;umap&quot;) ## Create labeled UMAP
+pdac1 &lt;- CreateSeuratObject(counts=pdac1.read, project=&quot;PDAC1&quot;, min.cells=1, min.features=1)
+pdac2 &lt;- CreateSeuratObject(counts=pdac2.read, project=&quot;PDAC2&quot;, min.cells=1, min.features=1)</code></pre>
+<!-- rnb-source-end -->
+<!-- rnb-chunk-end -->
+<!-- rnb-text-begin -->
+<p>Initial PDAC Datasets Clustering</p>
+<!-- rnb-text-end -->
+<!-- rnb-chunk-begin -->
+<!-- rnb-source-begin eyJkYXRhIjoiYGBgclxucGRhYzEgPC0gcHJlcHJvY2Vzc2luZyhwZGFjMSwgaGVhdG1hcD1GQUxTRSlcblxuYGBgIn0= -->
+<pre class="r"><code>pdac1 &lt;- preprocessing(pdac1, heatmap=FALSE)
 </code></pre>
+<!-- rnb-source-end -->
+<!-- rnb-output-begin eyJkYXRhIjoiUGVyZm9ybWluZyBsb2ctbm9ybWFsaXphdGlvblxuMCUgICAxMCAgIDIwICAgMzAgICA0MCAgIDUwICAgNjAgICA3MCAgIDgwICAgOTAgICAxMDAlXG5bLS0tLXwtLS0tfC0tLS18LS0tLXwtLS0tfC0tLS18LS0tLXwtLS0tfC0tLS18LS0tLXxcbioqKioqKioqKioqKioqKioqKioqKioqKioqKioqKioqKioqKioqKioqKioqKioqKioqfFxuQ2FsY3VsYXRpbmcgZ2VuZSB2YXJpYW5jZXNcbjAlICAgMTAgICAyMCAgIDMwICAgNDAgICA1MCAgIDYwICAgNzAgICA4MCAgIDkwICAgMTAwJVxuWy0tLS18LS0tLXwtLS0tfC0tLS18LS0tLXwtLS0tfC0tLS18LS0tLXwtLS0tfC0tLS18XG4qKioqKioqKioqKioqKioqKioqKioqKioqKioqKioqKioqKioqKioqKioqKioqKioqKnxcbkNhbGN1bGF0aW5nIGZlYXR1cmUgdmFyaWFuY2VzIG9mIHN0YW5kYXJkaXplZCBhbmQgY2xpcHBlZCB2YWx1ZXNcbjAlICAgMTAgICAyMCAgIDMwICAgNDAgICA1MCAgIDYwICAgNzAgICA4MCAgIDkwICAgMTAwJVxuWy0tLS18LS0tLXwtLS0tfC0tLS18LS0tLXwtLS0tfC0tLS18LS0tLXwtLS0tfC0tLS18XG4qKioqKioqKioqKioqKioqKioqKioqKioqKioqKioqKioqKioqKioqKioqKioqKioqKnxcbkNlbnRlcmluZyBhbmQgc2NhbGluZyBkYXRhIG1hdHJpeFxuXG4gIHwgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgIFxuICB8ICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICB8ICAgMCVcbiAgfCAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgXG4gIHw9PT09PT0gICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgIHwgICA2JVxuICB8ICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICBcbiAgfD09PT09PT09PT09PSAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgfCAgMTIlXG4gIHwgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgIFxuICB8PT09PT09PT09PT09PT09PT09ICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICB8ICAxOCVcbiAgfCAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgXG4gIHw9PT09PT09PT09PT09PT09PT09PT09PT0gICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgIHwgIDI0JVxuICB8ICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICBcbiAgfD09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT0gICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgfCAgMjklXG4gIHwgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgIFxuICB8PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PSAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICB8ICAzNSVcbiAgfCAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgXG4gIHw9PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09ICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgIHwgIDQxJVxuICB8ICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICBcbiAgfD09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT0gICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgfCAgNDclXG4gIHwgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgIFxuICB8PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PSAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICB8ICA1MyVcbiAgfCAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgXG4gIHw9PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09ICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgIHwgIDU5JVxuICB8ICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICBcbiAgfD09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT0gICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgfCAgNjUlXG4gIHwgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgIFxuICB8PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PSAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICB8ICA3MSVcbiAgfCAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgXG4gIHw9PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PSAgICAgICAgICAgICAgICAgICAgICAgIHwgIDc2JVxuICB8ICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICBcbiAgfD09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09ICAgICAgICAgICAgICAgICAgfCAgODIlXG4gIHwgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgIFxuICB8PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT0gICAgICAgICAgICB8ICA4OCVcbiAgfCAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgXG4gIHw9PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PSAgICAgIHwgIDk0JVxuICB8ICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICBcbiAgfD09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09fCAxMDAlXG5QQ18gMSBcblBvc2l0aXZlOiAgTEFQVE01LCBTUkdOLCBUWVJPQlAsIEZDRVIxRywgRkNHUjJBLCBSR1MxLCBTUEkxLCBJVEdCMiwgSENMUzEsIE1TNEE3IFxuXHQgICBHUFIxODMsIEFMT1g1QVAsIENENTMsIFZJTSwgRkNHUjNBLCBGR0wyLCBDU0YxUiwgQ1lCQiwgVE5GUlNGMUIsIEMxUUEgXG5cdCAgIENEMTYzLCBDMVFDLCBDMVFCLCBMQ1AxLCBBSUYxLCBNUzRBNkEsIEFSUkIyLCBQVFBSQywgQ0QzNywgQzVBUjEgXG5OZWdhdGl2ZTogIFNQSU5LMSwgVENOMSwgVE00U0YxLCBSRUcxQSwgVEZGMywgTVVDM0EsIE1NUDcsIEFRUDMsIERNQlQxLCBQTEFUIFxuXHQgICBBR1IyLCBURkYxLCBUQUNTVEQyLCBDUklTUDMsIEJJUkMzLCBEVU9YQTIsIEdDLCBUUE0xLCBBUENTLCBHUFJDNUEgXG5cdCAgIElUR0I0LCBTRVJQSU5BMSwgTUFMMiwgQVBPTDEsIFJBQjExRklQMSwgRVBIQTIsIFRGRjIsIEYzLCBTTEMxMkEyLCBJVEdCNiBcblBDXyAyIFxuUG9zaXRpdmU6ICBLUlQxNywgTFk2RCwgQ09MNkExLCBLUlQxNiwgQ09MMTdBMSwgUzEwMFAsIENPTDZBMiwgUzEwMEE0LCBFTVAxLCBQTEFVIFxuXHQgICBUUklNMjksIENSQUJQMiwgSUdGQlAyLCBTTEMyMEExLCBEQ0JMRDIsIExSUkM4QSwgQUhOQUsyLCBBUkhHQVAyMywgTEFNQzIsIEZTQ04xIFxuXHQgICBBTlhBOCwgQ1RTRSwgTUlBLCBTTkNHLCBGU1RMMSwgQkNBVDEsIFNFUlBJTkI1LCBSUlA3QSwgUENESDcsIEEyTUwxIFxuTmVnYXRpdmU6ICBSRUcxQSwgRE1CVDEsIENSSVNQMywgQVFQMywgVENOMSwgQVBDUywgR0MsIFRGRjMsIFNQSU5LMSwgU1BQMSBcblx0ICAgTFlaLCBNVUMzQSwgU0VSUElOQTEsIFRGRjEsIENSUCwgRkdBLCBSRUczQSwgQ0Q3NCwgQzYsIEFMRE9CIFxuXHQgICBDMywgQ0xETjIsIEhMQS1EUkIxLCBEVU9YQTIsIFBQUDFSMUIsIE1NUDEsIENFQUNBTTcsIEFEUkEyQSwgSExBLURSQjUsIE5PU1RSSU4gXG5QQ18gMyBcblBvc2l0aXZlOiAgTVM0QTcsIEMxUUEsIEMxUUIsIFNMQ08yQjEsIEMxUUMsIENEMTYzLCBBUE9FLCBITEEtRFJCMSwgQ0Q3NCwgSExBLURSQSBcblx0ICAgRkNHUjNBLCBUUkVNMiwgRkNHUjJBLCBUR0ZCSSwgRlRMLCBPTFIxLCBTRFMsIEhMQS1EUkI1LCBWU0lHNCwgQ1NGMVIgXG5cdCAgIEZQUjMsIE1TUjEsIEFQT0MxLCBNUzRBNEEsIENUU0QsIENUU0wsIENENjgsIE1BRkIsIEdQTk1CLCBGQ0dSM0IgXG5OZWdhdGl2ZTogIElMMlJCLCBDQ0w1LCBDRDY5LCBDRDcsIENEMjQ3LCBHWk1BLCBDVFNXLCBQUkYxLCBHTkxZLCBDRDUyIFxuXHQgICBUTkZSU0YxOCwgSE9QWCwgSUwyUkcsIEtMUkMxLCBOS0c3LCBLTFJDMiwgUkFDMiwgSUtaRjMsIENEMiwgTENLIFxuXHQgICBDQ05EMiwgS0xSQjEsIENPUk8xQSwgR1BSMTcxLCBGWU4sIFpORjY4MywgTENQMSwgQ0Q5NiwgTFRCLCBHWk1CIFxuUENfIDQgXG5Qb3NpdGl2ZTogIEhQR0RTLCBSR1MxMywgQk1YLCBTSDJENiwgS0lULCBMUk1QLCBUUlBNNSwgQVZJTCwgU1BJQiwgREtLMyBcblx0ICAgQ09STzJCLCBTUEFSQywgUExHLCBQVEdTMSwgSENLLCBDQ0RDMTI5LCBBT0MxLCBOVE0sIElHRkJQNywgU0gyRDcgXG5cdCAgIFBCWElQMSwgUFNUUElQMiwgSEVQQUNBTTIsIEhFRzEsIExJUEcsIFRJRTEsIERMQzEsIEdSQVNQLCBDT0w0QTEsIEdGSTFCIFxuTmVnYXRpdmU6ICBUT1AyQSwgTUtJNjcsIFBMSzEsIFRQWDIsIFVCRTJDLCBDRU5QRiwgQ0NOQTIsIE5VU0FQMSwgQklSQzUsIE5FSzIgXG5cdCAgIENFUDU1LCBDREMyMCwgUFJDMSwgUlJNMiwgQ0NOQjEsIEFTUE0sIE1ZQkwyLCBTVE1OMSwgQ0NOQjIsIFBUVEcxIFxuXHQgICBLSUYyMEEsIFJBQ0dBUDEsIEtJRjExLCBBVVJLQiwgQVJIR0FQMTFBLCBLSUYyMywgQ0VOUEUsIEhNR0IyLCBCVUIxLCBQUlIxMSBcblBDXyA1IFxuUG9zaXRpdmU6ICBCTVgsIFNIMkQ2LCBUUlBNNSwgQVZJTCwgTFJNUCwgQ09STzJCLCBIUEdEUywgUExHLCBIQ0ssIENDREMxMjkgXG5cdCAgIFJHUzEzLCBTUElCLCBMSVBHLCBTSDJENywgREtLMywgUFNUUElQMiwgSEVQQUNBTTIsIEtDVEQxMiwgQU9DMSwgTlRNIFxuXHQgICBBWkdQMSwgTlJHTiwgU0RDMiwgSUdTRjIxLCBQQ1A0LCBTVUNOUjEsIEdGSTFCLCBQVEdTMSwgUFRQUlQsIFNLQVAyIFxuTmVnYXRpdmU6ICBJTDJSQiwgQ0NMNSwgQ0Q1MiwgUFJGMSwgQ0Q2OSwgQ0QyNDcsIEdaTUEsIExDUDEsIElMMlJHLCBDRDcgXG5cdCAgIENUU1csIEdOTFksIFRORlJTRjE4LCBLTFJDMSwgS0xSQzIsIFMxMDBBNCwgQ0NORDIsIEhPUFgsIENPUk8xQSwgUElNMSBcblx0ICAgTFRCLCBOS0c3LCBJS1pGMywgSENTVCwgU1RLMTdCLCBLTFJCMSwgS1JUODYsIExTUDEsIEdaTUIsIEFSSEdESUIgXG4ifQ== -->
+<pre><code>Performing log-normalization
+0%   10   20   30   40   50   60   70   80   90   100%
+[----|----|----|----|----|----|----|----|----|----|
+**************************************************|
+Calculating gene variances
+0%   10   20   30   40   50   60   70   80   90   100%
+[----|----|----|----|----|----|----|----|----|----|
+**************************************************|
+Calculating feature variances of standardized and clipped values
+0%   10   20   30   40   50   60   70   80   90   100%
+[----|----|----|----|----|----|----|----|----|----|
+**************************************************|
+Centering and scaling data matrix
 
-<div id="rmd-source-code">LS0tDQp0aXRsZTogIlIgTm90ZWJvb2siDQpvdXRwdXQ6DQogIHdvcmRfZG9jdW1lbnQ6IGRlZmF1bHQNCiAgcGRmX2RvY3VtZW50OiBkZWZhdWx0DQogIGh0bWxfbm90ZWJvb2s6IGRlZmF1bHQNCi0tLQ0KDQpUcnkgZXhlY3V0aW5nIHRoaXMgY2h1bmsgYnkgY2xpY2tpbmcgdGhlICpSdW4qIGJ1dHRvbiB3aXRoaW4gdGhlIGNodW5rIG9yIGJ5IHBsYWNpbmcgeW91ciBjdXJzb3IgaW5zaWRlIGl0IGFuZCBwcmVzc2luZyAqQ3RybCtTaGlmdCtFbnRlciouIGANCg0KQWRkIGEgbmV3IGNodW5rIGJ5IGNsaWNraW5nIHRoZSAqSW5zZXJ0IENodW5rKiBidXR0b24gb24gdGhlIHRvb2xiYXIgb3IgYnkgcHJlc3NpbmcgKkN0cmwrQWx0K0kqLg0KDQpUaGUgcHJldmlldyBzaG93cyB5b3UgYSByZW5kZXJlZCBIVE1MIGNvcHkgb2YgdGhlIGNvbnRlbnRzIG9mIHRoZSBlZGl0b3IuIENvbnNlcXVlbnRseSwgdW5saWtlICpLbml0KiwgKlByZXZpZXcqIGRvZXMgbm90IHJ1biBhbnkgUiBjb2RlIGNodW5rcy4gSW5zdGVhZCwgdGhlIG91dHB1dCBvZiB0aGUgY2h1bmsgd2hlbiBpdCB3YXMgbGFzdCBydW4gaW4gdGhlIGVkaXRvciBpcyBkaXNwbGF5ZWQuDQoNCldoZW4geW91IHNhdmUgdGhlIG5vdGVib29rLCBhbiBIVE1MIGZpbGUgY29udGFpbmluZyB0aGUgY29kZSBhbmQgb3V0cHV0IHdpbGwgYmUgc2F2ZWQgYWxvbmdzaWRlIGl0IChjbGljayB0aGUgKlByZXZpZXcqIGJ1dHRvbiBvciBwcmVzcyAqQ3RybCtTaGlmdCtLKiB0byBwcmV2aWV3IHRoZSBIVE1MIGZpbGUpLg0KDQpgYGB7cn0NCiMjIExvYWQgcGFja2FnZXMNCmxpYnJhcnkoZHBseXIpDQpsaWJyYXJ5KFNldXJhdCkNCmxpYnJhcnkocGF0Y2h3b3JrKQ0KbGlicmFyeShnZ3Bsb3QyKQ0KYGBgDQoNCg0KUmVhZCBkYXRhIGZyb20gR1NFMTIzODEzIChwYXBlOiBjbG9uYWwgcmVwbGFjZW1lbnQgb2YgdHVtb3Itc3BlY2lmaWMgVCBjZWxscyBmb2xsb3dpbmcgUEQtMSBibG9ja2FkZSkNCmh0dHBzOi8vd3d3Lm5jYmkubmxtLm5paC5nb3YvZ2VvL3F1ZXJ5L2FjYy5jZ2k/YWNjPUdTRTEyMzgxMw0KDQpgYGB7cn0NCiMjIFJlYWQgZGF0YQ0KQkNDSU8ucmVhZCA8LSByZWFkLnRhYmxlKCJDOlxcVXNlcnNcXFJ5YW5cXERvd25sb2Fkc1xcR1NFIDEyMzgxM1xcYmNjX3NjUk5BX2NvdW50cy50eHQiLCByb3cubmFtZXMgPSAxLCBzZXA9Ilx0IiwgYXMuaXM9VCkNCg0KIyMgUmVhZCBtZXRhZGF0YQ0KQkNDSU8ubWV0YS5kYXRhLnJlYWRhbGwgPC0gcmVhZC50YWJsZSgiQzpcXFVzZXJzXFxSeWFuXFxEb3dubG9hZHNcXEdTRSAxMjM4MTNcXGJjY19hbGxfbWV0YWRhdGEudHh0Iiwgcm93Lm5hbWVzID0gMSwgc2VwPSJcdCIsIGFzLmlzPVQpDQoNCiMjIEZvcm1hdCBtZXRhZGF0YQ0KQkNDSU8ubWV0YS5kYXRhLnJlYWRfY29sbmFtZXNhbGwgPC0gQkNDSU8ubWV0YS5kYXRhLnJlYWRhbGxbMSxdICMgU3RvcmUgY29sdW1uIG5hbWVzIA0KDQpCQ0NJTy5tZXRhLmRhdGEucmVhZF9jb2xuYW1lcyA8LSBCQ0NJTy5tZXRhLmRhdGEucmVhZF9jb2xuYW1lc2FsbFssMTozXSAjIEtlZXAgb25seSBwYXRpZW50LCB0cmVhdG1lbnQgYW5kIHNvcnQgY29sdW1ucw0KDQpCQ0NJTy5tZXRhLmRhdGEgPC0gQkNDSU8ubWV0YS5kYXRhLnJlYWRhbGxbMjpucm93KEJDQ0lPLm1ldGEuZGF0YS5yZWFkYWxsKSwxOjNdICMgR2V0IHJpZCBvZiBjb2x1bW4gbmFtZXMgKGZpcnN0IHJvdykgYW5kIHRoZSBjb2x1bW5zIEkgZG9uJ3Qgd2FudA0KDQpuYW1lcyhCQ0NJTy5tZXRhLmRhdGEpIDwtIEJDQ0lPLm1ldGEuZGF0YS5yZWFkX2NvbG5hbWVzICMgQ2hhbmdlIHRoZSBjb2x1bW4gbmFtZXMNCmBgYA0KDQoNCkNyZWF0ZSBTZXVyYXQgb2JqZWN0DQoNCmBgYHtyfQ0KbWVtb3J5LmxpbWl0KHNpemUgPSAxNjAwMDAwMCkgI0luY3JlYXNlIG1lbW9yeSBsaW1pdCBmb3IgdmVjdG9yIHNpemVzIA0KQkNDSU8gPC0gQ3JlYXRlU2V1cmF0T2JqZWN0KGNvdW50cyA9IEJDQ0lPLnJlYWQsIHByb2plY3QgPSAiQkNDSU8iLCBtaW4uY2VsbHMgPSAzLCBtaW4uZmVhdHVyZXMgPSAyMDAsIG1ldGEuZGF0YSA9IEJDQ0lPLm1ldGEuZGF0YSkNCmBgYA0KDQoNClByZS1wcm9jZXNzaW5nIHdvcmtmbG93DQoNCmBgYHtyfQ0KQkNDSU9bWyJwZXJjZW50Lm10Il1dIDwtIFBlcmNlbnRhZ2VGZWF0dXJlU2V0KEJDQ0lPLCBwYXR0ZXJuID0gIl5NVC0iKSAjIFN0b3JlIG1pdG9jaG9uZHJpYWwgUUMgbWV0cmljcyBpbiBhbiBhZGRpdGlvbmFsIGNvbHVtbg0KQkNDSU8gPC0gTm9ybWFsaXplRGF0YShCQ0NJTywgbm9ybWFsaXphdGlvbi5tZXRob2Q9ICJMb2dOb3JtYWxpemUiLCBzY2FsZS5mYWN0b3IgPSAxMDAwMCkgIyBOb3JtYWxpemUgZmVhdHVyZSBleHByZXNzaW9uIA0KDQpCQ0NJTyA8LSBGaW5kVmFyaWFibGVGZWF0dXJlcyhCQ0NJTywgc2VsZWN0aW9uLm1ldGhvZCA9ICJ2c3QiLCBuZmVhdHVyZXMgPSAyMDAwKSAjIEZlYXR1cmUgc2VsZWN0aW9uIChoaWdobHkgdmFyaWFibGUgZmVhdHVyZXMpDQoNCmFsbC5nZW5lcyA8LSByb3duYW1lcyhCQ0NJTykNCkJDQ0lPIDwtIFNjYWxlRGF0YShCQ0NJTywgZmVhdHVyZXMgPSBhbGwuZ2VuZXMpICMgU2NhbGUgZGF0YSBpbiBwcmVwYXJhdGlvbiBmb3IgUENBIA0KQkNDSU8gPC0gUnVuUENBKEJDQ0lPLCBmZWF0dXJlcyA9IFZhcmlhYmxlRmVhdHVyZXMob2JqZWN0ID0gQkNDSU8pKSAjIFBlcmZvcm0gUENBDQpgYGANCg0KDQpDaGVja3BvaW50IChTYXZlIFdvcmsgSGVyZSkNCg0KYGBge3J9DQpzYXZlKEJDQ0lPLCBmaWxlPSJDOlxcVXNlcnNcXFJ5YW5cXERvd25sb2Fkc1xcR1NFIDEyMzgxM1xcQkNDSU8iKQ0Kc2F2ZShCQ0NJTy5tZXRhLmRhdGEsQkNDSU8ucmVhZCwgZmlsZSA9ICJDOlxcVXNlcnNcXFJ5YW5cXERvd25sb2Fkc1xcR1NFIDEyMzgxM1xcQkNDSU9yYXdkYXRhIikNCmBgYA0KDQoNClRlc3Qgb3V0IENsdXN0ZXJpbmcgKFZhcnlpbmcgUmVzb2x1dGlvbiBMZXZlbHMpDQotLSBIaWdoZXIgcmVzb2x1dGlvbiA9IGdyZWF0ZXIgY2x1c3RlcmluZyAtLT4gDQoNCmBgYHtyfQ0KDQpCQ0NJTyA8LSBGaW5kTmVpZ2hib3JzKEJDQ0lPLCBkaW1zID0gMToxMCkNCg0KIyMgU3RhcnQgd2l0aCByID0gMC4zIChvdmVyY2x1c3RlcmVkKQ0KDQpCQ0NJTyA8LSBGaW5kQ2x1c3RlcnMoQkNDSU8sIHJlc29sdXRpb24gPSAwLjMsIGFsZ29yaXRobSA9IDMpDQpCQ0NJTy5tYXJrZXJzIDwtIEZpbmRBbGxNYXJrZXJzKEJDQ0lPLCB0ZXN0LnVzZSA9ICd3aWxjb3gnLCBtaW4ucGN0ID0gMC4yNSwgbG9nZmMudGhyZXNob2xkID0gMC41MCwgbWF4LmNlbGxzLnBlci5pZGVudCA9IDUwMCkNCnRvcDUgPC0gQkNDSU8ubWFya2VycyAlPiUgZ3JvdXBfYnkoY2x1c3RlcikgJT4lIHRvcF9uKG49NSwgd3Q9YXZnX2xvZ0ZDKQ0KRG9IZWF0bWFwKEJDQ0lPLGZlYXR1cmVzID0gdG9wNSRnZW5lLCBzaXplID0gMykNCg0KIyMgVHJ5IHIgPSAwLjIgKG92ZXJjbHVzdGVyZWQpDQoNCkJDQ0lPIDwtIEZpbmRDbHVzdGVycyhCQ0NJTywgcmVzb2x1dGlvbiA9IDAuMiwgYWxnb3JpdGhtID0gMykNCkJDQ0lPLm1hcmtlcnMgPC0gRmluZEFsbE1hcmtlcnMoQkNDSU8sIHRlc3QudXNlID0gJ3dpbGNveCcsIG1pbi5wY3QgPSAwLjI1LCBsb2dmYy50aHJlc2hvbGQgPSAwLjUwLCBtYXguY2VsbHMucGVyLmlkZW50ID0gNTAwKQ0KdG9wNSA8LSBCQ0NJTy5tYXJrZXJzICU+JSBncm91cF9ieShjbHVzdGVyKSAlPiUgdG9wX24obj01LCB3dD1hdmdfbG9nRkMpDQpEb0hlYXRtYXAoQkNDSU8sZmVhdHVyZXMgPSB0b3A1JGdlbmUsIHNpemUgPSAzKQ0KDQojIyBUcnkgciA9IDAuMSAob3ZlcmNsdXN0ZXJlZCkNCg0KQkNDSU8gPC0gRmluZENsdXN0ZXJzKEJDQ0lPLCByZXNvbHV0aW9uID0gMC4xLCBhbGdvcml0aG0gPSAzKQ0KQkNDSU8ubWFya2VycyA8LSBGaW5kQWxsTWFya2VycyhCQ0NJTywgdGVzdC51c2UgPSAnd2lsY294JywgbWluLnBjdCA9IDAuMjUsIGxvZ2ZjLnRocmVzaG9sZCA9IDAuNTAsIG1heC5jZWxscy5wZXIuaWRlbnQgPSA1MDApDQp0b3A1IDwtIEJDQ0lPLm1hcmtlcnMgJT4lIGdyb3VwX2J5KGNsdXN0ZXIpICU+JSB0b3BfbihuPTUsIHd0PWF2Z19sb2dGQykNCkRvSGVhdG1hcChCQ0NJTyxmZWF0dXJlcyA9IHRvcDUkZ2VuZSwgc2l6ZSA9IDMpDQoNCiMjIFRyeSByID0gMC4wNSAobG9va3Mgb2theSkNCg0KQkNDSU8gPC0gRmluZENsdXN0ZXJzKEJDQ0lPLCByZXNvbHV0aW9uID0gMC4wNSwgYWxnb3JpdGhtID0gMykNCkJDQ0lPLm1hcmtlcnMgPC0gRmluZEFsbE1hcmtlcnMoQkNDSU8sIHRlc3QudXNlID0gJ3dpbGNveCcsIG1pbi5wY3QgPSAwLjI1LCBsb2dmYy50aHJlc2hvbGQgPSAwLjUwLCBtYXguY2VsbHMucGVyLmlkZW50ID0gNTAwKQ0KdG9wNSA8LSBCQ0NJTy5tYXJrZXJzICU+JSBncm91cF9ieShjbHVzdGVyKSAlPiUgdG9wX24obj01LCB3dD1hdmdfbG9nRkMpDQpEb0hlYXRtYXAoQkNDSU8sZmVhdHVyZXMgPSB0b3A1JGdlbmUsIHNpemUgPSAzKQ0KDQojIyBUcnkgciA9IDAuMDMgKGFyb3VuZCB0aGUgc2FtZSBhcyAwLjA1KQ0KDQpCQ0NJTyA8LSBGaW5kQ2x1c3RlcnMoQkNDSU8sIHJlc29sdXRpb24gPSAwLjA0LCBhbGdvcml0aG0gPSAzKQ0KQkNDSU8ubWFya2VycyA8LSBGaW5kQWxsTWFya2VycyhCQ0NJTywgdGVzdC51c2UgPSAnd2lsY294JywgbWluLnBjdCA9IDAuMjUsIGxvZ2ZjLnRocmVzaG9sZCA9IDAuNTAsIG1heC5jZWxscy5wZXIuaWRlbnQgPSA1MDApDQp0b3A1IDwtIEJDQ0lPLm1hcmtlcnMgJT4lIGdyb3VwX2J5KGNsdXN0ZXIpICU+JSB0b3BfbihuPTUsIHd0PWF2Z19sb2dGQykNCkRvSGVhdG1hcChCQ0NJTyxmZWF0dXJlcyA9IHRvcDUkZ2VuZSwgc2l6ZSA9IDMpDQpgYGANCg0KRnVsbCBERSBUZXN0aW5nIChVTUFQKQ0KDQpgYGB7cn0NCg0KQkNDSU8gPC0gRmluZENsdXN0ZXJzKEJDQ0lPLCByZXNvbHV0aW9uID0gMC4wNSwgYWxnb3JpdGhtID0gMykgIyMgU2V0IHIgPSAwLjA1DQpCQ0NJTy5tYXJrZXJzIDwtIEZpbmRBbGxNYXJrZXJzKEJDQ0lPLCB0ZXN0LnVzZSA9ICd3aWxjb3gnLCBtaW4ucGN0ID0gMC4yNSwgbG9nZmMudGhyZXNob2xkID0gMC41MCwgbWF4LmNlbGxzLnBlci5pZGVudCA9IEluZikgIyMgUnVuIHRocm91Z2ggYWxsIGNlbGxzDQp0b3A1IDwtIEJDQ0lPLm1hcmtlcnMgJT4lIGdyb3VwX2J5KGNsdXN0ZXIpICU+JSB0b3BfbihuPTUsIHd0PWF2Z19sb2dGQykNCkRvSGVhdG1hcChCQ0NJTyxmZWF0dXJlcyA9IHRvcDUkZ2VuZSwgc2l6ZSA9IDMpICMjIEhlYXRtYXAgd2l0aCBhbGwgY2VsbHMNCg0KRGltUGxvdChCQ0NJTywgbGFiZWwgPSBUKQ0KRGltUGxvdChCQ0NJTywgcmVkdWN0aW9uPSAidW1hcCIpICMjIENyZWF0ZSBVTUFQDQoNCmxhYmVscyA8LSBjKCIiKQ0KQkNDSU8gPC0gUmVuYW1lQ2x1c3RlcnMoQkNDSU8sIGxhYmVscykgDQoNCkRpbVBsb3QoQkNDSU8sIHJlZHVjdGlvbj0idW1hcCIpICMjIENyZWF0ZSBsYWJlbGVkIFVNQVANCg0KYGBgDQoNCg==</div>
+  |                                                                                                              
+  |                                                                                                        |   0%
+  |                                                                                                              
+  |======                                                                                                  |   6%
+  |                                                                                                              
+  |============                                                                                            |  12%
+  |                                                                                                              
+  |==================                                                                                      |  18%
+  |                                                                                                              
+  |========================                                                                                |  24%
+  |                                                                                                              
+  |===============================                                                                         |  29%
+  |                                                                                                              
+  |=====================================                                                                   |  35%
+  |                                                                                                              
+  |===========================================                                                             |  41%
+  |                                                                                                              
+  |=================================================                                                       |  47%
+  |                                                                                                              
+  |=======================================================                                                 |  53%
+  |                                                                                                              
+  |=============================================================                                           |  59%
+  |                                                                                                              
+  |===================================================================                                     |  65%
+  |                                                                                                              
+  |=========================================================================                               |  71%
+  |                                                                                                              
+  |================================================================================                        |  76%
+  |                                                                                                              
+  |======================================================================================                  |  82%
+  |                                                                                                              
+  |============================================================================================            |  88%
+  |                                                                                                              
+  |==================================================================================================      |  94%
+  |                                                                                                              
+  |========================================================================================================| 100%
+PC_ 1 
+Positive:  LAPTM5, SRGN, TYROBP, FCER1G, FCGR2A, RGS1, SPI1, ITGB2, HCLS1, MS4A7 
+       GPR183, ALOX5AP, CD53, VIM, FCGR3A, FGL2, CSF1R, CYBB, TNFRSF1B, C1QA 
+       CD163, C1QC, C1QB, LCP1, AIF1, MS4A6A, ARRB2, PTPRC, CD37, C5AR1 
+Negative:  SPINK1, TCN1, TM4SF1, REG1A, TFF3, MUC3A, MMP7, AQP3, DMBT1, PLAT 
+       AGR2, TFF1, TACSTD2, CRISP3, BIRC3, DUOXA2, GC, TPM1, APCS, GPRC5A 
+       ITGB4, SERPINA1, MAL2, APOL1, RAB11FIP1, EPHA2, TFF2, F3, SLC12A2, ITGB6 
+PC_ 2 
+Positive:  KRT17, LY6D, COL6A1, KRT16, COL17A1, S100P, COL6A2, S100A4, EMP1, PLAU 
+       TRIM29, CRABP2, IGFBP2, SLC20A1, DCBLD2, LRRC8A, AHNAK2, ARHGAP23, LAMC2, FSCN1 
+       ANXA8, CTSE, MIA, SNCG, FSTL1, BCAT1, SERPINB5, RRP7A, PCDH7, A2ML1 
+Negative:  REG1A, DMBT1, CRISP3, AQP3, TCN1, APCS, GC, TFF3, SPINK1, SPP1 
+       LYZ, MUC3A, SERPINA1, TFF1, CRP, FGA, REG3A, CD74, C6, ALDOB 
+       C3, CLDN2, HLA-DRB1, DUOXA2, PPP1R1B, MMP1, CEACAM7, ADRA2A, HLA-DRB5, NOSTRIN 
+PC_ 3 
+Positive:  MS4A7, C1QA, C1QB, SLCO2B1, C1QC, CD163, APOE, HLA-DRB1, CD74, HLA-DRA 
+       FCGR3A, TREM2, FCGR2A, TGFBI, FTL, OLR1, SDS, HLA-DRB5, VSIG4, CSF1R 
+       FPR3, MSR1, APOC1, MS4A4A, CTSD, CTSL, CD68, MAFB, GPNMB, FCGR3B 
+Negative:  IL2RB, CCL5, CD69, CD7, CD247, GZMA, CTSW, PRF1, GNLY, CD52 
+       TNFRSF18, HOPX, IL2RG, KLRC1, NKG7, KLRC2, RAC2, IKZF3, CD2, LCK 
+       CCND2, KLRB1, CORO1A, GPR171, FYN, ZNF683, LCP1, CD96, LTB, GZMB 
+PC_ 4 
+Positive:  HPGDS, RGS13, BMX, SH2D6, KIT, LRMP, TRPM5, AVIL, SPIB, DKK3 
+       CORO2B, SPARC, PLG, PTGS1, HCK, CCDC129, AOC1, NTM, IGFBP7, SH2D7 
+       PBXIP1, PSTPIP2, HEPACAM2, HEG1, LIPG, TIE1, DLC1, GRASP, COL4A1, GFI1B 
+Negative:  TOP2A, MKI67, PLK1, TPX2, UBE2C, CENPF, CCNA2, NUSAP1, BIRC5, NEK2 
+       CEP55, CDC20, PRC1, RRM2, CCNB1, ASPM, MYBL2, STMN1, CCNB2, PTTG1 
+       KIF20A, RACGAP1, KIF11, AURKB, ARHGAP11A, KIF23, CENPE, HMGB2, BUB1, PRR11 
+PC_ 5 
+Positive:  BMX, SH2D6, TRPM5, AVIL, LRMP, CORO2B, HPGDS, PLG, HCK, CCDC129 
+       RGS13, SPIB, LIPG, SH2D7, DKK3, PSTPIP2, HEPACAM2, KCTD12, AOC1, NTM 
+       AZGP1, NRGN, SDC2, IGSF21, PCP4, SUCNR1, GFI1B, PTGS1, PTPRT, SKAP2 
+Negative:  IL2RB, CCL5, CD52, PRF1, CD69, CD247, GZMA, LCP1, IL2RG, CD7 
+       CTSW, GNLY, TNFRSF18, KLRC1, KLRC2, S100A4, CCND2, HOPX, CORO1A, PIM1 
+       LTB, NKG7, IKZF3, HCST, STK17B, KLRB1, KRT86, LSP1, GZMB, ARHGDIB </code></pre>
+<!-- rnb-output-end -->
+<!-- rnb-source-begin eyJkYXRhIjoiYGBgclxucGRhYzIgPC0gcHJlcHJvY2Vzc2luZyhwZGFjMiwgaGVhdG1hcD1GQUxTRSlcbmBgYCJ9 -->
+<pre class="r"><code>pdac2 &lt;- preprocessing(pdac2, heatmap=FALSE)</code></pre>
+<!-- rnb-source-end -->
+<!-- rnb-output-begin eyJkYXRhIjoiUGVyZm9ybWluZyBsb2ctbm9ybWFsaXphdGlvblxuMCUgICAxMCAgIDIwICAgMzAgICA0MCAgIDUwICAgNjAgICA3MCAgIDgwICAgOTAgICAxMDAlXG5bLS0tLXwtLS0tfC0tLS18LS0tLXwtLS0tfC0tLS18LS0tLXwtLS0tfC0tLS18LS0tLXxcbioqKioqKioqKioqKioqKioqKioqKioqKioqKioqKioqKioqKioqKioqKioqKioqKioqfFxuQ2FsY3VsYXRpbmcgZ2VuZSB2YXJpYW5jZXNcbjAlICAgMTAgICAyMCAgIDMwICAgNDAgICA1MCAgIDYwICAgNzAgICA4MCAgIDkwICAgMTAwJVxuWy0tLS18LS0tLXwtLS0tfC0tLS18LS0tLXwtLS0tfC0tLS18LS0tLXwtLS0tfC0tLS18XG4qKioqKioqKioqKioqKioqKioqKioqKioqKioqKioqKioqKioqKioqKioqKioqKioqKnxcbkNhbGN1bGF0aW5nIGZlYXR1cmUgdmFyaWFuY2VzIG9mIHN0YW5kYXJkaXplZCBhbmQgY2xpcHBlZCB2YWx1ZXNcbjAlICAgMTAgICAyMCAgIDMwICAgNDAgICA1MCAgIDYwICAgNzAgICA4MCAgIDkwICAgMTAwJVxuWy0tLS18LS0tLXwtLS0tfC0tLS18LS0tLXwtLS0tfC0tLS18LS0tLXwtLS0tfC0tLS18XG4qKioqKioqKioqKioqKioqKioqKioqKioqKioqKioqKioqKioqKioqKioqKioqKioqKnxcbkNlbnRlcmluZyBhbmQgc2NhbGluZyBkYXRhIG1hdHJpeFxuXG4gIHwgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgIFxuICB8ICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICB8ICAgMCVcbiAgfCAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgXG4gIHw9PT09PT0gICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgIHwgICA2JVxuICB8ICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICBcbiAgfD09PT09PT09PT09PT0gICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgfCAgMTIlXG4gIHwgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgIFxuICB8PT09PT09PT09PT09PT09PT09PT0gICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICB8ICAxOSVcbiAgfCAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgXG4gIHw9PT09PT09PT09PT09PT09PT09PT09PT09PSAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgIHwgIDI1JVxuICB8ICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICBcbiAgfD09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09ICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgfCAgMzElXG4gIHwgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgIFxuICB8PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09ICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICB8ICAzOCVcbiAgfCAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgXG4gIHw9PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09ICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgIHwgIDQ0JVxuICB8ICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICBcbiAgfD09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT0gICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgfCAgNTAlXG4gIHwgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgIFxuICB8PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PSAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICB8ICA1NiVcbiAgfCAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgXG4gIHw9PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PSAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgIHwgIDYyJVxuICB8ICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICBcbiAgfD09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PSAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgfCAgNjklXG4gIHwgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgIFxuICB8PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09ICAgICAgICAgICAgICAgICAgICAgICAgICB8ICA3NSVcbiAgfCAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgXG4gIHw9PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT0gICAgICAgICAgICAgICAgICAgIHwgIDgxJVxuICB8ICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICBcbiAgfD09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT0gICAgICAgICAgICAgfCAgODglXG4gIHwgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgIFxuICB8PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT0gICAgICB8ICA5NCVcbiAgfCAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgXG4gIHw9PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PXwgMTAwJVxuUENfIDEgXG5Qb3NpdGl2ZTogIFNQQVJDTDEsIFZXRiwgUEVDQU0xLCBWSU0sIElHRkJQNywgQUNLUjEsIFNMQ08yQTEsIEEyTSwgTU1STjIsIENBVjEgXG5cdCAgIEhFRzEsIENMRUMxNEEsIENEOTMsIFRDRjQsIENBTENSTCwgUExWQVAsIEVORywgUkFNUDIsIFJBTVAzLCBQT1NUTiBcblx0ICAgQ0xETjUsIEVNQ04sIENBVklOMSwgQ1BFLCBQQ0RIMTcsIFBUUFJCLCBFR0ZMNywgQ0QzNCwgRVNBTSwgTUdQIFxuTmVnYXRpdmU6ICBDRUFDQU02LCBBR1IyLCBNVUM1QiwgTENOMiwgVEZGMSwgUElHUiwgVEZGMywgU1BJTksxLCBMWVosIE1VQzNBIFxuXHQgICBURkYyLCBLUlQ3LCBGQ0dCUCwgVENOMSwgQU5QRVAsIFRTUEFOMSwgU0RDNCwgQ1RTRSwgQUtSMUIxMCwgQ0VTMSBcblx0ICAgR1BSQzVBLCBTTFBJLCBCSVJDMywgU0xDMTJBMiwgTVVDNUFDLCBBTlhBMTAsIERVT1gyLCBQRFpLMUlQMSwgTEdBTFMyLCBNR1NUMSBcblBDXyAyIFxuUG9zaXRpdmU6ICBDRUFDQU02LCBBR1IyLCBMQ04yLCBNVUM1QiwgVEZGMSwgUElHUiwgU1BJTksxLCBURkYzLCBIU1BHMiwgTVVDM0EgXG5cdCAgIElHRkJQNCwgU1BBUkNMMSwgQ0FWMSwgVEZGMiwgVldGLCBTTENPMkExLCBJR0ZCUDcsIEFRUDEsIENMRUMxNEEsIEtSVDcgXG5cdCAgIENBVklOMSwgTU1STjIsIEFDS1IxLCBQUlNTMjMsIEVQQVMxLCBGQU0xMDdBLCBUU1BBTjEsIFBNRVBBMSwgVEdGQlIzLCBSQU1QMyBcbk5lZ2F0aXZlOiAgVFlST0JQLCBMQVBUTTUsIExDUDEsIEZQUjEsIFNQSTEsIEZDRVIxRywgQ0Q1MywgRkNHUjNBLCBTMTAwQTksIEM1QVIxIFxuXHQgICBQVFBSQywgQVJSQjIsIE1ZTzFGLCBTMTAwQTgsIEZDR1IzQiwgU1JHTiwgSENMUzEsIE5DRjIsIExDUDIsIENEMzcgXG5cdCAgIFBMRUssIEZDR1IyQSwgTFNQMSwgSENTVCwgUzEwMEE0LCBJVEdCMiwgRkNOMSwgQVFQOSwgTFNUMSwgV0FTIFxuUENfIDMgXG5Qb3NpdGl2ZTogIENENzQsIEhMQS1EUkIxLCBQSUdSLCBITEEtRFJCNSwgSExBLURSQSwgVEZGMywgTVVDNUIsIEZDR0JQLCBITEEtRFFCMSwgTFlaIFxuXHQgICBURkYxLCBITEEtRFBCMSwgVEZGMiwgTVQyQSwgQ0VTMSwgSExBLURQQTEsIFRYTklQLCBHQywgTEdBTFMyLCBNVDFFIFxuXHQgICBUTkZTRjEzQiwgQU5QRVAsIEFLUjFCMTAsIFNMQzRBNCwgQUxESDFBMSwgU0xDMTJBMiwgQ1JJU1AzLCBTUFAxLCBBTlhBMTMsIFNQSU5LMSBcbk5lZ2F0aXZlOiAgQ0RLTjJBLCBLUlQxNywgV0ZEQzIsIFNFUlBJTkIzLCBDWVAzQTUsIFMxMDBQLCBTRVJQSU5IMSwgU0VSUElOQjQsIFNMQzJBMSwgQ0RIMyBcblx0ICAgQUhOQUsyLCBWQ0FOLCBTTEM2QTE0LCBJR0ZCUDMsIEtSVDE2LCBMQU1CMywgQU5YQTgsIENPTDZBMSwgTEFNQzIsIFBMQVQgXG5cdCAgIEFOWEE4TDEsIEZHRkJQMSwgRFNHMywgSVRHQjYsIEdQUkM1QSwgU1JJLCBQTEFVLCBPTEZNNCwgU0VNQTNDLCBLUlQ3IFxuUENfIDQgXG5Qb3NpdGl2ZTogIENENzQsIEhMQS1EUkIxLCBDRUFDQU02LCBITEEtRFJBLCBURkYxLCBITEEtRFJCNSwgTVVDNUIsIEFHUjIsIExDTjIsIFBJR1IgXG5cdCAgIFRGRjIsIEhMQS1EUEExLCBCSVJDMywgQUtSMUIxMCwgV0FSUywgVE5GU0YxM0IsIEdCUDEsIE1VQzNBLCBBU1MxLCBMR0FMUzIgXG5cdCAgIENPVEwxLCBEVU9YMiwgS0xGMiwgTVVDNUFDLCBGQ0dCUCwgQU5YQTEwLCBUU1BBTjEsIElMMzIsIENUU0UsIEFOUEVQIFxuTmVnYXRpdmU6ICBTSDJENiwgUExHLCBSR1MxMywgVFJQTTUsIExSTVAsIEhQR0RTLCBTUElCLCBHTkcxMywgQU9DMSwgQVZJTCBcblx0ICAgQk1YLCBDT1JPMkIsIFNIMkQ3LCBIRVBBQ0FNMiwgREtLMywgUFNUUElQMiwgSENLLCBLSVQsIEFaR1AxLCBQVEdTMSBcblx0ICAgQ0NEQzEyOSwgRllCMSwgUENQNCwgTFBBLCBGQVQzLCBQQlhJUDEsIENIQUQsIFBMRUtIRzcsIElMMTdSQiwgSUdTRjIxIFxuUENfIDUgXG5Qb3NpdGl2ZTogIEdDLCBDUklTUDMsIFNQUDEsIEFHVCwgQzYsIFNDR0IzQTEsIFJFRzFBLCBVR1QyQjE1LCBTTEMzQTEsIERNQlQxIFxuXHQgICBDRVMxLCBUQ04xLCBBUENTLCBBUENERDEsIFBBSCwgU0VSUElOQTUsIENMRE4zLCBTTEM0QTQsIEdBVE0sIFVHVDJCMTcgXG5cdCAgIEFOUEVQLCBDRlRSLCBIT01FUjIsIEdBQlJQLCBDNEIsIENZUzEsIE1NUDcsIEM0QSwgRk9MUjEsIEFNQlAgXG5OZWdhdGl2ZTogIFRPUDJBLCBNS0k2NywgUlJNMiwgVFBYMiwgQ0VOUEYsIFNUTU4xLCBIMkFGWiwgVUJFMkMsIE5VU0FQMSwgUFJDMSBcblx0ICAgQ0RLMSwgTVlCTDIsIFRLMSwgQVVSS0IsIEFOTE4sIFJSTTEsIEhNR0IyLCBQQkssIFBMSzEsIENDTkEyIFxuXHQgICBBU1BNLCBISVNUMUg0QywgVEFDQzMsIENDTkIxLCBDRU5QRSwgVFlNUywgUENMQUYsIFpXSU5ULCBQUlIxMSwgR1RTRTEgXG4ifQ== -->
+<pre><code>Performing log-normalization
+0%   10   20   30   40   50   60   70   80   90   100%
+[----|----|----|----|----|----|----|----|----|----|
+**************************************************|
+Calculating gene variances
+0%   10   20   30   40   50   60   70   80   90   100%
+[----|----|----|----|----|----|----|----|----|----|
+**************************************************|
+Calculating feature variances of standardized and clipped values
+0%   10   20   30   40   50   60   70   80   90   100%
+[----|----|----|----|----|----|----|----|----|----|
+**************************************************|
+Centering and scaling data matrix
+
+  |                                                                                                              
+  |                                                                                                        |   0%
+  |                                                                                                              
+  |======                                                                                                  |   6%
+  |                                                                                                              
+  |=============                                                                                           |  12%
+  |                                                                                                              
+  |====================                                                                                    |  19%
+  |                                                                                                              
+  |==========================                                                                              |  25%
+  |                                                                                                              
+  |================================                                                                        |  31%
+  |                                                                                                              
+  |=======================================                                                                 |  38%
+  |                                                                                                              
+  |==============================================                                                          |  44%
+  |                                                                                                              
+  |====================================================                                                    |  50%
+  |                                                                                                              
+  |==========================================================                                              |  56%
+  |                                                                                                              
+  |=================================================================                                       |  62%
+  |                                                                                                              
+  |========================================================================                                |  69%
+  |                                                                                                              
+  |==============================================================================                          |  75%
+  |                                                                                                              
+  |====================================================================================                    |  81%
+  |                                                                                                              
+  |===========================================================================================             |  88%
+  |                                                                                                              
+  |==================================================================================================      |  94%
+  |                                                                                                              
+  |========================================================================================================| 100%
+PC_ 1 
+Positive:  SPARCL1, VWF, PECAM1, VIM, IGFBP7, ACKR1, SLCO2A1, A2M, MMRN2, CAV1 
+       HEG1, CLEC14A, CD93, TCF4, CALCRL, PLVAP, ENG, RAMP2, RAMP3, POSTN 
+       CLDN5, EMCN, CAVIN1, CPE, PCDH17, PTPRB, EGFL7, CD34, ESAM, MGP 
+Negative:  CEACAM6, AGR2, MUC5B, LCN2, TFF1, PIGR, TFF3, SPINK1, LYZ, MUC3A 
+       TFF2, KRT7, FCGBP, TCN1, ANPEP, TSPAN1, SDC4, CTSE, AKR1B10, CES1 
+       GPRC5A, SLPI, BIRC3, SLC12A2, MUC5AC, ANXA10, DUOX2, PDZK1IP1, LGALS2, MGST1 
+PC_ 2 
+Positive:  CEACAM6, AGR2, LCN2, MUC5B, TFF1, PIGR, SPINK1, TFF3, HSPG2, MUC3A 
+       IGFBP4, SPARCL1, CAV1, TFF2, VWF, SLCO2A1, IGFBP7, AQP1, CLEC14A, KRT7 
+       CAVIN1, MMRN2, ACKR1, PRSS23, EPAS1, FAM107A, TSPAN1, PMEPA1, TGFBR3, RAMP3 
+Negative:  TYROBP, LAPTM5, LCP1, FPR1, SPI1, FCER1G, CD53, FCGR3A, S100A9, C5AR1 
+       PTPRC, ARRB2, MYO1F, S100A8, FCGR3B, SRGN, HCLS1, NCF2, LCP2, CD37 
+       PLEK, FCGR2A, LSP1, HCST, S100A4, ITGB2, FCN1, AQP9, LST1, WAS 
+PC_ 3 
+Positive:  CD74, HLA-DRB1, PIGR, HLA-DRB5, HLA-DRA, TFF3, MUC5B, FCGBP, HLA-DQB1, LYZ 
+       TFF1, HLA-DPB1, TFF2, MT2A, CES1, HLA-DPA1, TXNIP, GC, LGALS2, MT1E 
+       TNFSF13B, ANPEP, AKR1B10, SLC4A4, ALDH1A1, SLC12A2, CRISP3, SPP1, ANXA13, SPINK1 
+Negative:  CDKN2A, KRT17, WFDC2, SERPINB3, CYP3A5, S100P, SERPINH1, SERPINB4, SLC2A1, CDH3 
+       AHNAK2, VCAN, SLC6A14, IGFBP3, KRT16, LAMB3, ANXA8, COL6A1, LAMC2, PLAT 
+       ANXA8L1, FGFBP1, DSG3, ITGB6, GPRC5A, SRI, PLAU, OLFM4, SEMA3C, KRT7 
+PC_ 4 
+Positive:  CD74, HLA-DRB1, CEACAM6, HLA-DRA, TFF1, HLA-DRB5, MUC5B, AGR2, LCN2, PIGR 
+       TFF2, HLA-DPA1, BIRC3, AKR1B10, WARS, TNFSF13B, GBP1, MUC3A, ASS1, LGALS2 
+       COTL1, DUOX2, KLF2, MUC5AC, FCGBP, ANXA10, TSPAN1, IL32, CTSE, ANPEP 
+Negative:  SH2D6, PLG, RGS13, TRPM5, LRMP, HPGDS, SPIB, GNG13, AOC1, AVIL 
+       BMX, CORO2B, SH2D7, HEPACAM2, DKK3, PSTPIP2, HCK, KIT, AZGP1, PTGS1 
+       CCDC129, FYB1, PCP4, LPA, FAT3, PBXIP1, CHAD, PLEKHG7, IL17RB, IGSF21 
+PC_ 5 
+Positive:  GC, CRISP3, SPP1, AGT, C6, SCGB3A1, REG1A, UGT2B15, SLC3A1, DMBT1 
+       CES1, TCN1, APCS, APCDD1, PAH, SERPINA5, CLDN3, SLC4A4, GATM, UGT2B17 
+       ANPEP, CFTR, HOMER2, GABRP, C4B, CYS1, MMP7, C4A, FOLR1, AMBP 
+Negative:  TOP2A, MKI67, RRM2, TPX2, CENPF, STMN1, H2AFZ, UBE2C, NUSAP1, PRC1 
+       CDK1, MYBL2, TK1, AURKB, ANLN, RRM1, HMGB2, PBK, PLK1, CCNA2 
+       ASPM, HIST1H4C, TACC3, CCNB1, CENPE, TYMS, PCLAF, ZWINT, PRR11, GTSE1 </code></pre>
+<!-- rnb-output-end -->
+<!-- rnb-source-begin eyJkYXRhIjoiYGBgclxucGRhYzEgPC0gY2x1c3RlcmluZyhwZGFjMSwgUENzPTUwLCByZXNvbHV0aW9uPTAuNSlcbmBgYCJ9 -->
+<pre class="r"><code>pdac1 &lt;- clustering(pdac1, PCs=50, resolution=0.5)</code></pre>
+<!-- rnb-source-end -->
+<!-- rnb-output-begin eyJkYXRhIjoiQ29tcHV0aW5nIG5lYXJlc3QgbmVpZ2hib3IgZ3JhcGhcbkNvbXB1dGluZyBTTk5cbiJ9 -->
+<pre><code>Computing nearest neighbor graph
+Computing SNN</code></pre>
+<!-- rnb-output-end -->
+<!-- rnb-output-begin eyJkYXRhIjoiTW9kdWxhcml0eSBPcHRpbWl6ZXIgdmVyc2lvbiAxLjMuMCBieSBMdWRvIFdhbHRtYW4gYW5kIE5lZXMgSmFuIHZhbiBFY2tcblxuTnVtYmVyIG9mIG5vZGVzOiAxOTI2XG5OdW1iZXIgb2YgZWRnZXM6IDc3NzczXG5cblJ1bm5pbmcgc21hcnQgbG9jYWwgbW92aW5nIGFsZ29yaXRobS4uLlxuIn0= -->
+<pre><code>Modularity Optimizer version 1.3.0 by Ludo Waltman and Nees Jan van Eck
+
+Number of nodes: 1926
+Number of edges: 77773
+
+Running smart local moving algorithm...</code></pre>
+<!-- rnb-output-end -->
+<!-- rnb-output-begin eyJkYXRhIjoiMCUgICAxMCAgIDIwICAgMzAgICA0MCAgIDUwICAgNjAgICA3MCAgIDgwICAgOTAgICAxMDAlXG5bLS0tLXwtLS0tfC0tLS18LS0tLXwtLS0tfC0tLS18LS0tLXwtLS0tfC0tLS18LS0tLXxcbioqKioqKioqKioqKioqKioqKioqKioqKioqKioqKioqKioqKioqKioqKioqKioqKioqfFxuIn0= -->
+<pre><code>0%   10   20   30   40   50   60   70   80   90   100%
+[----|----|----|----|----|----|----|----|----|----|
+**************************************************|</code></pre>
+<!-- rnb-output-end -->
+<!-- rnb-output-begin eyJkYXRhIjoiTWF4aW11bSBtb2R1bGFyaXR5IGluIDEwIHJhbmRvbSBzdGFydHM6IDAuODcyNlxuTnVtYmVyIG9mIGNvbW11bml0aWVzOiAxMlxuRWxhcHNlZCB0aW1lOiAxIHNlY29uZHNcbiJ9 -->
+<pre><code>Maximum modularity in 10 random starts: 0.8726
+Number of communities: 12
+Elapsed time: 1 seconds</code></pre>
+<!-- rnb-output-end -->
+<!-- rnb-output-begin eyJkYXRhIjoiQ2FsY3VsYXRpbmcgY2x1c3RlciAwXG4ifQ== -->
+<pre><code>Calculating cluster 0</code></pre>
+<!-- rnb-output-end -->
+<!-- rnb-output-begin eyJkYXRhIjoiXG4gIHwgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgIHwgMCAlIH5jYWxjdWxhdGluZyAgXG4gIHwrICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgIHwgMSAlIH4wMXMgICAgICAgICAgXG4gIHwrKyAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgIHwgMyAlIH4wMXMgICAgICAgICAgXG4gIHwrKysgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgIHwgNCAlIH4wMXMgICAgICAgICAgXG4gIHwrKysgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgIHwgNiAlIH4wMXMgICAgICAgICAgXG4gIHwrKysrICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgIHwgNyAlIH4wMXMgICAgICAgICAgXG4gIHwrKysrKyAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgIHwgOCAlIH4wMXMgICAgICAgICAgXG4gIHwrKysrKyAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgIHwgMTAlIH4wMXMgICAgICAgICAgXG4gIHwrKysrKysgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgIHwgMTElIH4wMXMgICAgICAgICAgXG4gIHwrKysrKysrICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgIHwgMTIlIH4wMnMgICAgICAgICAgXG4gIHwrKysrKysrICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgIHwgMTQlIH4wMnMgICAgICAgICAgXG4gIHwrKysrKysrKyAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgIHwgMTUlIH4wMnMgICAgICAgICAgXG4gIHwrKysrKysrKysgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgIHwgMTclIH4wMnMgICAgICAgICAgXG4gIHwrKysrKysrKysrICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgIHwgMTglIH4wMnMgICAgICAgICAgXG4gIHwrKysrKysrKysrICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgIHwgMTklIH4wMnMgICAgICAgICAgXG4gIHwrKysrKysrKysrKyAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgIHwgMjElIH4wMnMgICAgICAgICAgXG4gIHwrKysrKysrKysrKysgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgIHwgMjIlIH4wMnMgICAgICAgICAgXG4gIHwrKysrKysrKysrKysgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgIHwgMjQlIH4wMnMgICAgICAgICAgXG4gIHwrKysrKysrKysrKysrICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgIHwgMjUlIH4wMnMgICAgICAgICAgXG4gIHwrKysrKysrKysrKysrKyAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgIHwgMjYlIH4wMnMgICAgICAgICAgXG4gIHwrKysrKysrKysrKysrKyAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgIHwgMjglIH4wMnMgICAgICAgICAgXG4gIHwrKysrKysrKysrKysrKysgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgIHwgMjklIH4wMnMgICAgICAgICAgXG4gIHwrKysrKysrKysrKysrKysrICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgIHwgMzElIH4wMXMgICAgICAgICAgXG4gIHwrKysrKysrKysrKysrKysrICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgIHwgMzIlIH4wMXMgICAgICAgICAgXG4gIHwrKysrKysrKysrKysrKysrKyAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgIHwgMzMlIH4wMXMgICAgICAgICAgXG4gIHwrKysrKysrKysrKysrKysrKysgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgIHwgMzUlIH4wMXMgICAgICAgICAgXG4gIHwrKysrKysrKysrKysrKysrKysrICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgIHwgMzYlIH4wMXMgICAgICAgICAgXG4gIHwrKysrKysrKysrKysrKysrKysrICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgIHwgMzglIH4wMXMgICAgICAgICAgXG4gIHwrKysrKysrKysrKysrKysrKysrKyAgICAgICAgICAgICAgICAgICAgICAgICAgICAgIHwgMzklIH4wMXMgICAgICAgICAgXG4gIHwrKysrKysrKysrKysrKysrKysrKysgICAgICAgICAgICAgICAgICAgICAgICAgICAgIHwgNDAlIH4wMXMgICAgICAgICAgXG4gIHwrKysrKysrKysrKysrKysrKysrKysgICAgICAgICAgICAgICAgICAgICAgICAgICAgIHwgNDIlIH4wMXMgICAgICAgICAgXG4gIHwrKysrKysrKysrKysrKysrKysrKysrICAgICAgICAgICAgICAgICAgICAgICAgICAgIHwgNDMlIH4wMXMgICAgICAgICAgXG4gIHwrKysrKysrKysrKysrKysrKysrKysrKyAgICAgICAgICAgICAgICAgICAgICAgICAgIHwgNDQlIH4wMXMgICAgICAgICAgXG4gIHwrKysrKysrKysrKysrKysrKysrKysrKyAgICAgICAgICAgICAgICAgICAgICAgICAgIHwgNDYlIH4wMXMgICAgICAgICAgXG4gIHwrKysrKysrKysrKysrKysrKysrKysrKysgICAgICAgICAgICAgICAgICAgICAgICAgIHwgNDclIH4wMXMgICAgICAgICAgXG4gIHwrKysrKysrKysrKysrKysrKysrKysrKysrICAgICAgICAgICAgICAgICAgICAgICAgIHwgNDklIH4wMXMgICAgICAgICAgXG4gIHwrKysrKysrKysrKysrKysrKysrKysrKysrICAgICAgICAgICAgICAgICAgICAgICAgIHwgNTAlIH4wMXMgICAgICAgICAgXG4gIHwrKysrKysrKysrKysrKysrKysrKysrKysrKyAgICAgICAgICAgICAgICAgICAgICAgIHwgNTElIH4wMXMgICAgICAgICAgXG4gIHwrKysrKysrKysrKysrKysrKysrKysrKysrKysgICAgICAgICAgICAgICAgICAgICAgIHwgNTMlIH4wMXMgICAgICAgICAgXG4gIHwrKysrKysrKysrKysrKysrKysrKysrKysrKysrICAgICAgICAgICAgICAgICAgICAgIHwgNTQlIH4wMXMgICAgICAgICAgXG4gIHwrKysrKysrKysrKysrKysrKysrKysrKysrKysrICAgICAgICAgICAgICAgICAgICAgIHwgNTYlIH4wMXMgICAgICAgICAgXG4gIHwrKysrKysrKysrKysrKysrKysrKysrKysrKysrKyAgICAgICAgICAgICAgICAgICAgIHwgNTclIH4wMXMgICAgICAgICAgXG4gIHwrKysrKysrKysrKysrKysrKysrKysrKysrKysrKysgICAgICAgICAgICAgICAgICAgIHwgNTglIH4wMXMgICAgICAgICAgXG4gIHwrKysrKysrKysrKysrKysrKysrKysrKysrKysrKysgICAgICAgICAgICAgICAgICAgIHwgNjAlIH4wMXMgICAgICAgICAgXG4gIHwrKysrKysrKysrKysrKysrKysrKysrKysrKysrKysrICAgICAgICAgICAgICAgICAgIHwgNjElIH4wMXMgICAgICAgICAgXG4gIHwrKysrKysrKysrKysrKysrKysrKysrKysrKysrKysrKyAgICAgICAgICAgICAgICAgIHwgNjIlIH4wMXMgICAgICAgICAgXG4gIHwrKysrKysrKysrKysrKysrKysrKysrKysrKysrKysrKyAgICAgICAgICAgICAgICAgIHwgNjQlIH4wMXMgICAgICAgICAgXG4gIHwrKysrKysrKysrKysrKysrKysrKysrKysrKysrKysrKysgICAgICAgICAgICAgICAgIHwgNjUlIH4wMXMgICAgICAgICAgXG4gIHwrKysrKysrKysrKysrKysrKysrKysrKysrKysrKysrKysrICAgICAgICAgICAgICAgIHwgNjclIH4wMXMgICAgICAgICAgXG4gIHwrKysrKysrKysrKysrKysrKysrKysrKysrKysrKysrKysrKyAgICAgICAgICAgICAgIHwgNjglIH4wMXMgICAgICAgICAgXG4gIHwrKysrKysrKysrKysrKysrKysrKysrKysrKysrKysrKysrKyAgICAgICAgICAgICAgIHwgNjklIH4wMXMgICAgICAgICAgXG4gIHwrKysrKysrKysrKysrKysrKysrKysrKysrKysrKysrKysrKysgICAgICAgICAgICAgIHwgNzElIH4wMXMgICAgICAgICAgXG4gIHwrKysrKysrKysrKysrKysrKysrKysrKysrKysrKysrKysrKysrICAgICAgICAgICAgIHwgNzIlIH4wMXMgICAgICAgICAgXG4gIHwrKysrKysrKysrKysrKysrKysrKysrKysrKysrKysrKysrKysrICAgICAgICAgICAgIHwgNzQlIH4wMXMgICAgICAgICAgXG4gIHwrKysrKysrKysrKysrKysrKysrKysrKysrKysrKysrKysrKysrKyAgICAgICAgICAgIHwgNzUlIH4wMXMgICAgICAgICAgXG4gIHwrKysrKysrKysrKysrKysrKysrKysrKysrKysrKysrKysrKysrKysgICAgICAgICAgIHwgNzYlIH4wMXMgICAgICAgICAgXG4gIHwrKysrKysrKysrKysrKysrKysrKysrKysrKysrKysrKysrKysrKysgICAgICAgICAgIHwgNzglIH4wMXMgICAgICAgICAgXG4gIHwrKysrKysrKysrKysrKysrKysrKysrKysrKysrKysrKysrKysrKysrICAgICAgICAgIHwgNzklIH4wMXMgICAgICAgICAgXG4gIHwrKysrKysrKysrKysrKysrKysrKysrKysrKysrKysrKysrKysrKysrKyAgICAgICAgIHwgODElIH4wMHMgICAgICAgICAgXG4gIHwrKysrKysrKysrKysrKysrKysrKysrKysrKysrKysrKysrKysrKysrKyAgICAgICAgIHwgODIlIH4wMHMgICAgICAgICAgXG4gIHwrKysrKysrKysrKysrKysrKysrKysrKysrKysrKysrKysrKysrKysrKysgICAgICAgIHwgODMlIH4wMHMgICAgICAgICAgXG4gIHwrKysrKysrKysrKysrKysrKysrKysrKysrKysrKysrKysrKysrKysrKysrICAgICAgIHwgODUlIH4wMHMgICAgICAgICAgXG4gIHwrKysrKysrKysrKysrKysrKysrKysrKysrKysrKysrKysrKysrKysrKysrKyAgICAgIHwgODYlIH4wMHMgICAgICAgICAgXG4gIHwrKysrKysrKysrKysrKysrKysrKysrKysrKysrKysrKysrKysrKysrKysrKyAgICAgIHwgODglIH4wMHMgICAgICAgICAgXG4gIHwrKysrKysrKysrKysrKysrKysrKysrKysrKysrKysrKysrKysrKysrKysrKysgICAgIHwgODklIH4wMHMgICAgICAgICAgXG4gIHwrKysrKysrKysrKysrKysrKysrKysrKysrKysrKysrKysrKysrKysrKysrKysrICAgIHwgOTAlIH4wMHMgICAgICAgICAgXG4gIHwrKysrKysrKysrKysrKysrKysrKysrKysrKysrKysrKysrKysrKysrKysrKysrICAgIHwgOTIlIH4wMHMgICAgICAgICAgXG4gIHwrKysrKysrKysrKysrKysrKysrKysrKysrKysrKysrKysrKysrKysrKysrKysrKyAgIHwgOTMlIH4wMHMgICAgICAgICAgXG4gIHwrKysrKysrKysrKysrKysrKysrKysrKysrKysrKysrKysrKysrKysrKysrKysrKysgIHwgOTQlIH4wMHMgICAgICAgICAgXG4gIHwrKysrKysrKysrKysrKysrKysrKysrKysrKysrKysrKysrKysrKysrKysrKysrKysgIHwgOTYlIH4wMHMgICAgICAgICAgXG4gIHwrKysrKysrKysrKysrKysrKysrKysrKysrKysrKysrKysrKysrKysrKysrKysrKysrIHwgOTclIH4wMHMgICAgICAgICAgXG4gIHwrKysrKysrKysrKysrKysrKysrKysrKysrKysrKysrKysrKysrKysrKysrKysrKysrK3wgOTklIH4wMHMgICAgICAgICAgXG4gIHwrKysrKysrKysrKysrKysrKysrKysrKysrKysrKysrKysrKysrKysrKysrKysrKysrK3wgMTAwJSBlbGFwc2VkPTAycyAgXG4ifQ== -->
+<pre><code>
+  |                                                  | 0 % ~calculating  
+  |+                                                 | 1 % ~01s          
+  |++                                                | 3 % ~01s          
+  |+++                                               | 4 % ~01s          
+  |+++                                               | 6 % ~01s          
+  |++++                                              | 7 % ~01s          
+  |+++++                                             | 8 % ~01s          
+  |+++++                                             | 10% ~01s          
+  |++++++                                            | 11% ~01s          
+  |+++++++                                           | 12% ~02s          
+  |+++++++                                           | 14% ~02s          
+  |++++++++                                          | 15% ~02s          
+  |+++++++++                                         | 17% ~02s          
+  |++++++++++                                        | 18% ~02s          
+  |++++++++++                                        | 19% ~02s          
+  |+++++++++++                                       | 21% ~02s          
+  |++++++++++++                                      | 22% ~02s          
+  |++++++++++++                                      | 24% ~02s          
+  |+++++++++++++                                     | 25% ~02s          
+  |++++++++++++++                                    | 26% ~02s          
+  |++++++++++++++                                    | 28% ~02s          
+  |+++++++++++++++                                   | 29% ~02s          
+  |++++++++++++++++                                  | 31% ~01s          
+  |++++++++++++++++                                  | 32% ~01s          
+  |+++++++++++++++++                                 | 33% ~01s          
+  |++++++++++++++++++                                | 35% ~01s          
+  |+++++++++++++++++++                               | 36% ~01s          
+  |+++++++++++++++++++                               | 38% ~01s          
+  |++++++++++++++++++++                              | 39% ~01s          
+  |+++++++++++++++++++++                             | 40% ~01s          
+  |+++++++++++++++++++++                             | 42% ~01s          
+  |++++++++++++++++++++++                            | 43% ~01s          
+  |+++++++++++++++++++++++                           | 44% ~01s          
+  |+++++++++++++++++++++++                           | 46% ~01s          
+  |++++++++++++++++++++++++                          | 47% ~01s          
+  |+++++++++++++++++++++++++                         | 49% ~01s          
+  |+++++++++++++++++++++++++                         | 50% ~01s          
+  |++++++++++++++++++++++++++                        | 51% ~01s          
+  |+++++++++++++++++++++++++++                       | 53% ~01s          
+  |++++++++++++++++++++++++++++                      | 54% ~01s          
+  |++++++++++++++++++++++++++++                      | 56% ~01s          
+  |+++++++++++++++++++++++++++++                     | 57% ~01s          
+  |++++++++++++++++++++++++++++++                    | 58% ~01s          
+  |++++++++++++++++++++++++++++++                    | 60% ~01s          
+  |+++++++++++++++++++++++++++++++                   | 61% ~01s          
+  |++++++++++++++++++++++++++++++++                  | 62% ~01s          
+  |++++++++++++++++++++++++++++++++                  | 64% ~01s          
+  |+++++++++++++++++++++++++++++++++                 | 65% ~01s          
+  |++++++++++++++++++++++++++++++++++                | 67% ~01s          
+  |+++++++++++++++++++++++++++++++++++               | 68% ~01s          
+  |+++++++++++++++++++++++++++++++++++               | 69% ~01s          
+  |++++++++++++++++++++++++++++++++++++              | 71% ~01s          
+  |+++++++++++++++++++++++++++++++++++++             | 72% ~01s          
+  |+++++++++++++++++++++++++++++++++++++             | 74% ~01s          
+  |++++++++++++++++++++++++++++++++++++++            | 75% ~01s          
+  |+++++++++++++++++++++++++++++++++++++++           | 76% ~01s          
+  |+++++++++++++++++++++++++++++++++++++++           | 78% ~01s          
+  |++++++++++++++++++++++++++++++++++++++++          | 79% ~01s          
+  |+++++++++++++++++++++++++++++++++++++++++         | 81% ~00s          
+  |+++++++++++++++++++++++++++++++++++++++++         | 82% ~00s          
+  |++++++++++++++++++++++++++++++++++++++++++        | 83% ~00s          
+  |+++++++++++++++++++++++++++++++++++++++++++       | 85% ~00s          
+  |++++++++++++++++++++++++++++++++++++++++++++      | 86% ~00s          
+  |++++++++++++++++++++++++++++++++++++++++++++      | 88% ~00s          
+  |+++++++++++++++++++++++++++++++++++++++++++++     | 89% ~00s          
+  |++++++++++++++++++++++++++++++++++++++++++++++    | 90% ~00s          
+  |++++++++++++++++++++++++++++++++++++++++++++++    | 92% ~00s          
+  |+++++++++++++++++++++++++++++++++++++++++++++++   | 93% ~00s          
+  |++++++++++++++++++++++++++++++++++++++++++++++++  | 94% ~00s          
+  |++++++++++++++++++++++++++++++++++++++++++++++++  | 96% ~00s          
+  |+++++++++++++++++++++++++++++++++++++++++++++++++ | 97% ~00s          
+  |++++++++++++++++++++++++++++++++++++++++++++++++++| 99% ~00s          
+  |++++++++++++++++++++++++++++++++++++++++++++++++++| 100% elapsed=02s  </code></pre>
+<!-- rnb-output-end -->
+<!-- rnb-output-begin eyJkYXRhIjoiQ2FsY3VsYXRpbmcgY2x1c3RlciAxXG4ifQ== -->
+<pre><code>Calculating cluster 1</code></pre>
+<!-- rnb-output-end -->
+<!-- rnb-output-begin eyJkYXRhIjoiXG4gIHwgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgIHwgMCAlIH5jYWxjdWxhdGluZyAgXG4gIHwrICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgIHwgMSAlIH4wMnMgICAgICAgICAgXG4gIHwrKyAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgIHwgMiAlIH4wMnMgICAgICAgICAgXG4gIHwrKyAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgIHwgNCAlIH4wM3MgICAgICAgICAgXG4gIHwrKysgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgIHwgNSAlIH4wNHMgICAgICAgICAgXG4gIHwrKysrICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgIHwgNiAlIH4wNHMgICAgICAgICAgXG4gIHwrKysrICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgIHwgNyAlIH4wNHMgICAgICAgICAgXG4gIHwrKysrKyAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgIHwgOCAlIH4wNXMgICAgICAgICAgXG4gIHwrKysrKyAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgIHwgMTAlIH4wNXMgICAgICAgICAgXG4gIHwrKysrKysgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgIHwgMTElIH4wNHMgICAgICAgICAgXG4gIHwrKysrKysrICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgIHwgMTIlIH4wNHMgICAgICAgICAgXG4gIHwrKysrKysrICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgIHwgMTMlIH4wNHMgICAgICAgICAgXG4gIHwrKysrKysrKyAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgIHwgMTQlIH4wNHMgICAgICAgICAgXG4gIHwrKysrKysrKyAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgIHwgMTYlIH4wNHMgICAgICAgICAgXG4gIHwrKysrKysrKysgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgIHwgMTclIH4wNHMgICAgICAgICAgXG4gIHwrKysrKysrKysrICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgIHwgMTglIH4wNHMgICAgICAgICAgXG4gIHwrKysrKysrKysrICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgIHwgMTklIH4wNHMgICAgICAgICAgXG4gIHwrKysrKysrKysrKyAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgIHwgMjAlIH4wNHMgICAgICAgICAgXG4gIHwrKysrKysrKysrKyAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgIHwgMjIlIH4wNHMgICAgICAgICAgXG4gIHwrKysrKysrKysrKysgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgIHwgMjMlIH4wNHMgICAgICAgICAgXG4gIHwrKysrKysrKysrKysrICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgIHwgMjQlIH4wNHMgICAgICAgICAgXG4gIHwrKysrKysrKysrKysrICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgIHwgMjUlIH4wM3MgICAgICAgICAgXG4gIHwrKysrKysrKysrKysrKyAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgIHwgMjclIH4wM3MgICAgICAgICAgXG4gIHwrKysrKysrKysrKysrKyAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgIHwgMjglIH4wM3MgICAgICAgICAgXG4gIHwrKysrKysrKysrKysrKysgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgIHwgMjklIH4wM3MgICAgICAgICAgXG4gIHwrKysrKysrKysrKysrKysrICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgIHwgMzAlIH4wM3MgICAgICAgICAgXG4gIHwrKysrKysrKysrKysrKysrICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgIHwgMzElIH4wM3MgICAgICAgICAgXG4gIHwrKysrKysrKysrKysrKysrKyAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgIHwgMzMlIH4wM3MgICAgICAgICAgXG4gIHwrKysrKysrKysrKysrKysrKyAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgIHwgMzQlIH4wM3MgICAgICAgICAgXG4gIHwrKysrKysrKysrKysrKysrKysgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgIHwgMzUlIH4wM3MgICAgICAgICAgXG4gIHwrKysrKysrKysrKysrKysrKysrICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgIHwgMzYlIH4wM3MgICAgICAgICAgXG4gIHwrKysrKysrKysrKysrKysrKysrICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgIHwgMzclIH4wM3MgICAgICAgICAgXG4gIHwrKysrKysrKysrKysrKysrKysrKyAgICAgICAgICAgICAgICAgICAgICAgICAgICAgIHwgMzklIH4wM3MgICAgICAgICAgXG4gIHwrKysrKysrKysrKysrKysrKysrKyAgICAgICAgICAgICAgICAgICAgICAgICAgICAgIHwgNDAlIH4wM3MgICAgICAgICAgXG4gIHwrKysrKysrKysrKysrKysrKysrKysgICAgICAgICAgICAgICAgICAgICAgICAgICAgIHwgNDElIH4wM3MgICAgICAgICAgXG4gIHwrKysrKysrKysrKysrKysrKysrKysrICAgICAgICAgICAgICAgICAgICAgICAgICAgIHwgNDIlIH4wM3MgICAgICAgICAgXG4gIHwrKysrKysrKysrKysrKysrKysrKysrICAgICAgICAgICAgICAgICAgICAgICAgICAgIHwgNDMlIH4wM3MgICAgICAgICAgXG4gIHwrKysrKysrKysrKysrKysrKysrKysrKyAgICAgICAgICAgICAgICAgICAgICAgICAgIHwgNDUlIH4wMnMgICAgICAgICAgXG4gIHwrKysrKysrKysrKysrKysrKysrKysrKyAgICAgICAgICAgICAgICAgICAgICAgICAgIHwgNDYlIH4wMnMgICAgICAgICAgXG4gIHwrKysrKysrKysrKysrKysrKysrKysrKysgICAgICAgICAgICAgICAgICAgICAgICAgIHwgNDclIH4wMnMgICAgICAgICAgXG4gIHwrKysrKysrKysrKysrKysrKysrKysrKysrICAgICAgICAgICAgICAgICAgICAgICAgIHwgNDglIH4wMnMgICAgICAgICAgXG4gIHwrKysrKysrKysrKysrKysrKysrKysrKysrICAgICAgICAgICAgICAgICAgICAgICAgIHwgNDklIH4wMnMgICAgICAgICAgXG4gIHwrKysrKysrKysrKysrKysrKysrKysrKysrKyAgICAgICAgICAgICAgICAgICAgICAgIHwgNTElIH4wMnMgICAgICAgICAgXG4gIHwrKysrKysrKysrKysrKysrKysrKysrKysrKyAgICAgICAgICAgICAgICAgICAgICAgIHwgNTIlIH4wMnMgICAgICAgICAgXG4gIHwrKysrKysrKysrKysrKysrKysrKysrKysrKysgICAgICAgICAgICAgICAgICAgICAgIHwgNTMlIH4wMnMgICAgICAgICAgXG4gIHwrKysrKysrKysrKysrKysrKysrKysrKysrKysrICAgICAgICAgICAgICAgICAgICAgIHwgNTQlIH4wMnMgICAgICAgICAgXG4gIHwrKysrKysrKysrKysrKysrKysrKysrKysrKysrICAgICAgICAgICAgICAgICAgICAgIHwgNTUlIH4wMnMgICAgICAgICAgXG4gIHwrKysrKysrKysrKysrKysrKysrKysrKysrKysrKyAgICAgICAgICAgICAgICAgICAgIHwgNTclIH4wMnMgICAgICAgICAgXG4gIHwrKysrKysrKysrKysrKysrKysrKysrKysrKysrKyAgICAgICAgICAgICAgICAgICAgIHwgNTglIH4wMnMgICAgICAgICAgXG4gIHwrKysrKysrKysrKysrKysrKysrKysrKysrKysrKysgICAgICAgICAgICAgICAgICAgIHwgNTklIH4wMnMgICAgICAgICAgXG4gIHwrKysrKysrKysrKysrKysrKysrKysrKysrKysrKysrICAgICAgICAgICAgICAgICAgIHwgNjAlIH4wMnMgICAgICAgICAgXG4gIHwrKysrKysrKysrKysrKysrKysrKysrKysrKysrKysrICAgICAgICAgICAgICAgICAgIHwgNjElIH4wMnMgICAgICAgICAgXG4gIHwrKysrKysrKysrKysrKysrKysrKysrKysrKysrKysrKyAgICAgICAgICAgICAgICAgIHwgNjMlIH4wMnMgICAgICAgICAgXG4gIHwrKysrKysrKysrKysrKysrKysrKysrKysrKysrKysrKyAgICAgICAgICAgICAgICAgIHwgNjQlIH4wMnMgICAgICAgICAgXG4gIHwrKysrKysrKysrKysrKysrKysrKysrKysrKysrKysrKysgICAgICAgICAgICAgICAgIHwgNjUlIH4wMnMgICAgICAgICAgXG4gIHwrKysrKysrKysrKysrKysrKysrKysrKysrKysrKysrKysrICAgICAgICAgICAgICAgIHwgNjYlIH4wMnMgICAgICAgICAgXG4gIHwrKysrKysrKysrKysrKysrKysrKysrKysrKysrKysrKysrICAgICAgICAgICAgICAgIHwgNjclIH4wMXMgICAgICAgICAgXG4gIHwrKysrKysrKysrKysrKysrKysrKysrKysrKysrKysrKysrKyAgICAgICAgICAgICAgIHwgNjklIH4wMXMgICAgICAgICAgXG4gIHwrKysrKysrKysrKysrKysrKysrKysrKysrKysrKysrKysrKyAgICAgICAgICAgICAgIHwgNzAlIH4wMXMgICAgICAgICAgXG4gIHwrKysrKysrKysrKysrKysrKysrKysrKysrKysrKysrKysrKysgICAgICAgICAgICAgIHwgNzElIH4wMXMgICAgICAgICAgXG4gIHwrKysrKysrKysrKysrKysrKysrKysrKysrKysrKysrKysrKysrICAgICAgICAgICAgIHwgNzIlIH4wMXMgICAgICAgICAgXG4gIHwrKysrKysrKysrKysrKysrKysrKysrKysrKysrKysrKysrKysrICAgICAgICAgICAgIHwgNzMlIH4wMXMgICAgICAgICAgXG4gIHwrKysrKysrKysrKysrKysrKysrKysrKysrKysrKysrKysrKysrKyAgICAgICAgICAgIHwgNzUlIH4wMXMgICAgICAgICAgXG4gIHwrKysrKysrKysrKysrKysrKysrKysrKysrKysrKysrKysrKysrKyAgICAgICAgICAgIHwgNzYlIH4wMXMgICAgICAgICAgXG4gIHwrKysrKysrKysrKysrKysrKysrKysrKysrKysrKysrKysrKysrKysgICAgICAgICAgIHwgNzclIH4wMXMgICAgICAgICAgXG4gIHwrKysrKysrKysrKysrKysrKysrKysrKysrKysrKysrKysrKysrKysrICAgICAgICAgIHwgNzglIH4wMXMgICAgICAgICAgXG4gIHwrKysrKysrKysrKysrKysrKysrKysrKysrKysrKysrKysrKysrKysrICAgICAgICAgIHwgODAlIH4wMXMgICAgICAgICAgXG4gIHwrKysrKysrKysrKysrKysrKysrKysrKysrKysrKysrKysrKysrKysrKyAgICAgICAgIHwgODElIH4wMXMgICAgICAgICAgXG4gIHwrKysrKysrKysrKysrKysrKysrKysrKysrKysrKysrKysrKysrKysrKyAgICAgICAgIHwgODIlIH4wMXMgICAgICAgICAgXG4gIHwrKysrKysrKysrKysrKysrKysrKysrKysrKysrKysrKysrKysrKysrKysgICAgICAgIHwgODMlIH4wMXMgICAgICAgICAgXG4gIHwrKysrKysrKysrKysrKysrKysrKysrKysrKysrKysrKysrKysrKysrKysrICAgICAgIHwgODQlIH4wMXMgICAgICAgICAgXG4gIHwrKysrKysrKysrKysrKysrKysrKysrKysrKysrKysrKysrKysrKysrKysrICAgICAgIHwgODYlIH4wMXMgICAgICAgICAgXG4gIHwrKysrKysrKysrKysrKysrKysrKysrKysrKysrKysrKysrKysrKysrKysrKyAgICAgIHwgODclIH4wMXMgICAgICAgICAgXG4gIHwrKysrKysrKysrKysrKysrKysrKysrKysrKysrKysrKysrKysrKysrKysrKyAgICAgIHwgODglIH4wMXMgICAgICAgICAgXG4gIHwrKysrKysrKysrKysrKysrKysrKysrKysrKysrKysrKysrKysrKysrKysrKysgICAgIHwgODklIH4wMHMgICAgICAgICAgXG4gIHwrKysrKysrKysrKysrKysrKysrKysrKysrKysrKysrKysrKysrKysrKysrKysrICAgIHwgOTAlIH4wMHMgICAgICAgICAgXG4gIHwrKysrKysrKysrKysrKysrKysrKysrKysrKysrKysrKysrKysrKysrKysrKysrICAgIHwgOTIlIH4wMHMgICAgICAgICAgXG4gIHwrKysrKysrKysrKysrKysrKysrKysrKysrKysrKysrKysrKysrKysrKysrKysrKyAgIHwgOTMlIH4wMHMgICAgICAgICAgXG4gIHwrKysrKysrKysrKysrKysrKysrKysrKysrKysrKysrKysrKysrKysrKysrKysrKyAgIHwgOTQlIH4wMHMgICAgICAgICAgXG4gIHwrKysrKysrKysrKysrKysrKysrKysrKysrKysrKysrKysrKysrKysrKysrKysrKysgIHwgOTUlIH4wMHMgICAgICAgICAgXG4gIHwrKysrKysrKysrKysrKysrKysrKysrKysrKysrKysrKysrKysrKysrKysrKysrKysrIHwgOTYlIH4wMHMgICAgICAgICAgXG4gIHwrKysrKysrKysrKysrKysrKysrKysrKysrKysrKysrKysrKysrKysrKysrKysrKysrIHwgOTglIH4wMHMgICAgICAgICAgXG4gIHwrKysrKysrKysrKysrKysrKysrKysrKysrKysrKysrKysrKysrKysrKysrKysrKysrK3wgOTklIH4wMHMgICAgICAgICAgXG4gIHwrKysrKysrKysrKysrKysrKysrKysrKysrKysrKysrKysrKysrKysrKysrKysrKysrK3wgMTAwJSBlbGFwc2VkPTA0cyAgXG4ifQ== -->
+<pre><code>
+  |                                                  | 0 % ~calculating  
+  |+                                                 | 1 % ~02s          
+  |++                                                | 2 % ~02s          
+  |++                                                | 4 % ~03s          
+  |+++                                               | 5 % ~04s          
+  |++++                                              | 6 % ~04s          
+  |++++                                              | 7 % ~04s          
+  |+++++                                             | 8 % ~05s          
+  |+++++                                             | 10% ~05s          
+  |++++++                                            | 11% ~04s          
+  |+++++++                                           | 12% ~04s          
+  |+++++++                                           | 13% ~04s          
+  |++++++++                                          | 14% ~04s          
+  |++++++++                                          | 16% ~04s          
+  |+++++++++                                         | 17% ~04s          
+  |++++++++++                                        | 18% ~04s          
+  |++++++++++                                        | 19% ~04s          
+  |+++++++++++                                       | 20% ~04s          
+  |+++++++++++                                       | 22% ~04s          
+  |++++++++++++                                      | 23% ~04s          
+  |+++++++++++++                                     | 24% ~04s          
+  |+++++++++++++                                     | 25% ~03s          
+  |++++++++++++++                                    | 27% ~03s          
+  |++++++++++++++                                    | 28% ~03s          
+  |+++++++++++++++                                   | 29% ~03s          
+  |++++++++++++++++                                  | 30% ~03s          
+  |++++++++++++++++                                  | 31% ~03s          
+  |+++++++++++++++++                                 | 33% ~03s          
+  |+++++++++++++++++                                 | 34% ~03s          
+  |++++++++++++++++++                                | 35% ~03s          
+  |+++++++++++++++++++                               | 36% ~03s          
+  |+++++++++++++++++++                               | 37% ~03s          
+  |++++++++++++++++++++                              | 39% ~03s          
+  |++++++++++++++++++++                              | 40% ~03s          
+  |+++++++++++++++++++++                             | 41% ~03s          
+  |++++++++++++++++++++++                            | 42% ~03s          
+  |++++++++++++++++++++++                            | 43% ~03s          
+  |+++++++++++++++++++++++                           | 45% ~02s          
+  |+++++++++++++++++++++++                           | 46% ~02s          
+  |++++++++++++++++++++++++                          | 47% ~02s          
+  |+++++++++++++++++++++++++                         | 48% ~02s          
+  |+++++++++++++++++++++++++                         | 49% ~02s          
+  |++++++++++++++++++++++++++                        | 51% ~02s          
+  |++++++++++++++++++++++++++                        | 52% ~02s          
+  |+++++++++++++++++++++++++++                       | 53% ~02s          
+  |++++++++++++++++++++++++++++                      | 54% ~02s          
+  |++++++++++++++++++++++++++++                      | 55% ~02s          
+  |+++++++++++++++++++++++++++++                     | 57% ~02s          
+  |+++++++++++++++++++++++++++++                     | 58% ~02s          
+  |++++++++++++++++++++++++++++++                    | 59% ~02s          
+  |+++++++++++++++++++++++++++++++                   | 60% ~02s          
+  |+++++++++++++++++++++++++++++++                   | 61% ~02s          
+  |++++++++++++++++++++++++++++++++                  | 63% ~02s          
+  |++++++++++++++++++++++++++++++++                  | 64% ~02s          
+  |+++++++++++++++++++++++++++++++++                 | 65% ~02s          
+  |++++++++++++++++++++++++++++++++++                | 66% ~02s          
+  |++++++++++++++++++++++++++++++++++                | 67% ~01s          
+  |+++++++++++++++++++++++++++++++++++               | 69% ~01s          
+  |+++++++++++++++++++++++++++++++++++               | 70% ~01s          
+  |++++++++++++++++++++++++++++++++++++              | 71% ~01s          
+  |+++++++++++++++++++++++++++++++++++++             | 72% ~01s          
+  |+++++++++++++++++++++++++++++++++++++             | 73% ~01s          
+  |++++++++++++++++++++++++++++++++++++++            | 75% ~01s          
+  |++++++++++++++++++++++++++++++++++++++            | 76% ~01s          
+  |+++++++++++++++++++++++++++++++++++++++           | 77% ~01s          
+  |++++++++++++++++++++++++++++++++++++++++          | 78% ~01s          
+  |++++++++++++++++++++++++++++++++++++++++          | 80% ~01s          
+  |+++++++++++++++++++++++++++++++++++++++++         | 81% ~01s          
+  |+++++++++++++++++++++++++++++++++++++++++         | 82% ~01s          
+  |++++++++++++++++++++++++++++++++++++++++++        | 83% ~01s          
+  |+++++++++++++++++++++++++++++++++++++++++++       | 84% ~01s          
+  |+++++++++++++++++++++++++++++++++++++++++++       | 86% ~01s          
+  |++++++++++++++++++++++++++++++++++++++++++++      | 87% ~01s          
+  |++++++++++++++++++++++++++++++++++++++++++++      | 88% ~01s          
+  |+++++++++++++++++++++++++++++++++++++++++++++     | 89% ~00s          
+  |++++++++++++++++++++++++++++++++++++++++++++++    | 90% ~00s          
+  |++++++++++++++++++++++++++++++++++++++++++++++    | 92% ~00s          
+  |+++++++++++++++++++++++++++++++++++++++++++++++   | 93% ~00s          
+  |+++++++++++++++++++++++++++++++++++++++++++++++   | 94% ~00s          
+  |++++++++++++++++++++++++++++++++++++++++++++++++  | 95% ~00s          
+  |+++++++++++++++++++++++++++++++++++++++++++++++++ | 96% ~00s          
+  |+++++++++++++++++++++++++++++++++++++++++++++++++ | 98% ~00s          
+  |++++++++++++++++++++++++++++++++++++++++++++++++++| 99% ~00s          
+  |++++++++++++++++++++++++++++++++++++++++++++++++++| 100% elapsed=04s  </code></pre>
+<!-- rnb-output-end -->
+<!-- rnb-output-begin eyJkYXRhIjoiQ2FsY3VsYXRpbmcgY2x1c3RlciAyXG4ifQ== -->
+<pre><code>Calculating cluster 2</code></pre>
+<!-- rnb-output-end -->
+<!-- rnb-output-begin eyJkYXRhIjoiXG4gIHwgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgIHwgMCAlIH5jYWxjdWxhdGluZyAgXG4gIHwrICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgIHwgMSAlIH4wM3MgICAgICAgICAgXG4gIHwrKyAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgIHwgMiAlIH4wMnMgICAgICAgICAgXG4gIHwrKyAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgIHwgMyAlIH4wMnMgICAgICAgICAgXG4gIHwrKysgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgIHwgNSAlIH4wM3MgICAgICAgICAgXG4gIHwrKysgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgIHwgNiAlIH4wM3MgICAgICAgICAgXG4gIHwrKysrICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgIHwgNyAlIH4wM3MgICAgICAgICAgXG4gIHwrKysrKyAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgIHwgOCAlIH4wNHMgICAgICAgICAgXG4gIHwrKysrKyAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgIHwgOSAlIH4wNHMgICAgICAgICAgXG4gIHwrKysrKysgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgIHwgMTAlIH4wNHMgICAgICAgICAgXG4gIHwrKysrKysgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgIHwgMTElIH4wNHMgICAgICAgICAgXG4gIHwrKysrKysrICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgIHwgMTMlIH4wM3MgICAgICAgICAgXG4gIHwrKysrKysrICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgIHwgMTQlIH4wM3MgICAgICAgICAgXG4gIHwrKysrKysrKyAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgIHwgMTUlIH4wM3MgICAgICAgICAgXG4gIHwrKysrKysrKysgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgIHwgMTYlIH4wM3MgICAgICAgICAgXG4gIHwrKysrKysrKysgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgIHwgMTclIH4wM3MgICAgICAgICAgXG4gIHwrKysrKysrKysrICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgIHwgMTglIH4wM3MgICAgICAgICAgXG4gIHwrKysrKysrKysrICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgIHwgMjAlIH4wM3MgICAgICAgICAgXG4gIHwrKysrKysrKysrKyAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgIHwgMjElIH4wM3MgICAgICAgICAgXG4gIHwrKysrKysrKysrKyAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgIHwgMjIlIH4wM3MgICAgICAgICAgXG4gIHwrKysrKysrKysrKysgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgIHwgMjMlIH4wM3MgICAgICAgICAgXG4gIHwrKysrKysrKysrKysrICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgIHwgMjQlIH4wM3MgICAgICAgICAgXG4gIHwrKysrKysrKysrKysrICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgIHwgMjUlIH4wM3MgICAgICAgICAgXG4gIHwrKysrKysrKysrKysrKyAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgIHwgMjYlIH4wM3MgICAgICAgICAgXG4gIHwrKysrKysrKysrKysrKyAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgIHwgMjglIH4wM3MgICAgICAgICAgXG4gIHwrKysrKysrKysrKysrKysgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgIHwgMjklIH4wM3MgICAgICAgICAgXG4gIHwrKysrKysrKysrKysrKysgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgIHwgMzAlIH4wM3MgICAgICAgICAgXG4gIHwrKysrKysrKysrKysrKysrICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgIHwgMzElIH4wM3MgICAgICAgICAgXG4gIHwrKysrKysrKysrKysrKysrKyAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgIHwgMzIlIH4wM3MgICAgICAgICAgXG4gIHwrKysrKysrKysrKysrKysrKyAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgIHwgMzMlIH4wM3MgICAgICAgICAgXG4gIHwrKysrKysrKysrKysrKysrKysgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgIHwgMzQlIH4wM3MgICAgICAgICAgXG4gIHwrKysrKysrKysrKysrKysrKysgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgIHwgMzYlIH4wM3MgICAgICAgICAgXG4gIHwrKysrKysrKysrKysrKysrKysrICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgIHwgMzclIH4wM3MgICAgICAgICAgXG4gIHwrKysrKysrKysrKysrKysrKysrICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgIHwgMzglIH4wMnMgICAgICAgICAgXG4gIHwrKysrKysrKysrKysrKysrKysrKyAgICAgICAgICAgICAgICAgICAgICAgICAgICAgIHwgMzklIH4wMnMgICAgICAgICAgXG4gIHwrKysrKysrKysrKysrKysrKysrKysgICAgICAgICAgICAgICAgICAgICAgICAgICAgIHwgNDAlIH4wMnMgICAgICAgICAgXG4gIHwrKysrKysrKysrKysrKysrKysrKysgICAgICAgICAgICAgICAgICAgICAgICAgICAgIHwgNDElIH4wMnMgICAgICAgICAgXG4gIHwrKysrKysrKysrKysrKysrKysrKysrICAgICAgICAgICAgICAgICAgICAgICAgICAgIHwgNDMlIH4wMnMgICAgICAgICAgXG4gIHwrKysrKysrKysrKysrKysrKysrKysrICAgICAgICAgICAgICAgICAgICAgICAgICAgIHwgNDQlIH4wMnMgICAgICAgICAgXG4gIHwrKysrKysrKysrKysrKysrKysrKysrKyAgICAgICAgICAgICAgICAgICAgICAgICAgIHwgNDUlIH4wMnMgICAgICAgICAgXG4gIHwrKysrKysrKysrKysrKysrKysrKysrKyAgICAgICAgICAgICAgICAgICAgICAgICAgIHwgNDYlIH4wMnMgICAgICAgICAgXG4gIHwrKysrKysrKysrKysrKysrKysrKysrKysgICAgICAgICAgICAgICAgICAgICAgICAgIHwgNDclIH4wMnMgICAgICAgICAgXG4gIHwrKysrKysrKysrKysrKysrKysrKysrKysrICAgICAgICAgICAgICAgICAgICAgICAgIHwgNDglIH4wMnMgICAgICAgICAgXG4gIHwrKysrKysrKysrKysrKysrKysrKysrKysrICAgICAgICAgICAgICAgICAgICAgICAgIHwgNDklIH4wMnMgICAgICAgICAgXG4gIHwrKysrKysrKysrKysrKysrKysrKysrKysrKyAgICAgICAgICAgICAgICAgICAgICAgIHwgNTElIH4wMnMgICAgICAgICAgXG4gIHwrKysrKysrKysrKysrKysrKysrKysrKysrKyAgICAgICAgICAgICAgICAgICAgICAgIHwgNTIlIH4wMnMgICAgICAgICAgXG4gIHwrKysrKysrKysrKysrKysrKysrKysrKysrKysgICAgICAgICAgICAgICAgICAgICAgIHwgNTMlIH4wMnMgICAgICAgICAgXG4gIHwrKysrKysrKysrKysrKysrKysrKysrKysrKysrICAgICAgICAgICAgICAgICAgICAgIHwgNTQlIH4wMnMgICAgICAgICAgXG4gIHwrKysrKysrKysrKysrKysrKysrKysrKysrKysrICAgICAgICAgICAgICAgICAgICAgIHwgNTUlIH4wMnMgICAgICAgICAgXG4gIHwrKysrKysrKysrKysrKysrKysrKysrKysrKysrKyAgICAgICAgICAgICAgICAgICAgIHwgNTYlIH4wMnMgICAgICAgICAgXG4gIHwrKysrKysrKysrKysrKysrKysrKysrKysrKysrKyAgICAgICAgICAgICAgICAgICAgIHwgNTclIH4wMnMgICAgICAgICAgXG4gIHwrKysrKysrKysrKysrKysrKysrKysrKysrKysrKysgICAgICAgICAgICAgICAgICAgIHwgNTklIH4wMnMgICAgICAgICAgXG4gIHwrKysrKysrKysrKysrKysrKysrKysrKysrKysrKysgICAgICAgICAgICAgICAgICAgIHwgNjAlIH4wMnMgICAgICAgICAgXG4gIHwrKysrKysrKysrKysrKysrKysrKysrKysrKysrKysrICAgICAgICAgICAgICAgICAgIHwgNjElIH4wMnMgICAgICAgICAgXG4gIHwrKysrKysrKysrKysrKysrKysrKysrKysrKysrKysrKyAgICAgICAgICAgICAgICAgIHwgNjIlIH4wMnMgICAgICAgICAgXG4gIHwrKysrKysrKysrKysrKysrKysrKysrKysrKysrKysrKyAgICAgICAgICAgICAgICAgIHwgNjMlIH4wMnMgICAgICAgICAgXG4gIHwrKysrKysrKysrKysrKysrKysrKysrKysrKysrKysrKysgICAgICAgICAgICAgICAgIHwgNjQlIH4wMXMgICAgICAgICAgXG4gIHwrKysrKysrKysrKysrKysrKysrKysrKysrKysrKysrKysgICAgICAgICAgICAgICAgIHwgNjYlIH4wMXMgICAgICAgICAgXG4gIHwrKysrKysrKysrKysrKysrKysrKysrKysrKysrKysrKysrICAgICAgICAgICAgICAgIHwgNjclIH4wMXMgICAgICAgICAgXG4gIHwrKysrKysrKysrKysrKysrKysrKysrKysrKysrKysrKysrICAgICAgICAgICAgICAgIHwgNjglIH4wMXMgICAgICAgICAgXG4gIHwrKysrKysrKysrKysrKysrKysrKysrKysrKysrKysrKysrKyAgICAgICAgICAgICAgIHwgNjklIH4wMXMgICAgICAgICAgXG4gIHwrKysrKysrKysrKysrKysrKysrKysrKysrKysrKysrKysrKysgICAgICAgICAgICAgIHwgNzAlIH4wMXMgICAgICAgICAgXG4gIHwrKysrKysrKysrKysrKysrKysrKysrKysrKysrKysrKysrKysgICAgICAgICAgICAgIHwgNzElIH4wMXMgICAgICAgICAgXG4gIHwrKysrKysrKysrKysrKysrKysrKysrKysrKysrKysrKysrKysrICAgICAgICAgICAgIHwgNzIlIH4wMXMgICAgICAgICAgXG4gIHwrKysrKysrKysrKysrKysrKysrKysrKysrKysrKysrKysrKysrICAgICAgICAgICAgIHwgNzQlIH4wMXMgICAgICAgICAgXG4gIHwrKysrKysrKysrKysrKysrKysrKysrKysrKysrKysrKysrKysrKyAgICAgICAgICAgIHwgNzUlIH4wMXMgICAgICAgICAgXG4gIHwrKysrKysrKysrKysrKysrKysrKysrKysrKysrKysrKysrKysrKyAgICAgICAgICAgIHwgNzYlIH4wMXMgICAgICAgICAgXG4gIHwrKysrKysrKysrKysrKysrKysrKysrKysrKysrKysrKysrKysrKysgICAgICAgICAgIHwgNzclIH4wMXMgICAgICAgICAgXG4gIHwrKysrKysrKysrKysrKysrKysrKysrKysrKysrKysrKysrKysrKysrICAgICAgICAgIHwgNzglIH4wMXMgICAgICAgICAgXG4gIHwrKysrKysrKysrKysrKysrKysrKysrKysrKysrKysrKysrKysrKysrICAgICAgICAgIHwgNzklIH4wMXMgICAgICAgICAgXG4gIHwrKysrKysrKysrKysrKysrKysrKysrKysrKysrKysrKysrKysrKysrKyAgICAgICAgIHwgODAlIH4wMXMgICAgICAgICAgXG4gIHwrKysrKysrKysrKysrKysrKysrKysrKysrKysrKysrKysrKysrKysrKyAgICAgICAgIHwgODIlIH4wMXMgICAgICAgICAgXG4gIHwrKysrKysrKysrKysrKysrKysrKysrKysrKysrKysrKysrKysrKysrKysgICAgICAgIHwgODMlIH4wMXMgICAgICAgICAgXG4gIHwrKysrKysrKysrKysrKysrKysrKysrKysrKysrKysrKysrKysrKysrKysgICAgICAgIHwgODQlIH4wMXMgICAgICAgICAgXG4gIHwrKysrKysrKysrKysrKysrKysrKysrKysrKysrKysrKysrKysrKysrKysrICAgICAgIHwgODUlIH4wMXMgICAgICAgICAgXG4gIHwrKysrKysrKysrKysrKysrKysrKysrKysrKysrKysrKysrKysrKysrKysrKyAgICAgIHwgODYlIH4wMXMgICAgICAgICAgXG4gIHwrKysrKysrKysrKysrKysrKysrKysrKysrKysrKysrKysrKysrKysrKysrKyAgICAgIHwgODclIH4wMXMgICAgICAgICAgXG4gIHwrKysrKysrKysrKysrKysrKysrKysrKysrKysrKysrKysrKysrKysrKysrKysgICAgIHwgODklIH4wMHMgICAgICAgICAgXG4gIHwrKysrKysrKysrKysrKysrKysrKysrKysrKysrKysrKysrKysrKysrKysrKysgICAgIHwgOTAlIH4wMHMgICAgICAgICAgXG4gIHwrKysrKysrKysrKysrKysrKysrKysrKysrKysrKysrKysrKysrKysrKysrKysrICAgIHwgOTElIH4wMHMgICAgICAgICAgXG4gIHwrKysrKysrKysrKysrKysrKysrKysrKysrKysrKysrKysrKysrKysrKysrKysrICAgIHwgOTIlIH4wMHMgICAgICAgICAgXG4gIHwrKysrKysrKysrKysrKysrKysrKysrKysrKysrKysrKysrKysrKysrKysrKysrKyAgIHwgOTMlIH4wMHMgICAgICAgICAgXG4gIHwrKysrKysrKysrKysrKysrKysrKysrKysrKysrKysrKysrKysrKysrKysrKysrKysgIHwgOTQlIH4wMHMgICAgICAgICAgXG4gIHwrKysrKysrKysrKysrKysrKysrKysrKysrKysrKysrKysrKysrKysrKysrKysrKysgIHwgOTUlIH4wMHMgICAgICAgICAgXG4gIHwrKysrKysrKysrKysrKysrKysrKysrKysrKysrKysrKysrKysrKysrKysrKysrKysrIHwgOTclIH4wMHMgICAgICAgICAgXG4gIHwrKysrKysrKysrKysrKysrKysrKysrKysrKysrKysrKysrKysrKysrKysrKysrKysrIHwgOTglIH4wMHMgICAgICAgICAgXG4gIHwrKysrKysrKysrKysrKysrKysrKysrKysrKysrKysrKysrKysrKysrKysrKysrKysrK3wgOTklIH4wMHMgICAgICAgICAgXG4gIHwrKysrKysrKysrKysrKysrKysrKysrKysrKysrKysrKysrKysrKysrKysrKysrKysrK3wgMTAwJSBlbGFwc2VkPTA0cyAgXG4ifQ== -->
+<pre><code>
+  |                                                  | 0 % ~calculating  
+  |+                                                 | 1 % ~03s          
+  |++                                                | 2 % ~02s          
+  |++                                                | 3 % ~02s          
+  |+++                                               | 5 % ~03s          
+  |+++                                               | 6 % ~03s          
+  |++++                                              | 7 % ~03s          
+  |+++++                                             | 8 % ~04s          
+  |+++++                                             | 9 % ~04s          
+  |++++++                                            | 10% ~04s          
+  |++++++                                            | 11% ~04s          
+  |+++++++                                           | 13% ~03s          
+  |+++++++                                           | 14% ~03s          
+  |++++++++                                          | 15% ~03s          
+  |+++++++++                                         | 16% ~03s          
+  |+++++++++                                         | 17% ~03s          
+  |++++++++++                                        | 18% ~03s          
+  |++++++++++                                        | 20% ~03s          
+  |+++++++++++                                       | 21% ~03s          
+  |+++++++++++                                       | 22% ~03s          
+  |++++++++++++                                      | 23% ~03s          
+  |+++++++++++++                                     | 24% ~03s          
+  |+++++++++++++                                     | 25% ~03s          
+  |++++++++++++++                                    | 26% ~03s          
+  |++++++++++++++                                    | 28% ~03s          
+  |+++++++++++++++                                   | 29% ~03s          
+  |+++++++++++++++                                   | 30% ~03s          
+  |++++++++++++++++                                  | 31% ~03s          
+  |+++++++++++++++++                                 | 32% ~03s          
+  |+++++++++++++++++                                 | 33% ~03s          
+  |++++++++++++++++++                                | 34% ~03s          
+  |++++++++++++++++++                                | 36% ~03s          
+  |+++++++++++++++++++                               | 37% ~03s          
+  |+++++++++++++++++++                               | 38% ~02s          
+  |++++++++++++++++++++                              | 39% ~02s          
+  |+++++++++++++++++++++                             | 40% ~02s          
+  |+++++++++++++++++++++                             | 41% ~02s          
+  |++++++++++++++++++++++                            | 43% ~02s          
+  |++++++++++++++++++++++                            | 44% ~02s          
+  |+++++++++++++++++++++++                           | 45% ~02s          
+  |+++++++++++++++++++++++                           | 46% ~02s          
+  |++++++++++++++++++++++++                          | 47% ~02s          
+  |+++++++++++++++++++++++++                         | 48% ~02s          
+  |+++++++++++++++++++++++++                         | 49% ~02s          
+  |++++++++++++++++++++++++++                        | 51% ~02s          
+  |++++++++++++++++++++++++++                        | 52% ~02s          
+  |+++++++++++++++++++++++++++                       | 53% ~02s          
+  |++++++++++++++++++++++++++++                      | 54% ~02s          
+  |++++++++++++++++++++++++++++                      | 55% ~02s          
+  |+++++++++++++++++++++++++++++                     | 56% ~02s          
+  |+++++++++++++++++++++++++++++                     | 57% ~02s          
+  |++++++++++++++++++++++++++++++                    | 59% ~02s          
+  |++++++++++++++++++++++++++++++                    | 60% ~02s          
+  |+++++++++++++++++++++++++++++++                   | 61% ~02s          
+  |++++++++++++++++++++++++++++++++                  | 62% ~02s          
+  |++++++++++++++++++++++++++++++++                  | 63% ~02s          
+  |+++++++++++++++++++++++++++++++++                 | 64% ~01s          
+  |+++++++++++++++++++++++++++++++++                 | 66% ~01s          
+  |++++++++++++++++++++++++++++++++++                | 67% ~01s          
+  |++++++++++++++++++++++++++++++++++                | 68% ~01s          
+  |+++++++++++++++++++++++++++++++++++               | 69% ~01s          
+  |++++++++++++++++++++++++++++++++++++              | 70% ~01s          
+  |++++++++++++++++++++++++++++++++++++              | 71% ~01s          
+  |+++++++++++++++++++++++++++++++++++++             | 72% ~01s          
+  |+++++++++++++++++++++++++++++++++++++             | 74% ~01s          
+  |++++++++++++++++++++++++++++++++++++++            | 75% ~01s          
+  |++++++++++++++++++++++++++++++++++++++            | 76% ~01s          
+  |+++++++++++++++++++++++++++++++++++++++           | 77% ~01s          
+  |++++++++++++++++++++++++++++++++++++++++          | 78% ~01s          
+  |++++++++++++++++++++++++++++++++++++++++          | 79% ~01s          
+  |+++++++++++++++++++++++++++++++++++++++++         | 80% ~01s          
+  |+++++++++++++++++++++++++++++++++++++++++         | 82% ~01s          
+  |++++++++++++++++++++++++++++++++++++++++++        | 83% ~01s          
+  |++++++++++++++++++++++++++++++++++++++++++        | 84% ~01s          
+  |+++++++++++++++++++++++++++++++++++++++++++       | 85% ~01s          
+  |++++++++++++++++++++++++++++++++++++++++++++      | 86% ~01s          
+  |++++++++++++++++++++++++++++++++++++++++++++      | 87% ~01s          
+  |+++++++++++++++++++++++++++++++++++++++++++++     | 89% ~00s          
+  |+++++++++++++++++++++++++++++++++++++++++++++     | 90% ~00s          
+  |++++++++++++++++++++++++++++++++++++++++++++++    | 91% ~00s          
+  |++++++++++++++++++++++++++++++++++++++++++++++    | 92% ~00s          
+  |+++++++++++++++++++++++++++++++++++++++++++++++   | 93% ~00s          
+  |++++++++++++++++++++++++++++++++++++++++++++++++  | 94% ~00s          
+  |++++++++++++++++++++++++++++++++++++++++++++++++  | 95% ~00s          
+  |+++++++++++++++++++++++++++++++++++++++++++++++++ | 97% ~00s          
+  |+++++++++++++++++++++++++++++++++++++++++++++++++ | 98% ~00s          
+  |++++++++++++++++++++++++++++++++++++++++++++++++++| 99% ~00s          
+  |++++++++++++++++++++++++++++++++++++++++++++++++++| 100% elapsed=04s  </code></pre>
+<!-- rnb-output-end -->
+<!-- rnb-output-begin eyJkYXRhIjoiQ2FsY3VsYXRpbmcgY2x1c3RlciAzXG4ifQ== -->
+<pre><code>Calculating cluster 3</code></pre>
+<!-- rnb-output-end -->
+<!-- rnb-output-begin eyJkYXRhIjoiXG4gIHwgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgIHwgMCAlIH5jYWxjdWxhdGluZyAgXG4gIHwrICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgIHwgMSAlIH4wNXMgICAgICAgICAgXG4gIHwrKyAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgIHwgMiAlIH4wOHMgICAgICAgICAgXG4gIHwrKyAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgIHwgMyAlIH4wOHMgICAgICAgICAgXG4gIHwrKysgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgIHwgNCAlIH4wOHMgICAgICAgICAgXG4gIHwrKysgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgIHwgNSAlIH4wOHMgICAgICAgICAgXG4gIHwrKysrICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgIHwgNiAlIH4wOHMgICAgICAgICAgXG4gIHwrKysrICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgIHwgNyAlIH4wOHMgICAgICAgICAgXG4gIHwrKysrKyAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgIHwgOCAlIH4wN3MgICAgICAgICAgXG4gIHwrKysrKyAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgIHwgOSAlIH4wN3MgICAgICAgICAgXG4gIHwrKysrKysgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgIHwgMTAlIH4wN3MgICAgICAgICAgXG4gIHwrKysrKysgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgIHwgMTElIH4wN3MgICAgICAgICAgXG4gIHwrKysrKysrICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgIHwgMTIlIH4wN3MgICAgICAgICAgXG4gIHwrKysrKysrICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgIHwgMTMlIH4wN3MgICAgICAgICAgXG4gIHwrKysrKysrKyAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgIHwgMTQlIH4wN3MgICAgICAgICAgXG4gIHwrKysrKysrKyAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgIHwgMTUlIH4wN3MgICAgICAgICAgXG4gIHwrKysrKysrKysgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgIHwgMTYlIH4wN3MgICAgICAgICAgXG4gIHwrKysrKysrKysgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgIHwgMTclIH4wNnMgICAgICAgICAgXG4gIHwrKysrKysrKysrICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgIHwgMTglIH4wNnMgICAgICAgICAgXG4gIHwrKysrKysrKysrICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgIHwgMTklIH4wNnMgICAgICAgICAgXG4gIHwrKysrKysrKysrKyAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgIHwgMjAlIH4wNnMgICAgICAgICAgXG4gIHwrKysrKysrKysrKyAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgIHwgMjElIH4wNnMgICAgICAgICAgXG4gIHwrKysrKysrKysrKysgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgIHwgMjIlIH4wNnMgICAgICAgICAgXG4gIHwrKysrKysrKysrKysgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgIHwgMjMlIH4wNnMgICAgICAgICAgXG4gIHwrKysrKysrKysrKysrICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgIHwgMjQlIH4wNnMgICAgICAgICAgXG4gIHwrKysrKysrKysrKysrICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgIHwgMjYlIH4wNnMgICAgICAgICAgXG4gIHwrKysrKysrKysrKysrKyAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgIHwgMjclIH4wNnMgICAgICAgICAgXG4gIHwrKysrKysrKysrKysrKyAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgIHwgMjglIH4wNnMgICAgICAgICAgXG4gIHwrKysrKysrKysrKysrKysgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgIHwgMjklIH4wNnMgICAgICAgICAgXG4gIHwrKysrKysrKysrKysrKysgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgIHwgMzAlIH4wNnMgICAgICAgICAgXG4gIHwrKysrKysrKysrKysrKysrICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgIHwgMzElIH4wNnMgICAgICAgICAgXG4gIHwrKysrKysrKysrKysrKysrICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgIHwgMzIlIH4wNXMgICAgICAgICAgXG4gIHwrKysrKysrKysrKysrKysrKyAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgIHwgMzMlIH4wNXMgICAgICAgICAgXG4gIHwrKysrKysrKysrKysrKysrKyAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgIHwgMzQlIH4wNXMgICAgICAgICAgXG4gIHwrKysrKysrKysrKysrKysrKysgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgIHwgMzUlIH4wNXMgICAgICAgICAgXG4gIHwrKysrKysrKysrKysrKysrKysgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgIHwgMzYlIH4wNXMgICAgICAgICAgXG4gIHwrKysrKysrKysrKysrKysrKysrICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgIHwgMzclIH4wNXMgICAgICAgICAgXG4gIHwrKysrKysrKysrKysrKysrKysrICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgIHwgMzglIH4wNXMgICAgICAgICAgXG4gIHwrKysrKysrKysrKysrKysrKysrKyAgICAgICAgICAgICAgICAgICAgICAgICAgICAgIHwgMzklIH4wNXMgICAgICAgICAgXG4gIHwrKysrKysrKysrKysrKysrKysrKyAgICAgICAgICAgICAgICAgICAgICAgICAgICAgIHwgNDAlIH4wNXMgICAgICAgICAgXG4gIHwrKysrKysrKysrKysrKysrKysrKysgICAgICAgICAgICAgICAgICAgICAgICAgICAgIHwgNDElIH4wNXMgICAgICAgICAgXG4gIHwrKysrKysrKysrKysrKysrKysrKysgICAgICAgICAgICAgICAgICAgICAgICAgICAgIHwgNDIlIH4wNXMgICAgICAgICAgXG4gIHwrKysrKysrKysrKysrKysrKysrKysrICAgICAgICAgICAgICAgICAgICAgICAgICAgIHwgNDMlIH4wNXMgICAgICAgICAgXG4gIHwrKysrKysrKysrKysrKysrKysrKysrICAgICAgICAgICAgICAgICAgICAgICAgICAgIHwgNDQlIH4wNXMgICAgICAgICAgXG4gIHwrKysrKysrKysrKysrKysrKysrKysrKyAgICAgICAgICAgICAgICAgICAgICAgICAgIHwgNDUlIH4wNHMgICAgICAgICAgXG4gIHwrKysrKysrKysrKysrKysrKysrKysrKyAgICAgICAgICAgICAgICAgICAgICAgICAgIHwgNDYlIH4wNHMgICAgICAgICAgXG4gIHwrKysrKysrKysrKysrKysrKysrKysrKysgICAgICAgICAgICAgICAgICAgICAgICAgIHwgNDclIH4wNHMgICAgICAgICAgXG4gIHwrKysrKysrKysrKysrKysrKysrKysrKysgICAgICAgICAgICAgICAgICAgICAgICAgIHwgNDglIH4wNHMgICAgICAgICAgXG4gIHwrKysrKysrKysrKysrKysrKysrKysrKysrICAgICAgICAgICAgICAgICAgICAgICAgIHwgNDklIH4wNHMgICAgICAgICAgXG4gIHwrKysrKysrKysrKysrKysrKysrKysrKysrICAgICAgICAgICAgICAgICAgICAgICAgIHwgNTAlIH4wNHMgICAgICAgICAgXG4gIHwrKysrKysrKysrKysrKysrKysrKysrKysrKyAgICAgICAgICAgICAgICAgICAgICAgIHwgNTElIH4wNHMgICAgICAgICAgXG4gIHwrKysrKysrKysrKysrKysrKysrKysrKysrKysgICAgICAgICAgICAgICAgICAgICAgIHwgNTIlIH4wNHMgICAgICAgICAgXG4gIHwrKysrKysrKysrKysrKysrKysrKysrKysrKysgICAgICAgICAgICAgICAgICAgICAgIHwgNTMlIH4wNHMgICAgICAgICAgXG4gIHwrKysrKysrKysrKysrKysrKysrKysrKysrKysrICAgICAgICAgICAgICAgICAgICAgIHwgNTQlIH4wNHMgICAgICAgICAgXG4gIHwrKysrKysrKysrKysrKysrKysrKysrKysrKysrICAgICAgICAgICAgICAgICAgICAgIHwgNTUlIH4wNHMgICAgICAgICAgXG4gIHwrKysrKysrKysrKysrKysrKysrKysrKysrKysrKyAgICAgICAgICAgICAgICAgICAgIHwgNTYlIH4wM3MgICAgICAgICAgXG4gIHwrKysrKysrKysrKysrKysrKysrKysrKysrKysrKyAgICAgICAgICAgICAgICAgICAgIHwgNTclIH4wM3MgICAgICAgICAgXG4gIHwrKysrKysrKysrKysrKysrKysrKysrKysrKysrKysgICAgICAgICAgICAgICAgICAgIHwgNTglIH4wM3MgICAgICAgICAgXG4gIHwrKysrKysrKysrKysrKysrKysrKysrKysrKysrKysgICAgICAgICAgICAgICAgICAgIHwgNTklIH4wM3MgICAgICAgICAgXG4gIHwrKysrKysrKysrKysrKysrKysrKysrKysrKysrKysrICAgICAgICAgICAgICAgICAgIHwgNjAlIH4wM3MgICAgICAgICAgXG4gIHwrKysrKysrKysrKysrKysrKysrKysrKysrKysrKysrICAgICAgICAgICAgICAgICAgIHwgNjElIH4wM3MgICAgICAgICAgXG4gIHwrKysrKysrKysrKysrKysrKysrKysrKysrKysrKysrKyAgICAgICAgICAgICAgICAgIHwgNjIlIH4wM3MgICAgICAgICAgXG4ifQ== -->
+<pre><code>
+  |                                                  | 0 % ~calculating  
+  |+                                                 | 1 % ~05s          
+  |++                                                | 2 % ~08s          
+  |++                                                | 3 % ~08s          
+  |+++                                               | 4 % ~08s          
+  |+++                                               | 5 % ~08s          
+  |++++                                              | 6 % ~08s          
+  |++++                                              | 7 % ~08s          
+  |+++++                                             | 8 % ~07s          
+  |+++++                                             | 9 % ~07s          
+  |++++++                                            | 10% ~07s          
+  |++++++                                            | 11% ~07s          
+  |+++++++                                           | 12% ~07s          
+  |+++++++                                           | 13% ~07s          
+  |++++++++                                          | 14% ~07s          
+  |++++++++                                          | 15% ~07s          
+  |+++++++++                                         | 16% ~07s          
+  |+++++++++                                         | 17% ~06s          
+  |++++++++++                                        | 18% ~06s          
+  |++++++++++                                        | 19% ~06s          
+  |+++++++++++                                       | 20% ~06s          
+  |+++++++++++                                       | 21% ~06s          
+  |++++++++++++                                      | 22% ~06s          
+  |++++++++++++                                      | 23% ~06s          
+  |+++++++++++++                                     | 24% ~06s          
+  |+++++++++++++                                     | 26% ~06s          
+  |++++++++++++++                                    | 27% ~06s          
+  |++++++++++++++                                    | 28% ~06s          
+  |+++++++++++++++                                   | 29% ~06s          
+  |+++++++++++++++                                   | 30% ~06s          
+  |++++++++++++++++                                  | 31% ~06s          
+  |++++++++++++++++                                  | 32% ~05s          
+  |+++++++++++++++++                                 | 33% ~05s          
+  |+++++++++++++++++                                 | 34% ~05s          
+  |++++++++++++++++++                                | 35% ~05s          
+  |++++++++++++++++++                                | 36% ~05s          
+  |+++++++++++++++++++                               | 37% ~05s          
+  |+++++++++++++++++++                               | 38% ~05s          
+  |++++++++++++++++++++                              | 39% ~05s          
+  |++++++++++++++++++++                              | 40% ~05s          
+  |+++++++++++++++++++++                             | 41% ~05s          
+  |+++++++++++++++++++++                             | 42% ~05s          
+  |++++++++++++++++++++++                            | 43% ~05s          
+  |++++++++++++++++++++++                            | 44% ~05s          
+  |+++++++++++++++++++++++                           | 45% ~04s          
+  |+++++++++++++++++++++++                           | 46% ~04s          
+  |++++++++++++++++++++++++                          | 47% ~04s          
+  |++++++++++++++++++++++++                          | 48% ~04s          
+  |+++++++++++++++++++++++++                         | 49% ~04s          
+  |+++++++++++++++++++++++++                         | 50% ~04s          
+  |++++++++++++++++++++++++++                        | 51% ~04s          
+  |+++++++++++++++++++++++++++                       | 52% ~04s          
+  |+++++++++++++++++++++++++++                       | 53% ~04s          
+  |++++++++++++++++++++++++++++                      | 54% ~04s          
+  |++++++++++++++++++++++++++++                      | 55% ~04s          
+  |+++++++++++++++++++++++++++++                     | 56% ~03s          
+  |+++++++++++++++++++++++++++++                     | 57% ~03s          
+  |++++++++++++++++++++++++++++++                    | 58% ~03s          
+  |++++++++++++++++++++++++++++++                    | 59% ~03s          
+  |+++++++++++++++++++++++++++++++                   | 60% ~03s          
+  |+++++++++++++++++++++++++++++++                   | 61% ~03s          
+  |++++++++++++++++++++++++++++++++                  | 62% ~03s          </code></pre>
+<!-- rnb-output-end -->
+<!-- rnb-chunk-end -->
+<!-- rnb-text-begin -->
+<p>PDAC Datasets Clustering Comparison</p>
+<!-- rnb-text-end -->
+<!-- rnb-chunk-begin -->
+<!-- rnb-source-begin eyJkYXRhIjoiYGBgclxuXG5wZGFjMS5yZWFkLmNlbGwubGFiZWxzIDwtIHJlYWQudGFibGUoXCJDOlxcXFxVc2Vyc1xcXFxybGl1MFxcXFxEb3dubG9hZHNcXFxcTmllIFJlc2VhcmNoXFxcXEdTRTExMTY3Ml9QREFDLUEtaW5kcm9wLWZpbHRlcmVkLWV4cE1hdC50eHRcIiwgbnJvd3M9MSwgaGVhZGVyPUZBTFNFLCBzZXAgPSBcIlxcdFwiLCBhcy5pcyA9IDEpXG5wZGFjMS5yZWFkLmNlbGwubGFiZWxzIDwtIHQocGRhYzEucmVhZC5jZWxsLmxhYmVscylcbnBkYWMxLnJlYWQuY2VsbC5sYWJlbHMgPC0gcGRhYzEucmVhZC5jZWxsLmxhYmVsc1stYygxKSxdXG5wZGFjMUBtZXRhLmRhdGEkb3JpZ19jbHVzdGVycyA8LSBwZGFjMS5yZWFkLmNlbGwubGFiZWxzXG5cbnBkYWMyLnJlYWQuY2VsbC5sYWJlbHMgPC0gcmVhZC50YWJsZShcIkM6XFxcXFVzZXJzXFxcXHJsaXUwXFxcXERvd25sb2Fkc1xcXFxOaWUgUmVzZWFyY2hcXFxcR1NFMTExNjcyX1BEQUMtQi1pbmRyb3AtZmlsdGVyZWQtZXhwTWF0LnR4dFwiLCBucm93cz0xLCBoZWFkZXI9RkFMU0UsIHNlcCA9IFwiXFx0XCIsIGFzLmlzID0gMSlcbnBkYWMyLnJlYWQuY2VsbC5sYWJlbHMgPC0gdChwZGFjMi5yZWFkLmNlbGwubGFiZWxzKVxucGRhYzIucmVhZC5jZWxsLmxhYmVscyA8LSBwZGFjMi5yZWFkLmNlbGwubGFiZWxzWy1jKDEpLF1cbnBkYWMyQG1ldGEuZGF0YSRvcmlnX2NsdXN0ZXJzIDwtIHBkYWMyLnJlYWQuY2VsbC5sYWJlbHNcblxuXG5wZGFjMS51bWFwLm9yaWcgPC0gRGltUGxvdChwZGFjMSwgZ3JvdXAuYnkgPSBcIm9yaWdfY2x1c3RlcnNcIiwgbGFiZWw9VFJVRSwgcHQuc2l6ZT0wLjIpXG5wZGFjMi51bWFwLm9yaWcgPC0gRGltUGxvdChwZGFjMiwgZ3JvdXAuYnkgPSBcIm9yaWdfY2x1c3RlcnNcIiwgbGFiZWw9VFJVRSwgcHQuc2l6ZT0wLjIpIFxuXG5wZGFjMS51bWFwLm9yaWcgKyBwZGFjMi51bWFwLm9yaWdcblxucGRhYzEuaWRlbnRzIDwtIGMoXCJEdWN0YWwgMVwiLCBcIkR1Y3RhbCAyXCIsIFwiRHVjdGFsIDNcIiwgXCJDYW5jZXIgY2xvbmUgQlwiLCBcIk1hY3JvcGhhZ2VzXCIsIFwiQ2FuY2VyIGNsb25lIEFcIiwgXCJEdWN0YWwgNFwiLCBcIlQgJiBOS1wiLCBcIlR1ZnRcIiwgXCJFbmRvY3JpbmUgJiBSQkNzXCIsIFwiQWNpbmFyXCIsIFwiRW5kb3RoZWxpYWxcIilcblxucGRhYzIuaWRlbnRzIDwtIGMoXCJEdWN0YWwgMVwiLCBcIkR1Y3RhbCAyXCIsIFwiQ2FuY2VyIGNsb25lIEFcIiwgXCJEdWN0YWwgM1wiLCBcIkVuZG90aGVsaWFsXCIsIFwiTWFjcm9waGFnZXNcIiwgXCJEdWN0YWwgNFwiLCBcIlR1ZnQgJiBFbmRvY3JpbmVcIiwgXCJBY2luYXJcIilcblxubmFtZXMocGRhYzEuaWRlbnRzKSA8LSBsZXZlbHMocGRhYzEpXG5wZGFjMSA8LSBSZW5hbWVJZGVudHMocGRhYzEsIHBkYWMxLmlkZW50cylcblxubmFtZXMocGRhYzIuaWRlbnRzKSA8LSBsZXZlbHMocGRhYzIpXG5wZGFjMiA8LSBSZW5hbWVJZGVudHMocGRhYzIsIHBkYWMyLmlkZW50cylcblxuXG5cbmBgYCJ9 -->
+<pre class="r"><code>
+pdac1.read.cell.labels &lt;- read.table(&quot;C:\\Users\\rliu0\\Downloads\\Nie Research\\GSE111672_PDAC-A-indrop-filtered-expMat.txt&quot;, nrows=1, header=FALSE, sep = &quot;\t&quot;, as.is = 1)
+pdac1.read.cell.labels &lt;- t(pdac1.read.cell.labels)
+pdac1.read.cell.labels &lt;- pdac1.read.cell.labels[-c(1),]
+pdac1@meta.data$orig_clusters &lt;- pdac1.read.cell.labels
+
+pdac2.read.cell.labels &lt;- read.table(&quot;C:\\Users\\rliu0\\Downloads\\Nie Research\\GSE111672_PDAC-B-indrop-filtered-expMat.txt&quot;, nrows=1, header=FALSE, sep = &quot;\t&quot;, as.is = 1)
+pdac2.read.cell.labels &lt;- t(pdac2.read.cell.labels)
+pdac2.read.cell.labels &lt;- pdac2.read.cell.labels[-c(1),]
+pdac2@meta.data$orig_clusters &lt;- pdac2.read.cell.labels
+
+
+pdac1.umap.orig &lt;- DimPlot(pdac1, group.by = &quot;orig_clusters&quot;, label=TRUE, pt.size=0.2)
+pdac2.umap.orig &lt;- DimPlot(pdac2, group.by = &quot;orig_clusters&quot;, label=TRUE, pt.size=0.2) 
+
+pdac1.umap.orig + pdac2.umap.orig
+
+pdac1.idents &lt;- c(&quot;Ductal 1&quot;, &quot;Ductal 2&quot;, &quot;Ductal 3&quot;, &quot;Cancer clone B&quot;, &quot;Macrophages&quot;, &quot;Cancer clone A&quot;, &quot;Ductal 4&quot;, &quot;T &amp; NK&quot;, &quot;Tuft&quot;, &quot;Endocrine &amp; RBCs&quot;, &quot;Acinar&quot;, &quot;Endothelial&quot;)
+
+pdac2.idents &lt;- c(&quot;Ductal 1&quot;, &quot;Ductal 2&quot;, &quot;Cancer clone A&quot;, &quot;Ductal 3&quot;, &quot;Endothelial&quot;, &quot;Macrophages&quot;, &quot;Ductal 4&quot;, &quot;Tuft &amp; Endocrine&quot;, &quot;Acinar&quot;)
+
+names(pdac1.idents) &lt;- levels(pdac1)
+pdac1 &lt;- RenameIdents(pdac1, pdac1.idents)
+
+names(pdac2.idents) &lt;- levels(pdac2)
+pdac2 &lt;- RenameIdents(pdac2, pdac2.idents)
+</code></pre>
+<!-- rnb-source-end -->
+<!-- rnb-chunk-end -->
+<!-- rnb-text-begin -->
+<!-- rnb-text-end -->
+<!-- rnb-chunk-begin -->
+<!-- rnb-source-begin eyJkYXRhIjoiYGBgclxuXG5wZGFjMSA8LSBGaW5kTmVpZ2hib3JzKHBkYWMxLCBkaW1zID0gMTo1MClcbnBkYWMxIDwtIEZpbmRDbHVzdGVycyhwZGFjMSwgcmVzb2x1dGlvbiA9IDAuNSwgYWxnb3JpdGhtID0gMylcbnBkYWMxLm1hcmtlcnMgPC0gRmluZEFsbE1hcmtlcnMocGRhYzEsIHRlc3QudXNlID0gJ3dpbGNveCcsIG1pbi5wY3QgPSAwLjI1LCBsb2dmYy50aHJlc2hvbGQgPSAwLjUwLCBtYXguY2VsbHMucGVyLmlkZW50ID0gNTAwKVxucGRhYzEudG9wMjUgPC0gcGRhYzEubWFya2VycyAlPiUgZ3JvdXBfYnkoY2x1c3RlcikgJT4lIHRvcF9uKG49MjUsIHd0PWF2Z19sb2dGQylcblZpZXcocGRhYzEudG9wMjVbN10pXG5cblxuXG5cbnBkYWMyIDwtIEZpbmROZWlnaGJvcnMocGRhYzIsIGRpbXMgPSAxOjUwKVxucGRhYzIgPC0gRmluZENsdXN0ZXJzKHBkYWMyLCByZXNvbHV0aW9uID0gMC41LCBhbGdvcml0aG0gPSAzKVxucGRhYzIubWFya2VycyA8LSBGaW5kQWxsTWFya2VycyhwZGFjMiwgdGVzdC51c2UgPSAnd2lsY294JywgbWluLnBjdCA9IDAuMjUsIGxvZ2ZjLnRocmVzaG9sZCA9IDAuNTAsIG1heC5jZWxscy5wZXIuaWRlbnQgPSA1MDApXG5wZGFjMi50b3AyNSA8LSBwZGFjMi5tYXJrZXJzICU+JSBncm91cF9ieShjbHVzdGVyKSAlPiUgdG9wX24obj0yNSwgd3Q9YXZnX2xvZ0ZDKVxuVmlldyhwZGFjMi50b3AyNVs3XSlcblxuXG5gYGAifQ== -->
+<pre class="r"><code>
+pdac1 &lt;- FindNeighbors(pdac1, dims = 1:50)
+pdac1 &lt;- FindClusters(pdac1, resolution = 0.5, algorithm = 3)
+pdac1.markers &lt;- FindAllMarkers(pdac1, test.use = &#39;wilcox&#39;, min.pct = 0.25, logfc.threshold = 0.50, max.cells.per.ident = 500)
+pdac1.top25 &lt;- pdac1.markers %&gt;% group_by(cluster) %&gt;% top_n(n=25, wt=avg_logFC)
+View(pdac1.top25[7])
+
+
+
+
+pdac2 &lt;- FindNeighbors(pdac2, dims = 1:50)
+pdac2 &lt;- FindClusters(pdac2, resolution = 0.5, algorithm = 3)
+pdac2.markers &lt;- FindAllMarkers(pdac2, test.use = &#39;wilcox&#39;, min.pct = 0.25, logfc.threshold = 0.50, max.cells.per.ident = 500)
+pdac2.top25 &lt;- pdac2.markers %&gt;% group_by(cluster) %&gt;% top_n(n=25, wt=avg_logFC)
+View(pdac2.top25[7])
+</code></pre>
+<!-- rnb-source-end -->
+<!-- rnb-chunk-end -->
+<!-- rnb-text-begin -->
+<p>Combined analysis of pdac datasets</p>
+<!-- rnb-text-end -->
+<!-- rnb-chunk-begin -->
+<!-- rnb-source-begin eyJkYXRhIjoiYGBgclxuIyMgTWVyZ2UgYW5kIHByb2Nlc3MgZGF0YXNldHMgXG5wZGFjLmNvbWJpbmVkIDwtIG1lcmdlKHBkYWMxLCB5PXBkYWMyLCBhZGQuY2VsbC5pZHM9YyhcIlBhdGllbnQgMVwiLCBcIlBhdGllbnQgMlwiKSwgcHJvamVjdD1cIk1lcmdlZCBQREFDXCIpXG5wZGFjLmNvbWJpbmVkIDwtIHByZXByb2Nlc3NpbmcocGRhYy5jb21iaW5lZClcbnBkYWMuY29tYmluZWQgPC0gY2x1c3RlcmluZyhwZGFjLmNvbWJpbmVkKVxucGRhYy5jb21iaW5lZCA8LSBSdW5VTUFQKHBkYWMuY29tYmluZWQsIGRpbXM9MTo1MClcbiMjIENyZWF0ZSBVTUFQU1xucGRhYy5jb21iaW5lZC51bWFwIDwtIERpbVBsb3QocGRhYy5jb21iaW5lZCwgcmVkdWN0aW9uPVwidW1hcFwiKVxucGRhYy5jb21iaW5lZC5pZGVudHNlcC51bWFwIDwtIERpbVBsb3QocGRhYy5jb21iaW5lZCwgcmVkdWN0aW9uPVwidW1hcFwiLCBncm91cC5ieT1cIm9yaWcuaWRlbnRcIilcbnBkYWMuY29tYmluZWQudW1hcCArIHBkYWMuY29tYmluZWQuaWRlbnRzZXAudW1hcFxuRGltUGxvdChwZGFjLmNvbWJpbmVkLCByZWR1Y3Rpb24gPSBcInVtYXBcIiwgc3BsaXQuYnk9XCJvcmlnLmlkZW50XCIpXG4jIyBDaGVjayBmZWF0dXJlIGV4cHJlc3Npb24gXG5gYGAifQ== -->
+<pre class="r"><code>## Merge and process datasets 
+pdac.combined &lt;- merge(pdac1, y=pdac2, add.cell.ids=c(&quot;Patient 1&quot;, &quot;Patient 2&quot;), project=&quot;Merged PDAC&quot;)
+pdac.combined &lt;- preprocessing(pdac.combined)
+pdac.combined &lt;- clustering(pdac.combined)
+pdac.combined &lt;- RunUMAP(pdac.combined, dims=1:50)
+## Create UMAPS
+pdac.combined.umap &lt;- DimPlot(pdac.combined, reduction=&quot;umap&quot;)
+pdac.combined.identsep.umap &lt;- DimPlot(pdac.combined, reduction=&quot;umap&quot;, group.by=&quot;orig.ident&quot;)
+pdac.combined.umap + pdac.combined.identsep.umap
+DimPlot(pdac.combined, reduction = &quot;umap&quot;, split.by=&quot;orig.ident&quot;)
+## Check feature expression </code></pre>
+<!-- rnb-source-end -->
+<!-- rnb-chunk-end -->
+<!-- rnb-text-begin -->
+<p>Heatmap Comparison</p>
+<!-- rnb-text-end -->
+<!-- rnb-chunk-begin -->
+<!-- rnb-source-begin eyJkYXRhIjoiYGBgclxuXG5wZGFjLmRpc3RyaWJ1dGlvbi50YWJsZSA8LSBkaXN0X3RhYmxlKHBkYWMuY29tYmluZWQubWVyZ2VkLCB1bmlxdWVjbHVzdGVyczEsIHVuaXF1ZWNsdXN0ZXJzMiwgNiwgMTIpXG5cbnBkYWMucHJvcG9ydGlvbnMudGFibGUgPC0gcHJvcF90YWJsZShwZGFjLmRpc3RyaWJ1dGlvbi50YWJsZSwgdW5pcXVlY2x1c3RlcnMxLCB1bmlxdWVjbHVzdGVyczIpXG5cbnVuaXF1ZWNsdXN0ZXJzMiA8LSBjKFwiQWNpbmFyXCIsIFwiQ2FuY2VyIGNsb25lIEFcIiwgXCJEdWN0YWwgNFwiLCBcIkNhbmNlciBjbG9uZSBCXCIsIFwiRHVjdGFsIDNcIiwgXCJEdWN0YWwgMVwiLCBcIkR1Y3RhbCAyXCIsIFwiVHVmdFwiLCBcIlQgJiBOS1wiLCBcIkVuZG90aGVsaWFsXCIsIFwiTWFjcm9waGFnZXNcIiwgXCJFbmRvY3JpbmUgJiBSQkNzXCIsIFwiQl9BY2luYXJcIiwgXCJCX0NhbmNlciBjbG9uZSBBXCIsIFwiQl9EdWN0YWwgNFwiLCBcIkJfRHVjdGFsIDNcIiwgXCJCX0R1Y3RhbCAyXCIsIFwiQl9UdWZ0ICYgRW5kb2NyaW5lXCIsIFwiQl9NYWNyb3BoYWdlc1wiLCBcIkJfRHVjdGFsIDFcIiwgXCJCX0VuZG90aGVsaWFsXCIpXG5cbnBkYWMuY29tcGFyaXNvbi5oZWF0bWFwIDwtIGdncGxvdF9oZWF0bWFwKHBkYWMucHJvcG9ydGlvbnMudGFibGUsIHVuaXF1ZWNsdXN0ZXJzMSwgdW5pcXVlY2x1c3RlcnMyLCBjKFwiUmRHeVwiKSwgYyhcIk1lcmdlZCBDbHVzdGVyaW5nXCIpLCBjKFwiSW5kaXZpZHVhbCBDbHVzdGVyaW5nXCIpKVxuXG5wZGFjLmNvbXBhcmlzb24uaGVhdG1hcFxuXG5gYGAifQ== -->
+<pre class="r"><code>
+pdac.distribution.table &lt;- dist_table(pdac.combined.merged, uniqueclusters1, uniqueclusters2, 6, 12)
+
+pdac.proportions.table &lt;- prop_table(pdac.distribution.table, uniqueclusters1, uniqueclusters2)
+
+uniqueclusters2 &lt;- c(&quot;Acinar&quot;, &quot;Cancer clone A&quot;, &quot;Ductal 4&quot;, &quot;Cancer clone B&quot;, &quot;Ductal 3&quot;, &quot;Ductal 1&quot;, &quot;Ductal 2&quot;, &quot;Tuft&quot;, &quot;T &amp; NK&quot;, &quot;Endothelial&quot;, &quot;Macrophages&quot;, &quot;Endocrine &amp; RBCs&quot;, &quot;B_Acinar&quot;, &quot;B_Cancer clone A&quot;, &quot;B_Ductal 4&quot;, &quot;B_Ductal 3&quot;, &quot;B_Ductal 2&quot;, &quot;B_Tuft &amp; Endocrine&quot;, &quot;B_Macrophages&quot;, &quot;B_Ductal 1&quot;, &quot;B_Endothelial&quot;)
+
+pdac.comparison.heatmap &lt;- ggplot_heatmap(pdac.proportions.table, uniqueclusters1, uniqueclusters2, c(&quot;RdGy&quot;), c(&quot;Merged Clustering&quot;), c(&quot;Individual Clustering&quot;))
+
+pdac.comparison.heatmap
+</code></pre>
+<!-- rnb-source-end -->
+<!-- rnb-chunk-end -->
+<!-- rnb-text-begin -->
+<p>Identify clusters</p>
+<!-- rnb-text-end -->
+<!-- rnb-chunk-begin -->
+<!-- rnb-source-begin eyJkYXRhIjoiYGBgclxuZmVhdHVyZXMgPSBjKFwiSUw3UlwiLCBcIkNDUjdcIiwgXCJTMTAwQTRcIiwgXCJDRDE0XCIsIFwiTFlaXCIsIFwiTVM0QTFcIiwgXCJDRDhBXCIsIFwiRkNHUjNBXCIsIFwiTVM0QTdcIiwgXCJHTkxZXCIsIFwiTktHN1wiLCBcIkZDRVIxQVwiLCBcIkNTVDNcIiwgXCJQUEJQXCIpXG5GZWF0dXJlUGxvdChwZGFjLmNvbWJpbmVkLCBmZWF0dXJlcz1mZWF0dXJlcylcbkRvdFBsb3QocGRhYy5jb21iaW5lZCwgZmVhdHVyZXM9ZmVhdHVyZXMpICsgUm90YXRlZEF4aXMoKVxuUmlkZ2VQbG90KHBkYWMuY29tYmluZWQsIGZlYXR1cmVzPWZlYXR1cmVzLCBuY29sPTYpXG5Eb0hlYXRtYXAoc3Vic2V0KHBkYWMuY29tYmluZWQsIGRvd25zYW1wbGU9MTAwKSwgZmVhdHVyZXM9ZmVhdHVyZXMpXG5gYGAifQ== -->
+<pre class="r"><code>features = c(&quot;IL7R&quot;, &quot;CCR7&quot;, &quot;S100A4&quot;, &quot;CD14&quot;, &quot;LYZ&quot;, &quot;MS4A1&quot;, &quot;CD8A&quot;, &quot;FCGR3A&quot;, &quot;MS4A7&quot;, &quot;GNLY&quot;, &quot;NKG7&quot;, &quot;FCER1A&quot;, &quot;CST3&quot;, &quot;PPBP&quot;)
+FeaturePlot(pdac.combined, features=features)
+DotPlot(pdac.combined, features=features) + RotatedAxis()
+RidgePlot(pdac.combined, features=features, ncol=6)
+DoHeatmap(subset(pdac.combined, downsample=100), features=features)</code></pre>
+<!-- rnb-source-end -->
+<!-- rnb-chunk-end -->
+
+<div id="rmd-source-code">LS0tDQp0aXRsZTogIkdTRTExMTY3MiBQREFDIEFuYWx5c2lzIg0Kb3V0cHV0OiBodG1sX25vdGVib29rDQotLS0NCg0KVGhpcyBpcyBhbiBbUiBNYXJrZG93bl0oaHR0cDovL3JtYXJrZG93bi5yc3R1ZGlvLmNvbSkgTm90ZWJvb2suIFdoZW4geW91IGV4ZWN1dGUgY29kZSB3aXRoaW4gdGhlIG5vdGVib29rLCB0aGUgcmVzdWx0cyBhcHBlYXIgYmVuZWF0aCB0aGUgY29kZS4gDQoNClRyeSBleGVjdXRpbmcgdGhpcyBjaHVuayBieSBjbGlja2luZyB0aGUgKlJ1biogYnV0dG9uIHdpdGhpbiB0aGUgY2h1bmsgb3IgYnkgcGxhY2luZyB5b3VyIGN1cnNvciBpbnNpZGUgaXQgYW5kIHByZXNzaW5nICpDdHJsK1NoaWZ0K0VudGVyKi4gDQoNCmBgYHtyfQ0KIyMgTG9hZCBwYWNrYWdlcw0KbGlicmFyeShkcGx5cikNCmxpYnJhcnkoU2V1cmF0KQ0KbGlicmFyeShwYXRjaHdvcmspDQpsaWJyYXJ5KGdncGxvdDIpDQpsaWJyYXJ5KGNvd3Bsb3QpDQpsaWJyYXJ5KHByYWNtYSkNCmBgYA0KDQoNCg0KQW5hbHl6ZSBHU0UgMTExNjcyIERhdGFzZXRzDQoNCmBgYHtyfQ0KcGRhYzEucmVhZCA8LSByZWFkLnRhYmxlKCJDOlxcVXNlcnNcXFJ5YW5cXERvY3VtZW50c1xcTmllIFJlc2VhcmNoIFByb2plY3RcXEdTRTExMTY3MlxcR1NFMTExNjcyX1BEQUMtQS1pbmRyb3AtZmlsdGVyZWQtZXhwTWF0LnR4dCIsIHNlcCA9ICJcdCIsIGFzLmlzID0gMSkNCnBkYWMxLnJlYWQgPC0gcGRhYzEucmVhZFstYyg5OTQ2LCA5OTQ3KSwgXSAjIyBEdXBsaWNhdGVzIG9mIDEtTWFyIGFuZCAyLU1hciBnZW5lcyAoZXhjZWwgZXJyb3I/PykNCnJvd25hbWVzKHBkYWMxLnJlYWQpIDwtIHBkYWMxLnJlYWQkVjEgIyMgUm93bmFtZXMgYXJlIHN0b3JlZCBpbiB0aGUgZmlyc3QgY29sdW1uIG9mIHRoZSBkYXRhc2V0DQpwZGFjMS5yZWFkIDwtIHBkYWMxLnJlYWRbLCAtYygxKV0gIyMgRGVsZXRlIGV4dHJhIHJvd25hbWVzIHZlY3Rvcg0KbmFtZXMocGRhYzEucmVhZCkgPC0gbGFwcGx5KHBkYWMxLnJlYWRbMSxdLCBhcy5jaGFyYWN0ZXIpICMjIENvbHVtbiBuYW1lcyBhcmUgc3RvcmVkIGluIHRoZSBmaXJzdCByb3cgb2YgdGhlIGRhdGFzZXQNCnBkYWMxLnJlYWQgPC0gcGRhYzEucmVhZFstMSxdICMjIERlbGV0ZSBleHRyYSBjb2xuYW1lcyB2ZWN0b3INCg0KcGRhYzIucmVhZCA8LSByZWFkLnRhYmxlKCJDOlxcVXNlcnNcXFJ5YW5cXERvY3VtZW50c1xcTmllIFJlc2VhcmNoIFByb2plY3RcXEdTRTExMTY3MlxcR1NFMTExNjcyX1BEQUMtQi1pbmRyb3AtZmlsdGVyZWQtZXhwTWF0LnR4dCIsIHNlcCA9ICJcdCIsIGhlYWRlciA9IFRSVUUsIGFzLmlzID0gMSkNCnBkYWMyLnJlYWQgPC0gcGRhYzIucmVhZFstYyg5OTQ2LCA5OTQ3KSwgXQ0Kcm93bmFtZXMocGRhYzIucmVhZCkgPC0gcGRhYzIucmVhZCRHZW5lcw0KcGRhYzIucmVhZCA8LSBwZGFjMi5yZWFkWywgLWMoMSldDQoNCnBkYWMxIDwtIENyZWF0ZVNldXJhdE9iamVjdChjb3VudHM9cGRhYzEucmVhZCwgcHJvamVjdD0iUERBQzEiLCBtaW4uY2VsbHM9MSwgbWluLmZlYXR1cmVzPTEpDQpwZGFjMiA8LSBDcmVhdGVTZXVyYXRPYmplY3QoY291bnRzPXBkYWMyLnJlYWQsIHByb2plY3Q9IlBEQUMyIiwgbWluLmNlbGxzPTEsIG1pbi5mZWF0dXJlcz0xKQ0KYGBgDQoNCg0KDQpJbml0aWFsIFBEQUMgRGF0YXNldHMgQ2x1c3RlcmluZw0KDQpgYGB7cn0NCnBkYWMxIDwtIHByZXByb2Nlc3NpbmcocGRhYzEsIGhlYXRtYXA9RkFMU0UpDQpwZGFjMiA8LSBwcmVwcm9jZXNzaW5nKHBkYWMyLCBoZWF0bWFwPUZBTFNFKQ0KcGRhYzEgPC0gY2x1c3RlcmluZyhwZGFjMSwgUENzPTUwLCByZXNvbHV0aW9uPTAuNSkNCnBkYWMyIDwtIGNsdXN0ZXJpbmcocGRhYzIsIFBDcz01MCwgcmVzb2x1dGlvbj0wLjUpDQoNCg0KcGRhYzEudW1hcCA8LSBEaW1QbG90KHBkYWMxLCByZWR1Y3Rpb249InVtYXAiLCBsYWJlbD1UUlVFLCBwdC5zaXplPTAuMykgKyBOb0xlZ2VuZCgpDQpwZGFjMi51bWFwIDwtIERpbVBsb3QocGRhYzIsIHJlZHVjdGlvbj0idW1hcCIsIGxhYmVsPVRSVUUsIHB0LnNpemU9MC4zKSArIE5vTGVnZW5kKCkNCnBkYWMxLnVtYXAgKyBwZGFjMi51bWFwDQoNCmBgYA0KDQoNCg0KUERBQyBEYXRhc2V0cyBDbHVzdGVyaW5nIENvbXBhcmlzb24gDQoNCmBgYHtyfQ0KDQpwZGFjMS5yZWFkLmNlbGwubGFiZWxzIDwtIHJlYWQudGFibGUoIkM6XFxVc2Vyc1xccmxpdTBcXERvd25sb2Fkc1xcTmllIFJlc2VhcmNoXFxHU0UxMTE2NzJfUERBQy1BLWluZHJvcC1maWx0ZXJlZC1leHBNYXQudHh0IiwgbnJvd3M9MSwgaGVhZGVyPUZBTFNFLCBzZXAgPSAiXHQiLCBhcy5pcyA9IDEpDQpwZGFjMS5yZWFkLmNlbGwubGFiZWxzIDwtIHQocGRhYzEucmVhZC5jZWxsLmxhYmVscykNCnBkYWMxLnJlYWQuY2VsbC5sYWJlbHMgPC0gcGRhYzEucmVhZC5jZWxsLmxhYmVsc1stYygxKSxdDQpwZGFjMUBtZXRhLmRhdGEkb3JpZ19jbHVzdGVycyA8LSBwZGFjMS5yZWFkLmNlbGwubGFiZWxzDQoNCnBkYWMyLnJlYWQuY2VsbC5sYWJlbHMgPC0gcmVhZC50YWJsZSgiQzpcXFVzZXJzXFxybGl1MFxcRG93bmxvYWRzXFxOaWUgUmVzZWFyY2hcXEdTRTExMTY3Ml9QREFDLUItaW5kcm9wLWZpbHRlcmVkLWV4cE1hdC50eHQiLCBucm93cz0xLCBoZWFkZXI9RkFMU0UsIHNlcCA9ICJcdCIsIGFzLmlzID0gMSkNCnBkYWMyLnJlYWQuY2VsbC5sYWJlbHMgPC0gdChwZGFjMi5yZWFkLmNlbGwubGFiZWxzKQ0KcGRhYzIucmVhZC5jZWxsLmxhYmVscyA8LSBwZGFjMi5yZWFkLmNlbGwubGFiZWxzWy1jKDEpLF0NCnBkYWMyQG1ldGEuZGF0YSRvcmlnX2NsdXN0ZXJzIDwtIHBkYWMyLnJlYWQuY2VsbC5sYWJlbHMNCg0KDQpwZGFjMS51bWFwLm9yaWcgPC0gRGltUGxvdChwZGFjMSwgZ3JvdXAuYnkgPSAib3JpZ19jbHVzdGVycyIsIGxhYmVsPVRSVUUsIHB0LnNpemU9MC4yKQ0KcGRhYzIudW1hcC5vcmlnIDwtIERpbVBsb3QocGRhYzIsIGdyb3VwLmJ5ID0gIm9yaWdfY2x1c3RlcnMiLCBsYWJlbD1UUlVFLCBwdC5zaXplPTAuMikgDQoNCnBkYWMxLnVtYXAub3JpZyArIHBkYWMyLnVtYXAub3JpZw0KDQpwZGFjMS5pZGVudHMgPC0gYygiRHVjdGFsIDEiLCAiRHVjdGFsIDIiLCAiRHVjdGFsIDMiLCAiQ2FuY2VyIGNsb25lIEIiLCAiTWFjcm9waGFnZXMiLCAiQ2FuY2VyIGNsb25lIEEiLCAiRHVjdGFsIDQiLCAiVCAmIE5LIiwgIlR1ZnQiLCAiRW5kb2NyaW5lICYgUkJDcyIsICJBY2luYXIiLCAiRW5kb3RoZWxpYWwiKQ0KDQpwZGFjMi5pZGVudHMgPC0gYygiRHVjdGFsIDEiLCAiRHVjdGFsIDIiLCAiQ2FuY2VyIGNsb25lIEEiLCAiRHVjdGFsIDMiLCAiRW5kb3RoZWxpYWwiLCAiTWFjcm9waGFnZXMiLCAiRHVjdGFsIDQiLCAiVHVmdCAmIEVuZG9jcmluZSIsICJBY2luYXIiKQ0KDQpuYW1lcyhwZGFjMS5pZGVudHMpIDwtIGxldmVscyhwZGFjMSkNCnBkYWMxIDwtIFJlbmFtZUlkZW50cyhwZGFjMSwgcGRhYzEuaWRlbnRzKQ0KDQpuYW1lcyhwZGFjMi5pZGVudHMpIDwtIGxldmVscyhwZGFjMikNCnBkYWMyIDwtIFJlbmFtZUlkZW50cyhwZGFjMiwgcGRhYzIuaWRlbnRzKQ0KDQoNCg0KYGBgDQoNCg0KDQoNCmBgYHtyfQ0KDQpwZGFjMSA8LSBGaW5kTmVpZ2hib3JzKHBkYWMxLCBkaW1zID0gMTo1MCkNCnBkYWMxIDwtIEZpbmRDbHVzdGVycyhwZGFjMSwgcmVzb2x1dGlvbiA9IDAuNSwgYWxnb3JpdGhtID0gMykNCnBkYWMxLm1hcmtlcnMgPC0gRmluZEFsbE1hcmtlcnMocGRhYzEsIHRlc3QudXNlID0gJ3dpbGNveCcsIG1pbi5wY3QgPSAwLjI1LCBsb2dmYy50aHJlc2hvbGQgPSAwLjUwLCBtYXguY2VsbHMucGVyLmlkZW50ID0gNTAwKQ0KcGRhYzEudG9wMjUgPC0gcGRhYzEubWFya2VycyAlPiUgZ3JvdXBfYnkoY2x1c3RlcikgJT4lIHRvcF9uKG49MjUsIHd0PWF2Z19sb2dGQykNClZpZXcocGRhYzEudG9wMjVbN10pDQoNCg0KDQoNCnBkYWMyIDwtIEZpbmROZWlnaGJvcnMocGRhYzIsIGRpbXMgPSAxOjUwKQ0KcGRhYzIgPC0gRmluZENsdXN0ZXJzKHBkYWMyLCByZXNvbHV0aW9uID0gMC41LCBhbGdvcml0aG0gPSAzKQ0KcGRhYzIubWFya2VycyA8LSBGaW5kQWxsTWFya2VycyhwZGFjMiwgdGVzdC51c2UgPSAnd2lsY294JywgbWluLnBjdCA9IDAuMjUsIGxvZ2ZjLnRocmVzaG9sZCA9IDAuNTAsIG1heC5jZWxscy5wZXIuaWRlbnQgPSA1MDApDQpwZGFjMi50b3AyNSA8LSBwZGFjMi5tYXJrZXJzICU+JSBncm91cF9ieShjbHVzdGVyKSAlPiUgdG9wX24obj0yNSwgd3Q9YXZnX2xvZ0ZDKQ0KVmlldyhwZGFjMi50b3AyNVs3XSkNCg0KDQpgYGANCg0KDQoNCkNvbWJpbmVkIGFuYWx5c2lzIG9mIHBkYWMgZGF0YXNldHMNCg0KYGBge3J9DQojIyBNZXJnZSBhbmQgcHJvY2VzcyBkYXRhc2V0cyANCnBkYWMuY29tYmluZWQgPC0gbWVyZ2UocGRhYzEsIHk9cGRhYzIsIGFkZC5jZWxsLmlkcz1jKCJQYXRpZW50IDEiLCAiUGF0aWVudCAyIiksIHByb2plY3Q9Ik1lcmdlZCBQREFDIikNCnBkYWMuY29tYmluZWQgPC0gcHJlcHJvY2Vzc2luZyhwZGFjLmNvbWJpbmVkKQ0KcGRhYy5jb21iaW5lZCA8LSBjbHVzdGVyaW5nKHBkYWMuY29tYmluZWQpDQpwZGFjLmNvbWJpbmVkIDwtIFJ1blVNQVAocGRhYy5jb21iaW5lZCwgZGltcz0xOjUwKQ0KIyMgQ3JlYXRlIFVNQVBTDQpwZGFjLmNvbWJpbmVkLnVtYXAgPC0gRGltUGxvdChwZGFjLmNvbWJpbmVkLCByZWR1Y3Rpb249InVtYXAiKQ0KcGRhYy5jb21iaW5lZC5pZGVudHNlcC51bWFwIDwtIERpbVBsb3QocGRhYy5jb21iaW5lZCwgcmVkdWN0aW9uPSJ1bWFwIiwgZ3JvdXAuYnk9Im9yaWcuaWRlbnQiKQ0KcGRhYy5jb21iaW5lZC51bWFwICsgcGRhYy5jb21iaW5lZC5pZGVudHNlcC51bWFwDQpEaW1QbG90KHBkYWMuY29tYmluZWQsIHJlZHVjdGlvbiA9ICJ1bWFwIiwgc3BsaXQuYnk9Im9yaWcuaWRlbnQiKQ0KIyMgQ2hlY2sgZmVhdHVyZSBleHByZXNzaW9uIA0KYGBgDQoNCkhlYXRtYXAgQ29tcGFyaXNvbiANCg0KYGBge3J9DQoNCnBkYWMuZGlzdHJpYnV0aW9uLnRhYmxlIDwtIGRpc3RfdGFibGUocGRhYy5jb21iaW5lZC5tZXJnZWQsIHVuaXF1ZWNsdXN0ZXJzMSwgdW5pcXVlY2x1c3RlcnMyLCA2LCAxMikNCg0KcGRhYy5wcm9wb3J0aW9ucy50YWJsZSA8LSBwcm9wX3RhYmxlKHBkYWMuZGlzdHJpYnV0aW9uLnRhYmxlLCB1bmlxdWVjbHVzdGVyczEsIHVuaXF1ZWNsdXN0ZXJzMikNCg0KdW5pcXVlY2x1c3RlcnMyIDwtIGMoIkFjaW5hciIsICJDYW5jZXIgY2xvbmUgQSIsICJEdWN0YWwgNCIsICJDYW5jZXIgY2xvbmUgQiIsICJEdWN0YWwgMyIsICJEdWN0YWwgMSIsICJEdWN0YWwgMiIsICJUdWZ0IiwgIlQgJiBOSyIsICJFbmRvdGhlbGlhbCIsICJNYWNyb3BoYWdlcyIsICJFbmRvY3JpbmUgJiBSQkNzIiwgIkJfQWNpbmFyIiwgIkJfQ2FuY2VyIGNsb25lIEEiLCAiQl9EdWN0YWwgNCIsICJCX0R1Y3RhbCAzIiwgIkJfRHVjdGFsIDIiLCAiQl9UdWZ0ICYgRW5kb2NyaW5lIiwgIkJfTWFjcm9waGFnZXMiLCAiQl9EdWN0YWwgMSIsICJCX0VuZG90aGVsaWFsIikNCg0KcGRhYy5jb21wYXJpc29uLmhlYXRtYXAgPC0gZ2dwbG90X2hlYXRtYXAocGRhYy5wcm9wb3J0aW9ucy50YWJsZSwgdW5pcXVlY2x1c3RlcnMxLCB1bmlxdWVjbHVzdGVyczIsIGMoIlJkR3kiKSwgYygiTWVyZ2VkIENsdXN0ZXJpbmciKSwgYygiSW5kaXZpZHVhbCBDbHVzdGVyaW5nIikpDQoNCnBkYWMuY29tcGFyaXNvbi5oZWF0bWFwDQoNCmBgYA0KDQpJZGVudGlmeSBjbHVzdGVycw0KDQoNCmBgYHtyfQ0KZmVhdHVyZXMgPSBjKCJJTDdSIiwgIkNDUjciLCAiUzEwMEE0IiwgIkNEMTQiLCAiTFlaIiwgIk1TNEExIiwgIkNEOEEiLCAiRkNHUjNBIiwgIk1TNEE3IiwgIkdOTFkiLCAiTktHNyIsICJGQ0VSMUEiLCAiQ1NUMyIsICJQUEJQIikNCkZlYXR1cmVQbG90KHBkYWMuY29tYmluZWQsIGZlYXR1cmVzPWZlYXR1cmVzKQ0KRG90UGxvdChwZGFjLmNvbWJpbmVkLCBmZWF0dXJlcz1mZWF0dXJlcykgKyBSb3RhdGVkQXhpcygpDQpSaWRnZVBsb3QocGRhYy5jb21iaW5lZCwgZmVhdHVyZXM9ZmVhdHVyZXMsIG5jb2w9NikNCkRvSGVhdG1hcChzdWJzZXQocGRhYy5jb21iaW5lZCwgZG93bnNhbXBsZT0xMDApLCBmZWF0dXJlcz1mZWF0dXJlcykNCmBgYA0K</div>
 
 
 
@@ -1888,7 +2476,7 @@ $(document).ready(function () {
 <!-- code folding -->
 <script>
 $(document).ready(function () {
-  window.initializeSourceEmbed("Analyzing.scRNAseq.Data.MiniProject");
+  window.initializeSourceEmbed("PDACanalysis.Rmd");
   window.initializeCodeFolding("show" === "show");
 });
 </script>
