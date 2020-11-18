@@ -26,6 +26,8 @@ preprocessing <- function(dataset, normalize = TRUE, scale = TRUE, pca = TRUE, h
   if (isTRUE(heatmap)) {
     DimHeatmap(dataset, dims = 1:24, cells = 500, balanced = TRUE)
   }
+  
+  return(dataset)
 }
 
 
@@ -55,7 +57,6 @@ clustering <- function(dataset, PCs=20, resolution=0.3) {
   
   ## Create UMAP
   dataset <- RunUMAP(dataset, dims = 1:20)
-  DimPlot(dataset, reduction="umap", label=TRUE, pt.size = 0.1) + NoLegend()
 }
 
 
