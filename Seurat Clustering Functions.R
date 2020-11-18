@@ -40,7 +40,7 @@ determine_PCs <- function(dataset) {
 
 
 
-clustering <- function(dataset, PCs=50, resolution=0.3, UMAP=TRUE) {
+clustering <- function(dataset, PCs=20, resolution=0.3) {
   ## Find neighbors
   dataset <- FindNeighbors(dataset, dims = 1:PCs)
   
@@ -55,13 +55,8 @@ clustering <- function(dataset, PCs=50, resolution=0.3, UMAP=TRUE) {
   vec.dataset.top25 <- dplyr::pull(dataset.top25, 7)
   View(vec.dataset.top25)
   
-  return(dataset)
-  
   ## Create UMAP
-  if(isTRUE(UMAP)) {
-    dataset <- RunUMAP(dataset, dims = 1:PCs)
-    dataset <- DimPlot(dataset, reduction="umap", label=TRUE, pt.size = 0.1) + NoLegend()
-  }
+  dataset <- RunUMAP(dataset, dims = 1:20)
 }
 
 
