@@ -61,12 +61,12 @@ PDAC Datasets Clustering Comparison
 
 ```{r}
 
-pdac1.read.cell.labels <- read.table("C:\\Users\\rliu0\\Downloads\\Nie Research\\GSE111672_PDAC-A-indrop-filtered-expMat.txt", nrows=1, header=FALSE, sep = "\t", as.is = 1)
+pdac1.read.cell.labels <- read.table("C:\\Users\\Ryan\\Documents\\Nie Research Project\\GSE111672\\GSE111672_PDAC-A-indrop-filtered-expMat.txt", nrows=1, header=FALSE, sep = "\t", as.is = 1)
 pdac1.read.cell.labels <- t(pdac1.read.cell.labels)
 pdac1.read.cell.labels <- pdac1.read.cell.labels[-c(1),]
 pdac1@meta.data$orig_clusters <- pdac1.read.cell.labels
 
-pdac2.read.cell.labels <- read.table("C:\\Users\\rliu0\\Downloads\\Nie Research\\GSE111672_PDAC-B-indrop-filtered-expMat.txt", nrows=1, header=FALSE, sep = "\t", as.is = 1)
+pdac2.read.cell.labels <- read.table("C:\\Users\\Ryan\\Documents\\Nie Research Project\\GSE111672\\GSE111672_PDAC-B-indrop-filtered-expMat.txt", nrows=1, header=FALSE, sep = "\t", as.is = 1)
 pdac2.read.cell.labels <- t(pdac2.read.cell.labels)
 pdac2.read.cell.labels <- pdac2.read.cell.labels[-c(1),]
 pdac2@meta.data$orig_clusters <- pdac2.read.cell.labels
@@ -87,10 +87,7 @@ pdac1 <- RenameIdents(pdac1, pdac1.idents)
 names(pdac2.idents) <- levels(pdac2)
 pdac2 <- RenameIdents(pdac2, pdac2.idents)
 
-
-
 ```
-
 
 
 
@@ -100,17 +97,11 @@ pdac1 <- FindNeighbors(pdac1, dims = 1:50)
 pdac1 <- FindClusters(pdac1, resolution = 0.5, algorithm = 3)
 pdac1.markers <- FindAllMarkers(pdac1, test.use = 'wilcox', min.pct = 0.25, logfc.threshold = 0.50, max.cells.per.ident = 500)
 pdac1.top25 <- pdac1.markers %>% group_by(cluster) %>% top_n(n=25, wt=avg_logFC)
-View(pdac1.top25[7])
-
-
-
 
 pdac2 <- FindNeighbors(pdac2, dims = 1:50)
 pdac2 <- FindClusters(pdac2, resolution = 0.5, algorithm = 3)
 pdac2.markers <- FindAllMarkers(pdac2, test.use = 'wilcox', min.pct = 0.25, logfc.threshold = 0.50, max.cells.per.ident = 500)
 pdac2.top25 <- pdac2.markers %>% group_by(cluster) %>% top_n(n=25, wt=avg_logFC)
-View(pdac2.top25[7])
-
 
 ```
 
@@ -129,12 +120,30 @@ pdac.combined.umap <- DimPlot(pdac.combined, reduction="umap")
 pdac.combined.identsep.umap <- DimPlot(pdac.combined, reduction="umap", group.by="orig.ident")
 pdac.combined.umap + pdac.combined.identsep.umap
 DimPlot(pdac.combined, reduction = "umap", split.by="orig.ident")
-## Check feature expression 
+
 ```
 
-Heatmap Comparison 
+PDAC Merged Heatmap Comparison 
 
 ```{r}
+pdac.combined.meta.data <- pdac.combined@meta.data
+pdac1.meta.data <- pdac1@meta.data
+pdac2.meta.data <- pdac2@meta.data
+
+pdac1.meta.data$rownames <- rownames(pdac1.meta.data)
+pdac1.meta.data$rownames <- paste0("Patient 1_", pdac1.meta.data$rownames)
+
+pdac2.meta.data$rownames <- rownames(pdac2.meta.data)
+pdac2.meta.data$rownames <- paste0("Patient 2_", pdac2.meta.data$rownames)
+pdac2.meta.data$seurat_clusters <- paste0("B", pdac2.meta.data$seurat_clusters)
+
+pdac.combined.meta.data$rownames <- rownames(pdac.combined.meta.data)
+mergetest1 <- merge(pdac.combined.meta.data, pdac1.meta.data, by=c("rownames", "nCount_RNA"))
+mergetest2 <- merge(pdac.combined.meta.data, pdac2.meta.data, by=c("rownames", "nCount_RNA"))
+pdac.combined.merged <- rbind(mergetest1, mergetest2)
+
+uniqueclusters1 <- as.matrix(unique(pdac.combined.merged$seurat_clusters.x))
+uniqueclusters2 <- as.matrix(unique(pdac.combined.merged$seurat_clusters.y))
 
 pdac.distribution.table <- dist_table(pdac.combined.merged, uniqueclusters1, uniqueclusters2, 6, 12)
 
@@ -148,8 +157,69 @@ pdac.comparison.heatmap
 
 ```
 
-Identify clusters
 
+
+Integrated analysis of datasets 
+
+```{r}
+
+pdac.list <- list(pdac1, pdac2)
+pdac.anchors <- FindIntegrationAnchors(object.list=pdac.list, dims=1:50)
+pdac.integrated <- IntegrateData(anchorset=pdac.anchors, dims=1:50)
+DefaultAssay(pdac.integrated) <- "integrated"
+
+## Preprocessing function unable to work on integrated datasets 
+pdac.integrated <- ScaleData(pdac.integrated)
+pdac.integrated <- RunPCA(pdac.integrated, npcs=50)
+pdac.integrated <- RunUMAP(pdac.integrated, reduction="pca", dims=1:50)
+
+p1 <- DimPlot(pdac.integrated, reduction="umap", group.by="orig.ident")
+p2 <- DimPlot(pdac.integrated, reduction="umap", group.by="orig_clusters")
+p3 <- DimPlot(pdac.integrated, reduction="umap", group.by="seurat_clusters")
+p1 + p2 + p3
+```
+
+
+
+PDAC Integrated Heatmap Analysis
+
+```{r}
+
+pdac.integrated.meta.data <- pdac.integrated@meta.data
+pdac1.meta.data <- pdac1@meta.data
+pdac2.meta.data <- pdac2@meta.data
+
+pdac1.meta.data$rownames <- rownames(pdac1.meta.data)
+pdac1.meta.data$rownames <- paste0("Patient 1_", pdac1.meta.data$rownames)
+
+pdac2.meta.data$rownames <- rownames(pdac2.meta.data)
+pdac2.meta.data$rownames <- paste0("Patient 2_", pdac2.meta.data$rownames)
+pdac2.meta.data$seurat_clusters <- paste0("B", pdac2.meta.data$seurat_clusters)
+
+pdac.integrated.meta.data$rownames <- rownames(pdac.combined.meta.data)
+integratetest1 <- merge(pdac.integrated.meta.data, pdac1.meta.data, by=c("rownames", "nCount_RNA"))
+integratetest2 <- merge(pdac.integrated.meta.data, pdac2.meta.data, by=c("rownames", "nCount_RNA"))
+pdac.integrated.merged <- rbind(integratetest1, integratetest2)
+
+uniqueclusters1 <- as.matrix(unique(pdac.integrated.merged$seurat_clusters.x))
+uniqueclusters2 <- as.matrix(unique(pdac.integrated.merged$seurat_clusters.y))
+
+pdac.integrated.distribution.table <- dist_table(pdac.integrated.merged, uniqueclusters1, uniqueclusters2, 6, 11)
+
+pdac.integrated.proportions.table <- prop_table(pdac.integrated.distribution.table, uniqueclusters1, uniqueclusters2)
+
+uniqueclusters2 <- c("Acinar", "Cancer clone A", "Ductal 4", "Cancer clone B", "Ductal 3", "Ductal 1", "Ductal 2", "Tuft", "T & NK", "Endothelial", "Macrophages", "Endocrine & RBCs", "B_Acinar", "B_Cancer clone A", "B_Ductal 4", "B_Ductal 3", "B_Ductal 2", "B_Tuft & Endocrine", "B_Macrophages", "B_Ductal 1", "B_Endothelial")
+
+pdac.integrated.comparison.heatmap <- ggplot_heatmap(pdac.integrated.proportions.table, uniqueclusters1, uniqueclusters2, c("RdGy"), c("Integrated Clustering"), c("Individual Clustering"))
+
+pdac.integrated.comparison.heatmap
+
+
+
+
+
+
+```
 
 ```{r}
 features = c("IL7R", "CCR7", "S100A4", "CD14", "LYZ", "MS4A1", "CD8A", "FCGR3A", "MS4A7", "GNLY", "NKG7", "FCER1A", "CST3", "PPBP")
