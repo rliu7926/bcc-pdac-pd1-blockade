@@ -177,6 +177,11 @@ p1 <- DimPlot(pdac.integrated, reduction="umap", group.by="orig.ident")
 p2 <- DimPlot(pdac.integrated, reduction="umap", group.by="orig_clusters")
 p3 <- DimPlot(pdac.integrated, reduction="umap", group.by="seurat_clusters")
 p1 + p2 + p3
+
+
+
+
+
 ```
 
 
@@ -214,12 +219,22 @@ pdac.integrated.comparison.heatmap <- ggplot_heatmap(pdac.integrated.proportions
 
 pdac.integrated.comparison.heatmap
 
+```
 
 
 
+```{r}
+DefaultAssay(pdac.integrated) <- "RNA"
+Idents(pdac.integrated) <- pdac.integrated$seurat_clusters
+FeaturePlot(pdac.integrated, c("CD68"), label=TRUE)
 
+
+VlnPlot(BCCIO, "PDCD1")
 
 ```
+
+
+
 
 ```{r}
 features = c("IL7R", "CCR7", "S100A4", "CD14", "LYZ", "MS4A1", "CD8A", "FCGR3A", "MS4A7", "GNLY", "NKG7", "FCER1A", "CST3", "PPBP")

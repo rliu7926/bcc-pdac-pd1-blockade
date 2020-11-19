@@ -72,6 +72,7 @@ save(BCCIO.meta.data,BCCIO.read, file = "C:\\Users\\Ryan\\Downloads\\GSE 123813\
 
 ## To load data use load(filelocation) function
 load("C:\\Users\\Ryan\\Downloads\\GSE 123813\\BCCIO")
+load("C:\\Users\\Ryan\\Downloads\\GSE 123813\\BCCIOrawdata")
 ```
 
 
@@ -181,7 +182,8 @@ BCCIO.top25genes <- top25[c(6,7)]
 BCCIO.top2genes <- BCCIO.markers %>% group_by(cluster) %>% top_n(n=2, wt=avg_logFC)
 BCCIO.geneslist <- unique(unlist(top2[7]))
 
-labels <- c("CD56+ NK 1", "CD4+ T 1", "CD19+ B 1", "CD56+ NK 2", "CD4+ T 2", "CD33+ Myeloid", "BDCA4+ Dendritic 1", "??1", "CD4+ T 3", "721 B Lymphoblasts", "BDCA4+ Dendritic 2", "??2", "??3", "??4", "??5", "??6", "??7", "??8", "CD34+", "CD19+ B 2")
+## these are old labels
+## labels <- c("CD56+ NK 1", "CD4+ T 1", "CD19+ B 1", "CD56+ NK 2", "CD4+ T 2", "CD33+ Myeloid", "BDCA4+ Dendritic 1", "??1", "CD4+ T 3", "721 B Lymphoblasts", "BDCA4+ Dendritic 2", "??2", "??3", "??4", "??5", "??6", "??7", "??8", "CD34+", "CD19+ B 2")
 
 names(labels) <- levels(BCCIO)
 BCCIO <- RenameIdents(BCCIO, labels)
@@ -257,9 +259,7 @@ Comparison of Pre- and Post-Treatment
 ```{r}
 
 DimPlot(BCCIO, reduction="umap", split.by="treatment")
-
 DotPlot(BCCIO, features=rev(BCCIO.geneslist), cols=c("blue", "red"), dot.scale=8, split.by="treatment") + RotatedAxis()
-
 DimPlot(BCCIO, reduction="umap", split.by="patient")
 
 
