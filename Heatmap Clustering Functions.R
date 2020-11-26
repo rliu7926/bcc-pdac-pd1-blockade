@@ -1,4 +1,4 @@
-dist_table <- function(dataset, uniqueclusters1, uniqueclusters2, loc1, loc2) {
+dist_table <- function(adintertaset, uniqueclusters1, uniqueclusters2, loc1, loc2) {
   
   ## Datset should be a dataframe 
   ## Uniqueclusters 1 and uniqueclustesr2 are matrices
@@ -35,7 +35,24 @@ ggplot_heatmap <- function(proportions.table, uniqueclusters1, uniqueclusters2, 
   y <- uniqueclusters2
   data <- expand.grid(X=x, Y=y)
   data$Z <- proportions.table
-  ggplot(data, aes(X, Y, fill= Z)) + geom_tile() + scale_fill_distiller(palette=palette) + labs(x=xlab, y=ylab)
+  ggplot(data, aes(X, Y, fill= Z)) + geom_tile() + scale_fill_distiller(palette=palette) + labs(x=xlab, y=ylab) + theme(axis.text.x = element_text(angle=45, hjust=1))
 }
 
 
+ggplot_barcharts <- function(dataset.batch, dataset.clusters, colors) {
+  
+  dataframe <- data.frame("Batch" = dataset.batch, "Clusters" = dataset.clusters)
+  tibble <- as_tibble(dataframe)
+  
+  summary <- tibble %>% group_by(Clusters, Batch) %>% count()
+  print("good3")
+  
+  normalized_dataset <- summary %>% group_by(Batch) %>% mutate(normalize = n/sum(n))
+  print("good4")
+  
+  ggplot(normalized_dataset, aes(x=Clusters, y=normalize, fill=Batch)) + 
+    geom_col(position = 'fill') + 
+    scale_fill_brewer(palette=colors) +
+    theme(axis.text.x = element_text(angle=45, hjust=1)) + 
+    ylab("Cell Proportion Normalized by Batch")
+}
