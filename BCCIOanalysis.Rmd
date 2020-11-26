@@ -231,7 +231,8 @@ DimPlot(BCCIO, reduction="umap", split.by="treatment")
 DotPlot(BCCIO, features=rev(BCCIO.geneslist), cols=c("blue", "red"), dot.scale=8, split.by="treatment") + RotatedAxis()
 DimPlot(BCCIO, reduction="umap", split.by="patient")
 
-
+BCCIO.treatment.barchart <- ggplot_barcharts(BCCIO@meta.data$treatment, BCCIO@meta.data$seurat_clusters, colors="PuBu")
+BCCIO.treatment.barchart
 
 ```
 
