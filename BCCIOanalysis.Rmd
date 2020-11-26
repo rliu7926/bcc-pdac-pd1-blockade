@@ -171,7 +171,7 @@ Full DE Testing (UMAP) for r=0.4, test=wilcox
 ```{r}
 
 BCCIO <- FindNeighbors(BCCIO, dims = 1:50)
-BCCIO <- FindClusters(BCCIO, resolution = 0.4, algorithm = 3) ## Set r = 0.3
+BCCIO <- FindClusters(BCCIO, resolution = 0.4, algorithm = 3)
 BCCIO.markers <- FindAllMarkers(BCCIO, test.use = 'wilcox', min.pct = 0.25, logfc.threshold = 0.25, max.cells.per.ident = 500) ## Run through all cells
 top5 <- BCCIO.markers %>% group_by(cluster) %>% top_n(n=5, wt=avg_logFC)
 DoHeatmap(BCCIO,features = top5$gene, size = 3) ## Heatmap with all cells
@@ -196,7 +196,7 @@ DimPlot(BCCIO, reduction="umap", label=TRUE, pt.size = 0.1) + NoLegend() ## Crea
 
 ```
 
-Clustering Comparison Heatmap 
+Clustering comparison heatmap
 
 ```{r}
 
@@ -212,45 +212,14 @@ BCCIO.clustering.comparison <- BCCIO.meta.data.merge[c("cluster", "seurat_cluste
 uniqueclusters1 <- as.matrix(unique(BCCIO.clustering.comparison[,1]))
 uniqueclusters2 <- as.matrix(unique(BCCIO.clustering.comparison[,2]))
 
-BCCIO.distribution.table <- data.frame(matrix(0, nrow=nrow(uniqueclusters1), ncol=nrow(uniqueclusters2)))
-for (cluster1 in 1:nrow(uniqueclusters1)) {
-  for (cluster2 in 1:nrow(uniqueclusters2)) {
-    for (row in 1:53029) {
-      if ((BCCIO.clustering.comparison[row,1] == uniqueclusters1[cluster1,]) & (BCCIO.clustering.comparison[row,2] == uniqueclusters2[cluster2,])) {
-        BCCIO.distribution.table[cluster1, cluster2] <- BCCIO.distribution.table[cluster1, cluster2] + 1
-      }
-    }
-  }
-}
+BCCIO.distribution.table <- dist_table(BCCIO.clustering.comparison, uniqueclusters1, uniqueclusters2, 1, 2)
 
-BCCIO.distribution.table <- as.data.frame(BCCIO.distribution.table)
-BCCIO.distribution.table <- as.matrix(BCCIO.distribution.table)
+BCCIO.proportion.table <- prop_table(BCCIO.distribution.table, uniqueclusters1, uniqueclusters2)
 
-
-rownames(BCCIO.distribution.table) <- uniqueclusters1
-colnames(BCCIO.distribution.table) <- uniqueclusters2
-
-BCCIO.distribution.table <- mapply(BCCIO.distribution.table, FUN=as.numeric)
-
-colnames(BCCIO.distribution.table) <- c("CD56+ NK1", "CD4+ T1", "CD4+ T2", "721 B Lymphoblasts", "CD34+", "CD4+ T3", "CD56+ NK2", "CD19+ B1", "CD33+ Myeloid", "BDCA4+ Dendritic2", "BDCA4+ Dendritic1", "??5", "CD19+ B2", "CAFs", "Endothelial", "Myofibroblasts", "??8", "Tumor1", "Tumor2", "Melanocytes")
-
-BCCIO.proportions.table <- prop.table(BCCIO.distribution.table,1)
-BCCIO.proportions.table <- unlist(BCCIO.proportions.table)
-BCCIO.proportions.table <- as.data.frame(BCCIO.proportions.table)
-
-BCCIO.clustering.heatmap <- ggplot(BCCIO.proportions.table, aes(uniqueclusters2, uniqueclusters1, fill=Proportion)) + geom_tile() + scale_fill_distiller(palette = "Spectral") + theme(axis.text.x = element_text(angle=45, hjust=1)) + labs(x="My Clustering", y="Metadata Clustering")
-BCCIO.clustering.heatmap
-
-x <- uniqueclusters1
-y <- uniqueclusters2
-data <- expand.grid(X=x, Y=y)
-data$Z <- BCCIO.proportions.table
-BCCIO.clustering.heatmap <- ggplot(data, aes(X, Y, fill=Z)) + geom_tile() + scale_fill_distiller(palette="Spectral") + theme(axis.text.x = element_text(angle=45, hjust=1)) + labs(x="My Clustering", y="Metadata Clustering")
-BCCIO.clustering.heatmap
+BCCIO.heatmap <- ggplot_heatmap(BCCIO.proportion.table, uniqueclusters1, uniqueclusters2, c("Spectral"), c("xlab"), c("ylab"))
+BCCIO.heatmap
 
 ```
-
-
 
 
 
