@@ -182,17 +182,20 @@ BCCIO.top25genes <- top25[c(6,7)]
 BCCIO.top2genes <- BCCIO.markers %>% group_by(cluster) %>% top_n(n=2, wt=avg_logFC)
 BCCIO.geneslist <- unique(unlist(top2[7]))
 
-## these are old labels
-## labels <- c("CD56+ NK 1", "CD4+ T 1", "CD19+ B 1", "CD56+ NK 2", "CD4+ T 2", "CD33+ Myeloid", "BDCA4+ Dendritic 1", "??1", "CD4+ T 3", "721 B Lymphoblasts", "BDCA4+ Dendritic 2", "??2", "??3", "??4", "??5", "??6", "??7", "??8", "CD34+", "CD19+ B 2")
+BCCIO <- RunUMAP(BCCIO, dims = 1:50)
+DimPlot(BCCIO, reduction="umap", label=TRUE, pt.size = 0.1) + NoLegend() 
+
+## Checkpoint
+save(BCCIO, file="C:\\Users\\Ryan\\Downloads\\GSE 123813\\BCCIOwithUMAP")
+## To load: 
+load("C:\\Users\\Ryan\\Downloads\\GSE 123813\\BCCIOwithUMAP")
+
+## New Labels
+labels <- c("CD8_memory", "CD4", "B cells", "Tregs", "CD8_activation", "CD8_exhausted", "Macrophages", "Plasma", "Tumor 1", "Misc.", "T_proliferation", "CAFs", "CD8_exhausted", "NK", "pDCs", "Tumor 2", "Tumor 1", "Misc.", "Plasma", "Endothelial", "DCs", "Macrophages", "Misc.", "Myofibroblasts", "Tumor 2", "Misc.", "Plasma", "Melanocytes", "Melanocytes")
 
 names(labels) <- levels(BCCIO)
 BCCIO <- RenameIdents(BCCIO, labels)
-
-new_idents <- rep(c("0", "1", "2", "3", "4", "5", "6", "7", "8", "9", "10", "11", "12", "13", "14", "15", "16", "17", "18", "19"), times=c("CD56+ NK 1", "CD4+ T 1", "CD19+ B 1", "CD56+ NK 2", "CD4+ T 2", "CD33+ Myeloid", "BDCA4+ Dendritic 1", "??1", "CD4+ T 3", "721 B Lymphoblasts", "BDCA4+ Dendritic 2", "??2", "??3", "??4", "??5", "??6", "??7", "??8", "CD34+", "CD19+ B 2"))
-
-
-BCCIO <- RunUMAP(BCCIO, dims = 1:50)
-DimPlot(BCCIO, reduction="umap", label=TRUE, pt.size = 0.1) + NoLegend() ## Create labeled UMAP
+BCCIO@meta.data$seurat_clusters <- BCCIO@active.ident
 
 ```
 
@@ -228,57 +231,53 @@ Comparison of Pre- and Post-Treatment
 ```{r}
 
 DimPlot(BCCIO, reduction="umap", split.by="treatment")
-DotPlot(BCCIO, features=rev(BCCIO.geneslist), cols=c("blue", "red"), dot.scale=8, split.by="treatment") + RotatedAxis()
+
 DimPlot(BCCIO, reduction="umap", split.by="patient")
 
 BCCIO.treatment.barchart <- ggplot_barcharts(BCCIO@meta.data$treatment, BCCIO@meta.data$seurat_clusters, colors="PuBu")
 BCCIO.treatment.barchart
 
+BCCIO.patient.barchart <- ggplot_barcharts(BCCIO@meta.data$patient, BCCIO@meta.data$seurat_clusters, colors="Spectral")
+BCCIO.patient.barchart
+
+## Pre vs. post divided by patient 
+Idents(BCCIO) <- BCCIO$treatment
+BCCIO.pre <- subset(BCCIO, idents=c("pre"))
+BCCIO.post <- subset(BCCIO, idents=c("post"))
+
+BCCIO.pre.patient.barchart <- ggplot_barcharts(BCCIO.pre@meta.data$patient, BCCIO.pre@meta.data$seurat_clusters, colors="Spectral")
+BCCIO.post.patient.barchart <- ggplot_barcharts(BCCIO.post@meta.data$patient, BCCIO.post@meta.data$seurat_clusters, colors="Spectral")
+BCCIO.pre.patient.barchart + BCCIO.post.patient.barchart
+
+## Patient divided by pre vs. post
+Idents(BCCIO) <- BCCIO$patient
+BCCIO.su001 <- subset(BCCIO, idents=c("su001"))
+BCCIO.su002 <- subset(BCCIO, idents=c("su002"))
+BCCIO.su003 <- subset(BCCIO, idents=c("su003"))
+BCCIO.su004 <- subset(BCCIO, idents=c("su004"))
+BCCIO.su005 <- subset(BCCIO, idents=c("su005"))
+BCCIO.su006 <- subset(BCCIO, idents=c("su006"))
+BCCIO.su007 <- subset(BCCIO, idents=c("su007"))
+BCCIO.su008 <- subset(BCCIO, idents=c("su008"))
+BCCIO.su009 <- subset(BCCIO, idents=c("su009"))
+BCCIO.su010 <- subset(BCCIO, idents=c("su010"))
+BCCIO.su012 <- subset(BCCIO, idents=c("su012"))
+
+BCCIO.su001.treatment.barchart <- ggplot_barcharts(BCCIO.su001@meta.data$treatment, BCCIO.su001@meta.data$seurat_clusters, colors="PuBu")
+BCCIO.su002.treatment.barchart <- ggplot_barcharts(BCCIO.su002@meta.data$treatment, BCCIO.su002@meta.data$seurat_clusters, colors="PuBu")
+BCCIO.su003.treatment.barchart <- ggplot_barcharts(BCCIO.su003@meta.data$treatment, BCCIO.su003@meta.data$seurat_clusters, colors="PuBu")
+BCCIO.su004.treatment.barchart <- ggplot_barcharts(BCCIO.su004@meta.data$treatment, BCCIO.su004@meta.data$seurat_clusters, colors="PuBu")
+BCCIO.su005.treatment.barchart <- ggplot_barcharts(BCCIO.su005@meta.data$treatment, BCCIO.su005@meta.data$seurat_clusters, colors="PuBu")
+BCCIO.su006.treatment.barchart <- ggplot_barcharts(BCCIO.su006@meta.data$treatment, BCCIO.su006@meta.data$seurat_clusters, colors="PuBu")
+BCCIO.su007.treatment.barchart <- ggplot_barcharts(BCCIO.su007@meta.data$treatment, BCCIO.su007@meta.data$seurat_clusters, colors="PuBu")
+BCCIO.su008.treatment.barchart <- ggplot_barcharts(BCCIO.su008@meta.data$treatment, BCCIO.su008@meta.data$seurat_clusters, colors="PuBu")
+BCCIO.su009.treatment.barchart <- ggplot_barcharts(BCCIO.su009@meta.data$treatment, BCCIO.su009@meta.data$seurat_clusters, colors="PuBu")
+BCCIO.su010.treatment.barchart <- ggplot_barcharts(BCCIO.su010@meta.data$treatment, BCCIO.su010@meta.data$seurat_clusters, colors="PuBu")
+BCCIO.su012.treatment.barchart <- ggplot_barcharts(BCCIO.su012@meta.data$treatment, BCCIO.su012@meta.data$seurat_clusters, colors="PuBu")
+
+grid.arrange(BCCIO.su001.treatment.barchart, BCCIO.su002.treatment.barchart, BCCIO.su003.treatment.barchart, BCCIO.su004.treatment.barchart, BCCIO.su005.treatment.barchart, BCCIO.su006.treatment.barchart, BCCIO.su007.treatment.barchart, BCCIO.su008.treatment.barchart, BCCIO.su009.treatment.barchart, BCCIO.su010.treatment.barchart, BCCIO.su012.treatment.barchart, nrow=3)
+
+
 ```
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-UMAP Clustering (Following Paper) (not used anymore)
-
-```{r}
-
-BCCIO <- FindNeighbors(BCCIO, compute.SNN = TRUE, k.param = 30)
-
-BCCIO <- FindClusters(BCCIO, resolution = 0.4, algorithm = 3) 
-BCCIO.markers <- FindAllMarkers(BCCIO, test.use = 'wilcox', min.pct = 0.25, logfc.threshold = 0.50, max.cells.per.ident = Inf) 
-top5 <- BCCIO.markers %>% group_by(cluster) %>% top_n(n=5, wt=avg_logFC)
-DoHeatmap(BCCIO,features = top5$gene, size = 3) ## Heatmap with all cells
-
-BCCIO <- RunUMAP(BCCIO, dims = 1:10)
-DimPlot(BCCIO, reduction="umap")
-
-top25 <- BCCIO.markers %>% group_by(cluster) %>% top_n(n=25, wt=avg_logFC) ## top 25 markers per cluster for UMAP labeling
-
-labels <- c("CD4+ T Cells", "CD19+ B Cells", "Smooth Muscle 1", "Small Intestine", "Bronchial Epithelial Cells", "Smooth Muscle 2", "721 B Lymphocytes", "Tongue", "Cardiac Myocytes") ## Lables found using Human Gene Atlas on Enrichr
-
-names(labels) <- levels(BCCIO)
-BCCIO <- RenameIdents(BCCIO, labels)
-
-BCCIO <- RunUMAP(BCCIO, dims = 1:10)
-DimPlot(BCCIO, reduction="umap", label=TRUE) ## Create labeled UMAP
-
-```
