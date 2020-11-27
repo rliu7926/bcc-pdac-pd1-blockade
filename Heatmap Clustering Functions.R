@@ -1,4 +1,4 @@
-dist_table <- function(adintertaset, uniqueclusters1, uniqueclusters2, loc1, loc2) {
+dist_table <- function(dataset, uniqueclusters1, uniqueclusters2, loc1, loc2) {
   
   ## Datset should be a dataframe 
   ## Uniqueclusters 1 and uniqueclustesr2 are matrices
@@ -45,10 +45,8 @@ ggplot_barcharts <- function(dataset.batch, dataset.clusters, colors) {
   tibble <- as_tibble(dataframe)
   
   summary <- tibble %>% group_by(Clusters, Batch) %>% count()
-  print("good3")
   
   normalized_dataset <- summary %>% group_by(Batch) %>% mutate(normalize = n/sum(n))
-  print("good4")
   
   ggplot(normalized_dataset, aes(x=Clusters, y=normalize, fill=Batch)) + 
     geom_col(position = 'fill') + 
