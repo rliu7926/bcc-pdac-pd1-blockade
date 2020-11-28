@@ -40,7 +40,7 @@ determine_PCs <- function(dataset) {
 
 
 
-clustering <- function(dataset, PCs=20, resolution=0.3) {
+clustering <- function(dataset, PCs=20, resolution=0.3, genes=FALSE) {
   ## Find neighbors
   dataset <- FindNeighbors(dataset, dims = 1:PCs)
   
@@ -51,12 +51,14 @@ clustering <- function(dataset, PCs=20, resolution=0.3) {
   DoHeatmap(dataset, features = top5$gene, size = 3)
   
   ## Get list of genes
-  dataset.top25 <- dataset.markers %>% group_by(cluster) %>% top_n(n=25, wt=avg_logFC)
-  vec.dataset.top25 <- dplyr::pull(dataset.top25, 7)
-  View(vec.dataset.top25)
-  
+  if(isTRUE(genes)) {
+    dataset.top25 <- dataset.markers %>% group_by(cluster) %>% top_n(n=25, wt=avg_logFC)
+    vec.dataset.top25 <- dplyr::pull(dataset.top25, 7)
+    return(vec.dataset.top25)
+  }
+
   ## Create UMAP
-  dataset <- RunUMAP(dataset, dims = 1:20)
+  dataset <- RunUMAP(dataset, dims = 1:PCs)
 }
 
 

@@ -188,6 +188,7 @@ DimPlot(BCCIO, reduction="umap", label=TRUE, pt.size = 0.1) + NoLegend()
 ## Checkpoint
 save(BCCIO, file="C:\\Users\\Ryan\\Downloads\\GSE 123813\\BCCIOwithUMAP")
 ## To load: 
+memory.limit(size = 16000000) 
 load("C:\\Users\\Ryan\\Downloads\\GSE 123813\\BCCIOwithUMAP")
 
 ## New Labels
@@ -196,6 +197,7 @@ labels <- c("CD8_memory", "CD4", "B cells", "Tregs", "CD8_activation", "CD8_exha
 names(labels) <- levels(BCCIO)
 BCCIO <- RenameIdents(BCCIO, labels)
 BCCIO@meta.data$seurat_clusters <- BCCIO@active.ident
+DimPlot(BCCIO, reduction="umap", label=TRUE, pt.size = 0.1) + NoLegend() 
 
 ```
 
@@ -217,10 +219,17 @@ uniqueclusters2 <- as.matrix(unique(BCCIO.clustering.comparison[,2]))
 
 BCCIO.distribution.table <- dist_table(BCCIO.clustering.comparison, uniqueclusters1, uniqueclusters2, 1, 2)
 
+
 BCCIO.proportion.table <- prop_table(BCCIO.distribution.table, uniqueclusters1, uniqueclusters2)
 
 BCCIO.heatmap <- ggplot_heatmap(BCCIO.proportion.table, uniqueclusters1, uniqueclusters2, c("Spectral"), c("xlab"), c("ylab"))
+
 BCCIO.heatmap
+
+## Checkpoint
+save(BCCIO.heatmap, file="C:\\Users\\Ryan\\Downloads\\GSE 123813\\BCCIOheatmap")
+## To load: 
+load("C:\\Users\\Ryan\\Downloads\\GSE 123813\\BCCIOheatmap")
 
 ```
 
@@ -281,3 +290,19 @@ grid.arrange(BCCIO.su001.treatment.barchart, BCCIO.su002.treatment.barchart, BCC
 ```
 
 
+
+Gene investigation 
+
+```{r}
+Idents(BCCIO) <- BCCIO$patient
+BCCIO.vlnplot.PDCD1 <- VlnPlot(BCCIO, "PDCD1")
+BCCIO.ridgeplot.PDCD1 <- RidgePlot(BCCIO, "PDCD1")
+BCCIO.vlnplot.PDCD1
+BCCIO.ridgeplot.PDCD1
+
+BCCIO.vlnplot.CD28 <- VlnPlot(BCCIO, "CD28")
+BCCIO.vlnplot.CD28
+
+
+
+```

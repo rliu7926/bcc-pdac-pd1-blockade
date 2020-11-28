@@ -22,6 +22,7 @@ library(pracma)
 Analyze GSE 111672 Datasets
 
 ```{r}
+
 pdac1.read <- read.table("C:\\Users\\Ryan\\Documents\\Nie Research Project\\GSE111672\\GSE111672_PDAC-A-indrop-filtered-expMat.txt", sep = "\t", as.is = 1)
 pdac1.read <- pdac1.read[-c(9946, 9947), ] ## Duplicates of 1-Mar and 2-Mar genes (excel error??)
 rownames(pdac1.read) <- pdac1.read$V1 ## Rownames are stored in the first column of the dataset
@@ -43,8 +44,10 @@ pdac2 <- CreateSeuratObject(counts=pdac2.read, project="PDAC2", min.cells=1, min
 Initial PDAC Datasets Clustering
 
 ```{r}
+
 pdac1 <- preprocessing(pdac1, heatmap=FALSE)
 pdac2 <- preprocessing(pdac2, heatmap=FALSE)
+
 pdac1 <- clustering(pdac1, PCs=50, resolution=0.5)
 pdac2 <- clustering(pdac2, PCs=50, resolution=0.5)
 
@@ -114,7 +117,7 @@ Combined analysis of pdac datasets
 pdac.combined <- merge(pdac1, y=pdac2, add.cell.ids=c("Patient 1", "Patient 2"), project="Merged PDAC")
 pdac.combined <- preprocessing(pdac.combined)
 pdac.combined <- clustering(pdac.combined)
-pdac.combined <- RunUMAP(pdac.combined, dims=1:50)
+
 ## Create UMAPS
 pdac.combined.umap <- DimPlot(pdac.combined, reduction="umap")
 pdac.combined.identsep.umap <- DimPlot(pdac.combined, reduction="umap", group.by="orig.ident")
@@ -166,17 +169,16 @@ Integrated analysis of datasets
 pdac.list <- list(pdac1, pdac2)
 pdac.anchors <- FindIntegrationAnchors(object.list=pdac.list, dims=1:50)
 pdac.integrated <- IntegrateData(anchorset=pdac.anchors, dims=1:50)
-DefaultAssay(pdac.integrated) <- "integrated"
+DefaultAssay(pdac.integrated) <- "RNA"
 
-## Preprocessing function unable to work on integrated datasets 
-pdac.integrated <- ScaleData(pdac.integrated)
-pdac.integrated <- RunPCA(pdac.integrated, npcs=50)
-pdac.integrated <- RunUMAP(pdac.integrated, reduction="pca", dims=1:50)
+pdac.integrated <- preprocessing(pdac.integrated, heatmap=FALSE)
+pdac.integrated <- clustering(pdac.integrated, PCs=50, genes=FALSE)
+pdac.integrated <- RunUMAP(pdac.integrated, dims=1:50)
+pdac.integrated.heatmap <- DimPlot(pdac.integrated, reduction="umap", label=TRUE, pt.size = 0.1) + NoLegend() 
 
 p1 <- DimPlot(pdac.integrated, reduction="umap", group.by="orig.ident")
-p2 <- DimPlot(pdac.integrated, reduction="umap", group.by="orig_clusters")
-p3 <- DimPlot(pdac.integrated, reduction="umap", group.by="seurat_clusters")
-p1 + p2 + p3
+p2 <- DimPlot(pdac.integrated, reduction="umap", group.by="seurat_clusters")
+p1 + p2
 
 
 
@@ -199,7 +201,7 @@ pdac1.meta.data$rownames <- paste0("Patient 1_", pdac1.meta.data$rownames)
 
 pdac2.meta.data$rownames <- rownames(pdac2.meta.data)
 pdac2.meta.data$rownames <- paste0("Patient 2_", pdac2.meta.data$rownames)
-pdac2.meta.data$seurat_clusters <- paste0("B", pdac2.meta.data$seurat_clusters)
+pdac2.meta.data$seurat_clusters <- as.factor(as.numeric(as.character(pdac2.meta.data$seurat_clusters)) + 12)
 
 pdac.integrated.meta.data$rownames <- rownames(pdac.combined.meta.data)
 integratetest1 <- merge(pdac.integrated.meta.data, pdac1.meta.data, by=c("rownames", "nCount_RNA"))
@@ -209,7 +211,7 @@ pdac.integrated.merged <- rbind(integratetest1, integratetest2)
 uniqueclusters1 <- as.matrix(unique(pdac.integrated.merged$seurat_clusters.x))
 uniqueclusters2 <- as.matrix(unique(pdac.integrated.merged$seurat_clusters.y))
 
-pdac.integrated.distribution.table <- dist_table(pdac.integrated.merged, uniqueclusters1, uniqueclusters2, 6, 11)
+pdac.integrated.distribution.table <- dist_table(pdac.integrated.merged, uniqueclusters1, uniqueclusters2, 6, 12)
 
 pdac.integrated.proportions.table <- prop_table(pdac.integrated.distribution.table, uniqueclusters1, uniqueclusters2)
 
@@ -224,12 +226,20 @@ pdac.integrated.comparison.heatmap
 
 
 ```{r}
+pdac.integrated.treatment.barchart <- ggplot_barcharts(pdac.integrated@meta.data$treatment, BCCIO@meta.data$seurat_clusters, colors="PuBu")
+pdac.integrated.treatment.barchart
+
+
+```
+
+
+```{r}
 DefaultAssay(pdac.integrated) <- "RNA"
 Idents(pdac.integrated) <- pdac.integrated$seurat_clusters
 FeaturePlot(pdac.integrated, c("CD68"), label=TRUE)
 
 
-VlnPlot(BCCIO, "PDCD1")
+VlnPlot(BCCIO, "PDCD1)"
 
 ```
 

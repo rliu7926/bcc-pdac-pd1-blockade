@@ -53,4 +53,4 @@ ggplot_barcharts <- function(dataset.batch, dataset.clusters, colors) {
     scale_fill_brewer(palette=colors) +
     theme(axis.text.x = element_text(angle=45, hjust=1)) + 
     ylab("Cell Proportion Normalized by Batch")
-}
+}x
