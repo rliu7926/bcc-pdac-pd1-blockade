@@ -3,10 +3,6 @@ title: "GSE111672 PDAC Analysis"
 output: html_notebook
 ---
 
-This is an [R Markdown](http://rmarkdown.rstudio.com) Notebook. When you execute code within the notebook, the results appear beneath the code. 
-
-Try executing this chunk by clicking the *Run* button within the chunk or by placing your cursor inside it and pressing *Ctrl+Shift+Enter*. 
-
 ```{r}
 ## Load packages
 library(dplyr)
@@ -75,8 +71,8 @@ pdac2.read.cell.labels <- pdac2.read.cell.labels[-c(1),]
 pdac2@meta.data$orig_clusters <- pdac2.read.cell.labels
 
 
-pdac1.umap.orig <- DimPlot(pdac1, group.by = "orig_clusters", label=TRUE, pt.size=0.2)
-pdac2.umap.orig <- DimPlot(pdac2, group.by = "orig_clusters", label=TRUE, pt.size=0.2) 
+pdac1.umap.orig <- DimPlot(pdac1, group.by = "orig_clusters", label=TRUE, pt.size=0.2) + NoLegend()
+pdac2.umap.orig <- DimPlot(pdac2, group.by = "orig_clusters", label=TRUE, pt.size=0.2) + NoLegend()
 
 pdac1.umap.orig + pdac2.umap.orig
 
@@ -122,7 +118,7 @@ pdac.combined <- clustering(pdac.combined)
 pdac.combined.umap <- DimPlot(pdac.combined, reduction="umap")
 pdac.combined.identsep.umap <- DimPlot(pdac.combined, reduction="umap", group.by="orig.ident")
 pdac.combined.umap + pdac.combined.identsep.umap
-DimPlot(pdac.combined, reduction = "umap", split.by="orig.ident")
+
 
 ```
 
@@ -169,7 +165,7 @@ Integrated analysis of datasets
 pdac.list <- list(pdac1, pdac2)
 pdac.anchors <- FindIntegrationAnchors(object.list=pdac.list, dims=1:50)
 pdac.integrated <- IntegrateData(anchorset=pdac.anchors, dims=1:50)
-DefaultAssay(pdac.integrated) <- "RNA"
+DefaultAssay(pdac.integrated) <- " "
 
 pdac.integrated <- preprocessing(pdac.integrated, heatmap=FALSE)
 pdac.integrated <- clustering(pdac.integrated, PCs=50, genes=FALSE)
@@ -178,11 +174,8 @@ pdac.integrated.heatmap <- DimPlot(pdac.integrated, reduction="umap", label=TRUE
 
 p1 <- DimPlot(pdac.integrated, reduction="umap", group.by="orig.ident")
 p2 <- DimPlot(pdac.integrated, reduction="umap", group.by="seurat_clusters")
-p1 + p2
-
-
-
-
+p3 <- DimPlot(pdac.integrated, reduction="umap", group.by="orig_clusters", label=TRUE) + NoLegend()
+p1 + p2 + p3
 
 ```
 
@@ -226,7 +219,7 @@ pdac.integrated.comparison.heatmap
 
 
 ```{r}
-pdac.integrated.treatment.barchart <- ggplot_barcharts(pdac.integrated@meta.data$treatment, BCCIO@meta.data$seurat_clusters, colors="PuBu")
+pdac.integrated.treatment.barchart <- ggplot_barcharts(pdac.integrated@meta.data$orig.ident, pdac.integrated@meta.data$seurat_clusters, colors="PuBu")
 pdac.integrated.treatment.barchart
 
 
@@ -234,6 +227,7 @@ pdac.integrated.treatment.barchart
 
 
 ```{r}
+
 DefaultAssay(pdac.integrated) <- "RNA"
 Idents(pdac.integrated) <- pdac.integrated$seurat_clusters
 FeaturePlot(pdac.integrated, c("CD68"), label=TRUE)
@@ -252,4 +246,75 @@ FeaturePlot(pdac.combined, features=features)
 DotPlot(pdac.combined, features=features) + RotatedAxis()
 RidgePlot(pdac.combined, features=features, ncol=6)
 DoHeatmap(subset(pdac.combined, downsample=100), features=features)
+```
+
+
+
+Analyze GSE 155698 Dataset
+
+```{r}
+
+PDAC155698.1.read <- Read10X("C:\\Users\\Ryan\\Documents\\Nie Research Project\\GSE 155698\\GSM4710700\\GSM4710689_PDAC_TISSUE_1\\PDAC_TISSUE_1\\filtered_feature_bc_matrix\\")
+PDAC155698.2.read <- Read10X("C:\\Users\\Ryan\\Documents\\Nie Research Project\\GSE 155698\\GSM4710700\\GSM4710690_PDAC_TISSUE_2\\PDAC_TISSUE_2\\filtered_feature_bc_matrix\\")
+PDAC155698.3.read <- Read10X("C:\\Users\\Ryan\\Documents\\Nie Research Project\\GSE 155698\\GSM4710700\\GSM4710691_PDAC_TISSUE_3\\PDAC_TISSUE_3\\filtered_feature_bc_matrix\\")
+PDAC155698.4.read <- Read10X("C:\\Users\\Ryan\\Documents\\Nie Research Project\\GSE 155698\\GSM4710700\\GSM4710692_PDAC_TISSUE_4\\PDAC_TISSUE_4\\filtered_feature_bc_matrix\\")
+PDAC155698.5.read <- Read10X("C:\\Users\\Ryan\\Documents\\Nie Research Project\\GSE 155698\\GSM4710700\\GSM4710693_PDAC_TISSUE_5\\PDAC_TISSUE_5\\filtered_feature_bc_matrix\\")
+PDAC155698.6.read <- Read10X("C:\\Users\\Ryan\\Documents\\Nie Research Project\\GSE 155698\\GSM4710700\\GSM4710694_PDAC_TISSUE_6\\PDAC_TISSUE_6\\filtered_feature_bc_matrix\\")
+PDAC155698.7.read <- Read10X("C:\\Users\\Ryan\\Documents\\Nie Research Project\\GSE 155698\\GSM4710700\\GSM4710695_PDAC_TISSUE_7\\PDAC_TISSUE_7\\filtered_feature_bc_matrix\\")
+PDAC155698.8.read <- Read10X("C:\\Users\\Ryan\\Documents\\Nie Research Project\\GSE 155698\\GSM4710700\\GSM4710696_PDAC_TISSUE_8\\PDAC_TISSUE_8\\filtered_feature_bc_matrix\\")
+PDAC155698.9.read <- Read10X("C:\\Users\\Ryan\\Documents\\Nie Research Project\\GSE 155698\\GSM4710700\\GSM4710697_PDAC_TISSUE_9\\PDAC_TISSUE_9\\filtered_feature_bc_matrix\\")
+PDAC155698.10.read <- Read10X("C:\\Users\\Ryan\\Documents\\Nie Research Project\\GSE 155698\\GSM4710700\\GSM4710698_PDAC_TISSUE_10\\PDAC_TISSUE_10\\filtered_feature_bc_matrix\\")
+PDAC155698.11A.read <- Read10X("C:\\Users\\Ryan\\Documents\\Nie Research Project\\GSE 155698\\GSM4710700\\GSM4710699_PDAC_TISSUE_11A\\PDAC_TISSUE_11A\\filtered_feature_bc_matrix\\")
+PDAC155698.11B.read <- Read10X("C:\\Users\\Ryan\\Documents\\Nie Research Project\\GSE 155698\\GSM4710700\\GSM4710700_PDAC_TISSUE_11B\\PDAC_TISSUE_11B\\filtered_feature_bc_matrix\\")
+PDAC155698.12.read <- Read10X("C:\\Users\\Ryan\\Documents\\Nie Research Project\\GSE 155698\\GSM4710700\\GSM4710701_PDAC_TISSUE_12\\PDAC_TISSUE_12\\filtered_feature_bc_matrix\\")
+PDAC155698.13.read <- Read10X("C:\\Users\\Ryan\\Documents\\Nie Research Project\\GSE 155698\\GSM4710700\\GSM4710702_PDAC_TISSUE_13\\PDAC_TISSUE_13\\filtered_feature_bc_matrix\\")
+## PDAC155698.14.read <- Read10X("C:\\Users\\Ryan\\Documents\\Nie Research Project\\GSE 155698\\GSM4710700\\GSM4710703_PDAC_TISSUE_14\\PDAC_TISSUE_14\\filtered_feature_bc_matrix\\")
+PDAC155698.15.read <- Read10X("C:\\Users\\Ryan\\Documents\\Nie Research Project\\GSE 155698\\GSM4710700\\GSM4710704_PDAC_TISSUE_15\\PDAC_TISSUE_15\\filtered_feature_bc_matrix\\")
+PDAC155698.16.read <- Read10X("C:\\Users\\Ryan\\Documents\\Nie Research Project\\GSE 155698\\GSM4710700\\GSM4710705_PDAC_TISSUE_16\\PDAC_TISSUE_16\\filtered_gene_bc_matrices\\")
+
+## PDAC 14 file could not be opened 
+
+PDAC155698.1 <- CreateSeuratObject(PDAC155698.1.read, project="PDAC155698.1", min.cells=3, min.features=200)
+PDAC155698.2 <- CreateSeuratObject(PDAC155698.2.read, project="PDAC155698.2", min.cells=3, min.features=200)
+PDAC155698.3 <- CreateSeuratObject(PDAC155698.3.read, project="PDAC155698.3", min.cells=3, min.features=200)
+PDAC155698.4 <- CreateSeuratObject(PDAC155698.4.read, project="PDAC155698.4", min.cells=3, min.features=200)
+PDAC155698.5 <- CreateSeuratObject(PDAC155698.5.read, project="PDAC155698.5", min.cells=3, min.features=200)
+PDAC155698.6 <- CreateSeuratObject(PDAC155698.6.read, project="PDAC155698.6", min.cells=3, min.features=200)
+PDAC155698.7 <- CreateSeuratObject(PDAC155698.7.read, project="PDAC155698.7", min.cells=3, min.features=200)
+PDAC155698.8 <- CreateSeuratObject(PDAC155698.8.read, project="PDAC155698.8", min.cells=3, min.features=200)
+PDAC155698.9 <- CreateSeuratObject(PDAC155698.9.read, project="PDAC155698.9", min.cells=3, min.features=200)
+PDAC155698.10 <- CreateSeuratObject(PDAC155698.10.read, project="PDAC155698.10", min.cells=3, min.features=200)
+PDAC155698.11A <- CreateSeuratObject(PDAC155698.11A.read, project="PDAC155698.11A", min.cells=3, min.features=200)
+PDAC155698.11B <- CreateSeuratObject(PDAC155698.11B.read, project="PDAC155698.11B", min.cells=3, min.features=200)
+PDAC155698.12 <- CreateSeuratObject(PDAC155698.12.read, project="PDAC155698.12", min.cells=3, min.features=200)
+PDAC155698.13 <- CreateSeuratObject(PDAC155698.13.read, project="PDAC155698.13", min.cells=3, min.features=200)
+## PDAC155698.14 <- CreateSeuratObject(PDAC155698.14.read, project="PDAC155698.14", min.cells=3, min.features=200)
+PDAC155698.15 <- CreateSeuratObject(PDAC155698.15.read, project="PDAC155698.15", min.cells=3, min.features=200)
+PDAC155698.16 <- CreateSeuratObject(PDAC155698.16.read, project="PDAC155698.16", min.cells=3, min.features=200)
+
+PDAC155698 <- merge(PDAC155698.1, y=c(PDAC155698.2, PDAC155698.3, PDAC155698.4, PDAC155698.5, PDAC155698.6, PDAC155698.7, PDAC155698.8, PDAC155698.9, PDAC155698.10, PDAC155698.11A, PDAC155698.11B, PDAC155698.12, PDAC155698.13, PDAC155698.15, PDAC155698.16), add.cell.ids = c("tissue1", "tissue2", "tissue3", "tissue4", "tissue5", "tissue6", "tissue7", "tissue8", "tissue9", "tissue10", "tissue11A", "tissue11B", "tissue12", "tissue13", "tissue15", "tissue16"), project="PDAC155698")
+
+PDAC155698 <- preprocessing(PDAC155698)
+PDAC155698 <- clustering(PDAC155698)
+
+save(PDAC155698, file="C:\\Users\\Ryan\\Documents\\Nie Research Project\\GSE 155698\\PDAC155698")
+memory.limit(size=160000000)
+load("C:\\Users\\Ryan\\Documents\\Nie Research Project\\GSE 155698\\PDAC155698")
+
+
+PDAC155698.umap <- DimPlot(PDAC155698, reduction="umap")
+PDAC155698.umap
+
+```
+
+
+
+```{r}
+
+PDAC155698.tissue.umap <- DimPlot(PDAC155698, reduction="umap", group.by="orig.ident")
+PDAC155698.tissue.umap
+
+PDAC155698.tissue.barchart <- ggplot_barcharts(PDAC155698@meta.data$orig.ident, PDAC155698@meta.data$seurat_clusters, colors="Accent", manycolors=TRUE)
+PDAC155698.tissue.barchart
+
 ```
