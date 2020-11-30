@@ -39,7 +39,7 @@ ggplot_heatmap <- function(proportions.table, uniqueclusters1, uniqueclusters2, 
 }
 
 
-ggplot_barcharts <- function(dataset.batch, dataset.clusters, colors) {
+ggplot_barcharts <- function(dataset.batch, dataset.clusters, colors="Spectral", manycolors=FALSE) {
   
   dataframe <- data.frame("Batch" = dataset.batch, "Clusters" = dataset.clusters)
   tibble <- as_tibble(dataframe)
@@ -47,10 +47,21 @@ ggplot_barcharts <- function(dataset.batch, dataset.clusters, colors) {
   summary <- tibble %>% group_by(Clusters, Batch) %>% count()
   
   normalized_dataset <- summary %>% group_by(Batch) %>% mutate(normalize = n/sum(n))
-  
+
   ggplot(normalized_dataset, aes(x=Clusters, y=normalize, fill=Batch)) + 
     geom_col(position = 'fill') + 
     scale_fill_brewer(palette=colors) +
     theme(axis.text.x = element_text(angle=45, hjust=1)) + 
     ylab("Cell Proportion Normalized by Batch")
-}x
+  
+  if(isTRUE(manycolors)) {
+    colorCount = length(unique(dataset.batch))
+    getPalette = colorRampPalette(brewer.pal(9, colors))
+    
+  ggplot(normalized_dataset, aes(x=Clusters, y=normalize, fill=Batch)) + 
+      geom_col(position = 'fill') + 
+      scale_fill_manual(values= getPalette(colorCount)) +
+      theme(axis.text.x = element_text(angle=45, hjust=1)) + 
+      ylab("Cell Proportion Normalized by Batch")
+  }
+}
