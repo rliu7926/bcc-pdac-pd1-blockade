@@ -39,6 +39,16 @@ determine_PCs <- function(dataset) {
 }
 
 
+test_resolution <- function(dataset, resolution, max.cells=100) {
+  
+  ## Execute first: "dataset <- FindNeighbors(dataset, dims=1:PCs)"
+  
+  dataset <- FindClusters(dataset, resolution = resolution, algorithm = 3)
+  dataset.markers <- FindAllMarkers(dataset, test.use = 'wilcox', min.pct = 0.25, logfc.threshold = 0.50, max.cells.per.ident = max.cells)
+  top5 <- dataset.markers %>% group_by(cluster) %>% top_n(n=5, wt=avg_logFC)
+  DoHeatmap(dataset, features = top5$gene, size = 3)  
+}
+  
 
 clustering <- function(dataset, PCs=20, resolution=0.3, genes=FALSE) {
   ## Find neighbors
