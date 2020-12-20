@@ -11,6 +11,8 @@ library(patchwork)
 library(ggplot2)
 library(cowplot)
 library(pracma)
+library(RColorBrewer)
+library(EnhancedVolcano)
 ```
 
 
@@ -19,14 +21,14 @@ Analyze GSE 111672 Datasets
 
 ```{r}
 
-pdac1.read <- read.table("C:\\Users\\Ryan\\Documents\\Nie Research Project\\GSE111672\\GSE111672_PDAC-A-indrop-filtered-expMat.txt", sep = "\t", as.is = 1)
+pdac1.read <- read.table("C:\\Users\\Ryan\\Documents\\Nie Research Project\\GSE 111672\\GSE111672_PDAC-A-indrop-filtered-expMat.txt", sep = "\t", as.is = 1)
 pdac1.read <- pdac1.read[-c(9946, 9947), ] ## Duplicates of 1-Mar and 2-Mar genes (excel error??)
 rownames(pdac1.read) <- pdac1.read$V1 ## Rownames are stored in the first column of the dataset
 pdac1.read <- pdac1.read[, -c(1)] ## Delete extra rownames vector
 names(pdac1.read) <- lapply(pdac1.read[1,], as.character) ## Column names are stored in the first row of the dataset
 pdac1.read <- pdac1.read[-1,] ## Delete extra colnames vector
 
-pdac2.read <- read.table("C:\\Users\\Ryan\\Documents\\Nie Research Project\\GSE111672\\GSE111672_PDAC-B-indrop-filtered-expMat.txt", sep = "\t", header = TRUE, as.is = 1)
+pdac2.read <- read.table("C:\\Users\\Ryan\\Documents\\Nie Research Project\\GSE 111672\\GSE111672_PDAC-B-indrop-filtered-expMat.txt", sep = "\t", header = TRUE, as.is = 1)
 pdac2.read <- pdac2.read[-c(9946, 9947), ]
 rownames(pdac2.read) <- pdac2.read$Genes
 pdac2.read <- pdac2.read[, -c(1)]
@@ -52,6 +54,13 @@ pdac1.umap <- DimPlot(pdac1, reduction="umap", label=TRUE, pt.size=0.3) + NoLege
 pdac2.umap <- DimPlot(pdac2, reduction="umap", label=TRUE, pt.size=0.3) + NoLegend()
 pdac1.umap + pdac2.umap
 
+## Checkpoint
+
+save(pdac1, file="C:\\Users\\Ryan\\Documents\\Nie Research Project\\GSE 111672\\pdac1")
+save(pdac2, file="C:\\Users\\Ryan\\Documents\\Nie Research Project\\GSE 111672\\pdac2")
+
+load("C:\\Users\\Ryan\\Documents\\Nie Research Project\\GSE 111672\\pdac1")
+load("C:\\Users\\Ryan\\Documents\\Nie Research Project\\GSE 111672\\pdac2")
 ```
 
 
@@ -60,12 +69,12 @@ PDAC Datasets Clustering Comparison
 
 ```{r}
 
-pdac1.read.cell.labels <- read.table("C:\\Users\\Ryan\\Documents\\Nie Research Project\\GSE111672\\GSE111672_PDAC-A-indrop-filtered-expMat.txt", nrows=1, header=FALSE, sep = "\t", as.is = 1)
+pdac1.read.cell.labels <- read.table("C:\\Users\\Ryan\\Documents\\Nie Research Project\\GSE 111672\\GSE111672_PDAC-A-indrop-filtered-expMat.txt", nrows=1, header=FALSE, sep = "\t", as.is = 1)
 pdac1.read.cell.labels <- t(pdac1.read.cell.labels)
 pdac1.read.cell.labels <- pdac1.read.cell.labels[-c(1),]
 pdac1@meta.data$orig_clusters <- pdac1.read.cell.labels
 
-pdac2.read.cell.labels <- read.table("C:\\Users\\Ryan\\Documents\\Nie Research Project\\GSE111672\\GSE111672_PDAC-B-indrop-filtered-expMat.txt", nrows=1, header=FALSE, sep = "\t", as.is = 1)
+pdac2.read.cell.labels <- read.table("C:\\Users\\Ryan\\Documents\\Nie Research Project\\GSE 111672\\GSE111672_PDAC-B-indrop-filtered-expMat.txt", nrows=1, header=FALSE, sep = "\t", as.is = 1)
 pdac2.read.cell.labels <- t(pdac2.read.cell.labels)
 pdac2.read.cell.labels <- pdac2.read.cell.labels[-c(1),]
 pdac2@meta.data$orig_clusters <- pdac2.read.cell.labels
@@ -74,8 +83,8 @@ pdac2@meta.data$orig_clusters <- pdac2.read.cell.labels
 pdac1.umap.orig <- DimPlot(pdac1, group.by = "orig_clusters", label=TRUE, pt.size=0.2) + NoLegend()
 pdac2.umap.orig <- DimPlot(pdac2, group.by = "orig_clusters", label=TRUE, pt.size=0.2) + NoLegend()
 
-pdac1.umap.orig + pdac2.umap.orig
-
+pdac1.umap.orig
+pdac2.umap.orig
 pdac1.idents <- c("Ductal 1", "Ductal 2", "Ductal 3", "Cancer clone B", "Macrophages", "Cancer clone A", "Ductal 4", "T & NK", "Tuft", "Endocrine & RBCs", "Acinar", "Endothelial")
 
 pdac2.idents <- c("Ductal 1", "Ductal 2", "Cancer clone A", "Ductal 3", "Endothelial", "Macrophages", "Ductal 4", "Tuft & Endocrine", "Acinar")
@@ -122,6 +131,8 @@ pdac.combined.umap + pdac.combined.identsep.umap
 
 ```
 
+
+
 PDAC Merged Heatmap Comparison 
 
 ```{r}
@@ -165,17 +176,30 @@ Integrated analysis of datasets
 pdac.list <- list(pdac1, pdac2)
 pdac.anchors <- FindIntegrationAnchors(object.list=pdac.list, dims=1:50)
 pdac.integrated <- IntegrateData(anchorset=pdac.anchors, dims=1:50)
-DefaultAssay(pdac.integrated) <- " "
+DefaultAssay(pdac.integrated) <- "RNA"
 
 pdac.integrated <- preprocessing(pdac.integrated, heatmap=FALSE)
 pdac.integrated <- clustering(pdac.integrated, PCs=50, genes=FALSE)
 pdac.integrated <- RunUMAP(pdac.integrated, dims=1:50)
-pdac.integrated.heatmap <- DimPlot(pdac.integrated, reduction="umap", label=TRUE, pt.size = 0.1) + NoLegend() 
+pdac.integrated.heatmap <- DimPlot(pdac.integrated, reduction="umap", label=TRUE, pt.size = 0.1) + NoLegend()
+
+labels <- c("Ductal 1", "Ductal 2", "Ductal 3", "Cancer clone A (pat. B)", "Ductal 4", "Cancer clone B (pat. A)", "Endothelial", "Macrophages", "Cancer clone A (pat. A)", "NK & T 1", "Tuft", "NK & T 2", "Acinar", "Endocrine & RBCs")
+
+names(labels) <- levels(pdac.integrated)
+pdac.integrated <- RenameIdents(pdac.integrated, labels)
+pdac.integrated@meta.data$seurat_clusters <- pdac.integrated@active.ident
+DimPlot(pdac.integrated, reduction="umap", label=TRUE, pt.size = 0.1) + NoLegend() 
+
+
+##Checkpoint
+save(pdac.integrated, file="C:\\Users\\Ryan\\Documents\\Nie Research Project\\GSE 111672\\pdac.integrated")
+load("C:\\Users\\Ryan\\Documents\\Nie Research Project\\GSE 111672\\pdac.integrated")
+
 
 p1 <- DimPlot(pdac.integrated, reduction="umap", group.by="orig.ident")
 p2 <- DimPlot(pdac.integrated, reduction="umap", group.by="seurat_clusters")
 p3 <- DimPlot(pdac.integrated, reduction="umap", group.by="orig_clusters", label=TRUE) + NoLegend()
-p1 + p2 + p3
+p1 + p3
 
 ```
 
@@ -210,7 +234,7 @@ pdac.integrated.proportions.table <- prop_table(pdac.integrated.distribution.tab
 
 uniqueclusters2 <- c("Acinar", "Cancer clone A", "Ductal 4", "Cancer clone B", "Ductal 3", "Ductal 1", "Ductal 2", "Tuft", "T & NK", "Endothelial", "Macrophages", "Endocrine & RBCs", "B_Acinar", "B_Cancer clone A", "B_Ductal 4", "B_Ductal 3", "B_Ductal 2", "B_Tuft & Endocrine", "B_Macrophages", "B_Ductal 1", "B_Endothelial")
 
-pdac.integrated.comparison.heatmap <- ggplot_heatmap(pdac.integrated.proportions.table, uniqueclusters1, uniqueclusters2, c("RdGy"), c("Integrated Clustering"), c("Individual Clustering"))
+pdac.integrated.comparison.heatmap <- ggplot_heatmap(pdac.integrated.proportions.table, uniqueclusters1, uniqueclusters2, xlab=c("Integrated Clustering"), ylab=c("Individual Clustering"))
 
 pdac.integrated.comparison.heatmap
 
@@ -218,8 +242,27 @@ pdac.integrated.comparison.heatmap
 
 
 
+PDAC Gene Expression Analysis 
+
 ```{r}
-pdac.integrated.treatment.barchart <- ggplot_barcharts(pdac.integrated@meta.data$orig.ident, pdac.integrated@meta.data$seurat_clusters, colors="PuBu")
+
+Idents(pdac.integrated) <- pdac.integrated$seurat_clusters
+
+pdac.integrated.vlnplot.PDCD1 <- VlnPlot(pdac.integrated, "PDCD1") + NoLegend()
+pdac.integrated.vlnplot.CD274 <- VlnPlot(pdac.integrated, "CD274") + NoLegend()
+pdac.integrated.vlnplot.PDCD1LG2 <- VlnPlot(pdac.integrated, "PDCD1LG2") + NoLegend()
+pdac.integrated.vlnplot.TCF7 <- VlnPlot(pdac.integrated, "TCF7") + NoLegend()
+pdac.integrated.vlnplot.PDCD1 + pdac.integrated.vlnplot.CD274 + pdac.integrated.vlnplot.PDCD1LG2 + pdac.integrated.vlnplot.TCF7
+
+
+
+```
+
+
+
+```{r}
+
+pdac.integrated.treatment.barchart <- ggplot_barcharts(pdac.integrated@meta.data$orig.ident, pdac.integrated@meta.data$seurat_clusters, colors="Accent")
 pdac.integrated.treatment.barchart
 
 
@@ -228,12 +271,11 @@ pdac.integrated.treatment.barchart
 
 ```{r}
 
-DefaultAssay(pdac.integrated) <- "RNA"
-Idents(pdac.integrated) <- pdac.integrated$seurat_clusters
-FeaturePlot(pdac.integrated, c("CD68"), label=TRUE)
-
-
-VlnPlot(BCCIO, "PDCD1)"
+set.seed(001)
+pdac.subset <- SubsetData(pdac.integrated, max.cells.per.ident=100)
+Idents(pdac.subset) = pdac.subset$orig.ident
+pdac.averages <- AverageExpression(pdac.subset)
+head(pdac.averages[["RNA"]][c("TCF7", "PDCD1", "CD274", "PDCD1LG2"),])
 
 ```
 
@@ -249,6 +291,17 @@ DoHeatmap(subset(pdac.combined, downsample=100), features=features)
 ```
 
 
+
+
+
+
+
+
+
+
+
+
+##############################################################################################
 
 Analyze GSE 155698 Dataset
 
@@ -292,29 +345,100 @@ PDAC155698.13 <- CreateSeuratObject(PDAC155698.13.read, project="PDAC155698.13",
 PDAC155698.15 <- CreateSeuratObject(PDAC155698.15.read, project="PDAC155698.15", min.cells=3, min.features=200)
 PDAC155698.16 <- CreateSeuratObject(PDAC155698.16.read, project="PDAC155698.16", min.cells=3, min.features=200)
 
+## Merge datasets together
+
 PDAC155698 <- merge(PDAC155698.1, y=c(PDAC155698.2, PDAC155698.3, PDAC155698.4, PDAC155698.5, PDAC155698.6, PDAC155698.7, PDAC155698.8, PDAC155698.9, PDAC155698.10, PDAC155698.11A, PDAC155698.11B, PDAC155698.12, PDAC155698.13, PDAC155698.15, PDAC155698.16), add.cell.ids = c("tissue1", "tissue2", "tissue3", "tissue4", "tissue5", "tissue6", "tissue7", "tissue8", "tissue9", "tissue10", "tissue11A", "tissue11B", "tissue12", "tissue13", "tissue15", "tissue16"), project="PDAC155698")
 
-PDAC155698 <- preprocessing(PDAC155698)
-PDAC155698 <- clustering(PDAC155698)
 
-save(PDAC155698, file="C:\\Users\\Ryan\\Documents\\Nie Research Project\\GSE 155698\\PDAC155698")
-memory.limit(size=160000000)
-load("C:\\Users\\Ryan\\Documents\\Nie Research Project\\GSE 155698\\PDAC155698")
+## Integrate datasets together
 
-
-PDAC155698.umap <- DimPlot(PDAC155698, reduction="umap")
-PDAC155698.umap
+PDAC155698.list <- list(PDAC155698.1, PDAC155698.2, PDAC155698.3, PDAC155698.4, PDAC155698.5, PDAC155698.6, PDAC155698.7, PDAC155698.8, PDAC155698.9, PDAC155698.10, PDAC155698.11A, PDAC155698.11B, PDAC155698.12, PDAC155698.13, PDAC155698.15, PDAC155698.16)
+PDAC155698.anchors <- FindIntegrationAnchors(object.list=PDAC155698.list, dims=1:50)
+PDAC155698.integrated <- IntegrateData(anchorset=PDAC 155698.anchors, dims=1:50)
+DefaultAssay(PDAC155698.integrated) <- "RNA"
 
 ```
 
 
+Initial Analysis of GSE155698
+
+```{r}
+PDAC155698.integrated <- preprocessing(PDAC155698.integrated)
+
+## Determine optimal resolution 
+test_resolution(PDAC155698.integrated, 0.3)
+test_resolution(PDAC155698.integrated, 0.4)
+test_resolution(PDAC155698.integrated, 0.2)
+test_resolution(PDAC155698.integrated, 0.5)
+## Best resolution: 0.5 (27 clusters)
+
+PDAC155698.integrated <- clustering(PDAC155698.integrated, resolution=0.5, genes=FALSE)
+
+save(PDAC155698.integrated, file="C:\\Users\\Ryan\\Documents\\Nie Research Project\\GSE 155698\\PDAC155698.integrated")
+memory.limit(size=160000000)
+load("C:\\Users\\Ryan\\Documents\\Nie Research Project\\GSE 155698\\PDAC155698.integrated")
+
+PDAC155698.integrated.umap <- DimPlot(PDAC155698.integrated, reduction="umap", label=TRUE)
+PDAC155698.integrated.umap
+
+```
+
+Clustering Labels
 
 ```{r}
 
-PDAC155698.tissue.umap <- DimPlot(PDAC155698, reduction="umap", group.by="orig.ident")
+## Features taken from Figure 4B
+
+FeaturePlot(PDAC155698.integrated, features=c('LAMP3', 'CCL22', 'TFF1', 'KRT18', 'KRT19', 'KRT8', 'CLU', 'MMP7', 'SPP1', 'REG1A', 'CTRB2', 'PRSS1', 'DCN', 'LUM', 'CPA3', 'TPSAB1', 'CDH5', 'VWF', 'PLVAP', 'IRF7', 'RGS5', 'PDGFRB', 'CD3E', 'NCAM1', 'NKG7', 'CD3D', 'CD14', 'HLA-DRA', 'GZMB', 'ITGAX', 'ITGAM', 'APOE', 'LYZ', 'IGJ', 'CD79A', 'MS4A1'))
+
+labels <- c("0", "1", "Epithelial + Endocrine", "Macrophages", "Granulocytes", "Epithelial + Endocrine", "Dendritic", "Macrophages", "Epithelial + Endocrine", "Epithelial + Endocrine", "Fibroblasts", "Mast cells", "Macrophages", "Plasma cells", "Epithelial + Endocrine", "B cells", "Granulocytes", "Pericytes", "Acinar cells", "Epithelial + Endocrine", "20", "Acinar cells", "Epithelial + Endocrine", "Endothelial", "Macrophages", "Epithelial + Endocrine", "Plasma cells")
+
+names(labels) <- levels(PDAC155698.integrated)
+PDAC155698.integrated <- RenameIdents(PDAC155698.integrated, labels)
+PDAC155698.integrated@meta.data$seurat_clusters <- PDAC155698.integrated@active.ident
+DimPlot(PDAC155698.integrated, reduction="umap", label=TRUE, pt.size = 0.1) + NoLegend() 
+
+## Separate T and NK cell types
+
+PDAC155698.integrated.subset1 <- subset(PDAC155698.integrated, idents=c('0', '1', '20'))
+
+PDAC155698.integrated.subset1 <- clustering(PDAC155698.integrated.subset1, resolution=1)
+PDAC155698.integrated.subset1.umap <- DimPlot(PDAC155698.integrated.subset1, reduction="umap", label=TRUE)
+PDAC155698.integrated.subset1.umap
+
+FeaturePlot(PDAC155698.integrated.subset1, features=c("CD3E", "NCAM1", "NKG7", "CD3D", "FOXP3", "GZMB"))
+labels <- c("CD4+ T cells", "Tregs", "CD4+ T cells", "CD8+ T cells", "CD8+ T cells", "CD8+ T cells", "NK cells", "CD4+ T cells", "NK cells", "CD8+ T cells", "Other", "CD4+ T cells", "CD8+ T cells", "CD8+ T cells")
+names(labels) <- levels(PDAC155698.integrated.subset1)
+PDAC155698.integrated.subset1 <- RenameIdents(PDAC155698.integrated.subset1, labels)
+
+PDAC155698.integrated$sub_cluster <- as.character(Idents(PDAC155698.integrated))
+PDAC155698.integrated$sub_cluster[Cells(PDAC155698.integrated.subset1)] <- paste(Idents(PDAC155698.integrated.subset1))
+DimPlot(PDAC155698.integrated, group.by="sub_cluster", label = TRUE)
+
+PDAC155698.integrated$seurat_clusters <- PDAC155698.integrated$sub_cluster
+Idents(PDAC155698.integrated) <- PDAC155698.integrated$seurat_clusters
+
+PDAC155698.integrated <- RenameIdents(PDAC155698.integrated, 'Other' = 'Macrophages')
+PDAC155698.integrated.umap <- DimPlot(PDAC155698.integrated, reduction="umap", label=TRUE)
+PDAC155698.integrated.umap
+
+## Checkpoint
+
+save(PDAC155698.integrated, file="C:\\Users\\Ryan\\Documents\\Nie Research Project\\GSE 155698\\PDAC155698.integrated")
+memory.limit(size=160000000)
+load("C:\\Users\\Ryan\\Documents\\Nie Research Project\\GSE 155698\\PDAC155698.integrated")
+
+PDAC155698.integrated.umap <- DimPlot(PDAC155698.integrated, reduction="umap", label=TRUE) + NoLegend()
+PDAC155698.integrated.umap
+
+```
+
+```{r}
+
+PDAC155698.tissue.umap <- DimPlot(PDAC155698.integrated, reduction="umap", group.by="orig.ident")
 PDAC155698.tissue.umap
 
-PDAC155698.tissue.barchart <- ggplot_barcharts(PDAC155698@meta.data$orig.ident, PDAC155698@meta.data$seurat_clusters, colors="Accent", manycolors=TRUE)
+PDAC155698.tissue.barchart <- ggplot_barcharts(PDAC155698.integrated@meta.data$orig.ident, PDAC155698.integrated@meta.data$seurat_clusters, colors="Accent")
 PDAC155698.tissue.barchart
 
 ```
