@@ -1,0 +1,104 @@
+---
+title: "BCCIO / PDAC Comparison"
+output: html_notebook
+---
+
+Load Packages and Data
+
+```{r}
+## Load packages
+library(dplyr)
+library(Seurat)
+library(patchwork)
+library(ggplot2)
+library(cowplot)
+library(pracma)
+library(RColorBrewer)
+library(EnhancedVolcano)
+
+## Integrated PDAC datasets 
+load("C:\\Users\\Ryan\\Documents\\Nie Research Project\\GSE 155698\\PDAC155698.integrated")
+
+## BCCIO dataset
+load("C:\\Users\\Ryan\\Documents\\Nie Research Project\\GSE 123813\\BCCIOwithUMAP")
+
+```
+
+
+
+Enhanced Volcano Plots
+
+```{r}
+
+## Subset data and merge
+
+BCCIO@meta.data$cell.names <- rownames(BCCIO@meta.data)
+PDAC155698.integrated$cell.names <- rownames(PDAC155698.integrated@meta.data)
+
+cells.to.sample <- 5000
+set.seed(111)
+BCCIO.sampled.cells <- sample(x = BCCIO@meta.data$cell.names, size=cells.to.sample, replace=F)
+PDAC.sampled.cells <- sample(x = PDAC155698.integrated@meta.data$cell.names, size=cells.to.sample, replace=F)
+
+BCCIO.subset <- subset(BCCIO, cells = BCCIO.sampled.cells)
+PDAC155698.integrated.subset <- subset(PDAC155698.integrated, cells = PDAC.sampled.cells)
+
+BCCIO.subset$cancer <- c("bcc")
+PDAC155698.integrated.subset$cancer <- c("pdac")
+
+Idents(BCCIO.subset) <- BCCIO.subset$seurat_clusters
+Idents(PDAC155698.integrated.subset) <- PDAC155698.integrated.subset$seurat_clusters
+
+bcc.pdac.merge <- merge(BCCIO.subset, PDAC155698.integrated.subset, add.cell.ids = c("bcc", "pdac"))
+Idents(bcc.pdac.merge) <- bcc.pdac.merge@meta.data$seurat_clusters
+
+bcc.pdac.merge@meta.data <- bcc.pdac.merge@meta.data[, -which(colnames(bcc.pdac.merge@meta.data) %in% c('cell', 'cell.names', 'sub_cluster'))]
+bcc.pdac.merge$orig.clusters <- bcc.pdac.merge$seurat_clusters
+
+
+```
+
+
+
+Enhanced Volcano Plots 
+
+```{r}
+
+## How to read volcano plots: 
+## X-axis: difference in expression (log2 fold change) of gene between ident.1 and ident.2
+## Y-axis: statistical significance of difference in expression (-Log10 probability) 
+## Genes of interest: located on upper corners of plot
+
+
+## CD8 T cells
+bcc.pdac.merge <- RenameIdents(bcc.pdac.merge, 'CD8_memory' = 'CD8+ T cells', 'CD8_activation' = 'CD8+ T cells', 'CD8_exhausted' = 'CD8+ T cells', 'CD4' = 'CD4+ T cells')
+
+CD8.markers <- FindMarkers(bcc.pdac.merge, subset.ident='CD8+ T cells', group.by='cancer', ident.1='bcc')
+CD8.markers_tibble <- as_tibble(CD8.markers, rownames = "GeneNames")
+CD8.markers_tibble <- arrange(CD8.markers_tibble, avg_logFC)
+
+CD8.volcano <- EnhancedVolcano(CD8.markers_tibble,
+                               lab = CD8.markers_tibble$GeneNames,
+                               x = 'avg_logFC', y = 'p_val_adj',
+                               pCutoff = 0.05, FCcutoff = 0.5)
+CD8.volcano
+
+CD8.volcano.pd1 <- EnhancedVolcano(CD8.markers_tibble,
+                                   lab = CD8.markers_tibble$GeneNames,
+                                   x = 'avg_logFC', y = 'p_val_adj',
+                                   pCutoff= 0.99, FCcutoff = 0.5,
+                                   selectLab = c('PDCD1', 'CD274', 'PDCD1LG2', 'TCF7', 'SIRPA', 'HAVCR2', 'LGALS9', 'CD80', 'HLA-DQA1', 'ICOSLG', 'CD40', 'PVR', 'TNFSF18', 'TBFSF4', 'CSF1', 'TIGIT', 'TNFRSF18', 'LAG3', 'CD47', 'CD70', 'CD27', 'TNFRSF4', 'CTLA4', 'CD40LG', 'ICOS', 'CD28'),
+                                   title= 'CD8+ T Cell DE: BCC vs. PDAC')
+CD8.volcano.pd1
+
+## 
+
+```
+
+
+
+
+
+
+
+
