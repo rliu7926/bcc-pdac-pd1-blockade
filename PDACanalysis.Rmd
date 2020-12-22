@@ -1,5 +1,5 @@
 ---
-title: "GSE111672 PDAC Analysis"
+title: "PDAC Analysis"
 output: html_notebook
 ---
 
@@ -307,23 +307,23 @@ Analyze GSE 155698 Dataset
 
 ```{r}
 
-PDAC155698.1.read <- Read10X("C:\\Users\\Ryan\\Documents\\Nie Research Project\\GSE 155698\\GSM4710700\\GSM4710689_PDAC_TISSUE_1\\PDAC_TISSUE_1\\filtered_feature_bc_matrix\\")
-PDAC155698.2.read <- Read10X("C:\\Users\\Ryan\\Documents\\Nie Research Project\\GSE 155698\\GSM4710700\\GSM4710690_PDAC_TISSUE_2\\PDAC_TISSUE_2\\filtered_feature_bc_matrix\\")
-PDAC155698.3.read <- Read10X("C:\\Users\\Ryan\\Documents\\Nie Research Project\\GSE 155698\\GSM4710700\\GSM4710691_PDAC_TISSUE_3\\PDAC_TISSUE_3\\filtered_feature_bc_matrix\\")
-PDAC155698.4.read <- Read10X("C:\\Users\\Ryan\\Documents\\Nie Research Project\\GSE 155698\\GSM4710700\\GSM4710692_PDAC_TISSUE_4\\PDAC_TISSUE_4\\filtered_feature_bc_matrix\\")
-PDAC155698.5.read <- Read10X("C:\\Users\\Ryan\\Documents\\Nie Research Project\\GSE 155698\\GSM4710700\\GSM4710693_PDAC_TISSUE_5\\PDAC_TISSUE_5\\filtered_feature_bc_matrix\\")
-PDAC155698.6.read <- Read10X("C:\\Users\\Ryan\\Documents\\Nie Research Project\\GSE 155698\\GSM4710700\\GSM4710694_PDAC_TISSUE_6\\PDAC_TISSUE_6\\filtered_feature_bc_matrix\\")
-PDAC155698.7.read <- Read10X("C:\\Users\\Ryan\\Documents\\Nie Research Project\\GSE 155698\\GSM4710700\\GSM4710695_PDAC_TISSUE_7\\PDAC_TISSUE_7\\filtered_feature_bc_matrix\\")
-PDAC155698.8.read <- Read10X("C:\\Users\\Ryan\\Documents\\Nie Research Project\\GSE 155698\\GSM4710700\\GSM4710696_PDAC_TISSUE_8\\PDAC_TISSUE_8\\filtered_feature_bc_matrix\\")
-PDAC155698.9.read <- Read10X("C:\\Users\\Ryan\\Documents\\Nie Research Project\\GSE 155698\\GSM4710700\\GSM4710697_PDAC_TISSUE_9\\PDAC_TISSUE_9\\filtered_feature_bc_matrix\\")
-PDAC155698.10.read <- Read10X("C:\\Users\\Ryan\\Documents\\Nie Research Project\\GSE 155698\\GSM4710700\\GSM4710698_PDAC_TISSUE_10\\PDAC_TISSUE_10\\filtered_feature_bc_matrix\\")
-PDAC155698.11A.read <- Read10X("C:\\Users\\Ryan\\Documents\\Nie Research Project\\GSE 155698\\GSM4710700\\GSM4710699_PDAC_TISSUE_11A\\PDAC_TISSUE_11A\\filtered_feature_bc_matrix\\")
-PDAC155698.11B.read <- Read10X("C:\\Users\\Ryan\\Documents\\Nie Research Project\\GSE 155698\\GSM4710700\\GSM4710700_PDAC_TISSUE_11B\\PDAC_TISSUE_11B\\filtered_feature_bc_matrix\\")
-PDAC155698.12.read <- Read10X("C:\\Users\\Ryan\\Documents\\Nie Research Project\\GSE 155698\\GSM4710700\\GSM4710701_PDAC_TISSUE_12\\PDAC_TISSUE_12\\filtered_feature_bc_matrix\\")
-PDAC155698.13.read <- Read10X("C:\\Users\\Ryan\\Documents\\Nie Research Project\\GSE 155698\\GSM4710700\\GSM4710702_PDAC_TISSUE_13\\PDAC_TISSUE_13\\filtered_feature_bc_matrix\\")
-## PDAC155698.14.read <- Read10X("C:\\Users\\Ryan\\Documents\\Nie Research Project\\GSE 155698\\GSM4710700\\GSM4710703_PDAC_TISSUE_14\\PDAC_TISSUE_14\\filtered_feature_bc_matrix\\")
-PDAC155698.15.read <- Read10X("C:\\Users\\Ryan\\Documents\\Nie Research Project\\GSE 155698\\GSM4710700\\GSM4710704_PDAC_TISSUE_15\\PDAC_TISSUE_15\\filtered_feature_bc_matrix\\")
-PDAC155698.16.read <- Read10X("C:\\Users\\Ryan\\Documents\\Nie Research Project\\GSE 155698\\GSM4710700\\GSM4710705_PDAC_TISSUE_16\\PDAC_TISSUE_16\\filtered_gene_bc_matrices\\")
+PDAC155698.1.read <- Read10X("C:\\Users\\Ryan\\Documents\\Nie Research Project\\GSE 155698\\PDAC Samples\\GSM4710689_PDAC_TISSUE_1\\PDAC_TISSUE_1\\filtered_feature_bc_matrix\\")
+PDAC155698.2.read <- Read10X("C:\\Users\\Ryan\\Documents\\Nie Research Project\\GSE 155698\\PDAC Samples\\GSM4710690_PDAC_TISSUE_2\\PDAC_TISSUE_2\\filtered_feature_bc_matrix\\")
+PDAC155698.3.read <- Read10X("C:\\Users\\Ryan\\Documents\\Nie Research Project\\GSE 155698\\PDAC Samples\\GSM4710691_PDAC_TISSUE_3\\PDAC_TISSUE_3\\filtered_feature_bc_matrix\\")
+PDAC155698.4.read <- Read10X("C:\\Users\\Ryan\\Documents\\Nie Research Project\\GSE 155698\\PDAC Samples\\GSM4710692_PDAC_TISSUE_4\\PDAC_TISSUE_4\\filtered_feature_bc_matrix\\")
+PDAC155698.5.read <- Read10X("C:\\Users\\Ryan\\Documents\\Nie Research Project\\GSE 155698\\PDAC Samples\\GSM4710693_PDAC_TISSUE_5\\PDAC_TISSUE_5\\filtered_feature_bc_matrix\\")
+PDAC155698.6.read <- Read10X("C:\\Users\\Ryan\\Documents\\Nie Research Project\\GSE 155698\\PDAC Samples\\GSM4710694_PDAC_TISSUE_6\\PDAC_TISSUE_6\\filtered_feature_bc_matrix\\")
+PDAC155698.7.read <- Read10X("C:\\Users\\Ryan\\Documents\\Nie Research Project\\GSE 155698\\PDAC Samples\\GSM4710695_PDAC_TISSUE_7\\PDAC_TISSUE_7\\filtered_feature_bc_matrix\\")
+PDAC155698.8.read <- Read10X("C:\\Users\\Ryan\\Documents\\Nie Research Project\\GSE 155698\\PDAC Samples\\GSM4710696_PDAC_TISSUE_8\\PDAC_TISSUE_8\\filtered_feature_bc_matrix\\")
+PDAC155698.9.read <- Read10X("C:\\Users\\Ryan\\Documents\\Nie Research Project\\GSE 155698\\PDAC Samples\\GSM4710697_PDAC_TISSUE_9\\PDAC_TISSUE_9\\filtered_feature_bc_matrix\\")
+PDAC155698.10.read <- Read10X("C:\\Users\\Ryan\\Documents\\Nie Research Project\\GSE 155698\\PDAC Samples\\GSM4710698_PDAC_TISSUE_10\\PDAC_TISSUE_10\\filtered_feature_bc_matrix\\")
+PDAC155698.11A.read <- Read10X("C:\\Users\\Ryan\\Documents\\Nie Research Project\\GSE 155698\\PDAC Samples\\GSM4710699_PDAC_TISSUE_11A\\PDAC_TISSUE_11A\\filtered_feature_bc_matrix\\")
+PDAC155698.11B.read <- Read10X("C:\\Users\\Ryan\\Documents\\Nie Research Project\\GSE 155698\\PDAC Samples\\GSM4710700_PDAC_TISSUE_11B\\PDAC_TISSUE_11B\\filtered_feature_bc_matrix\\")
+PDAC155698.12.read <- Read10X("C:\\Users\\Ryan\\Documents\\Nie Research Project\\GSE 155698\\PDAC Samples\\GSM4710701_PDAC_TISSUE_12\\PDAC_TISSUE_12\\filtered_feature_bc_matrix\\")
+PDAC155698.13.read <- Read10X("C:\\Users\\Ryan\\Documents\\Nie Research Project\\GSE 155698\\PDAC Samples\\GSM4710702_PDAC_TISSUE_13\\PDAC_TISSUE_13\\filtered_feature_bc_matrix\\")
+## PDAC155698.14.read <- Read10X("C:\\Users\\Ryan\\Documents\\Nie Research Project\\GSE 155698\\PDAC Samples\\GSM4710703_PDAC_TISSUE_14\\PDAC_TISSUE_14\\filtered_feature_bc_matrix\\")
+PDAC155698.15.read <- Read10X("C:\\Users\\Ryan\\Documents\\Nie Research Project\\GSE 155698\\PDAC Samples\\GSM4710704_PDAC_TISSUE_15\\PDAC_TISSUE_15\\filtered_feature_bc_matrix\\")
+PDAC155698.16.read <- Read10X("C:\\Users\\Ryan\\Documents\\Nie Research Project\\GSE 155698\\PDAC Samples\\GSM4710705_PDAC_TISSUE_16\\PDAC_TISSUE_16\\filtered_gene_bc_matrices\\")
 
 ## PDAC 14 file could not be opened 
 
@@ -433,6 +433,9 @@ PDAC155698.integrated.umap
 
 ```
 
+
+Distribution of samples in integrated clustering
+
 ```{r}
 
 PDAC155698.tissue.umap <- DimPlot(PDAC155698.integrated, reduction="umap", group.by="orig.ident")
@@ -440,5 +443,38 @@ PDAC155698.tissue.umap
 
 PDAC155698.tissue.barchart <- ggplot_barcharts(PDAC155698.integrated@meta.data$orig.ident, PDAC155698.integrated@meta.data$seurat_clusters, colors="Accent")
 PDAC155698.tissue.barchart
+
+```
+
+
+GSE155698 Healthy Pancreas Samples
+
+```{r}
+
+## Read datasets
+
+PDAC155698.H1.read <- Read10X("C:\\Users\\Ryan\\Documents\\Nie Research Project\\GSE 155698\\Healthy Samples\\GSM4710726_Healthy_PBMC_1\\Healthy_PBMC_1\\filtered_feature_bc_matrix")
+PDAC155698.H2.read <- Read10X("C:\\Users\\Ryan\\Documents\\Nie Research Project\\GSE 155698\\Healthy Samples\\GSM4710727_Healthy_PBMC_2\\Healthy_PBMC_2\\filtered_feature_bc_matrix")
+PDAC155698.H3.read <- Read10X("C:\\Users\\Ryan\\Documents\\Nie Research Project\\GSE 155698\\Healthy Samples\\GSM4710728_Healthy_PBMC_3\\Healthy_PBMC_3\\filtered_feature_bc_matrix")
+PDAC155698.H4.read <- Read10X("C:\\Users\\Ryan\\Documents\\Nie Research Project\\GSE 155698\\Healthy Samples\\GSM4710729_Healthy_PBMC_4\\Healthy_PBMC_4\\filtered_feature_bc_matrix")
+
+## Create Seurat objects
+
+PDAC155698.H1 <- CreateSeuratObject(PDAC155698.H1.read, project="PDAC155698.H1", min.cells=3, min.features=200)
+PDAC155698.H2 <- CreateSeuratObject(PDAC155698.H2.read, project="PDAC155698.H2", min.cells=3, min.features=200)
+PDAC155698.H3 <- CreateSeuratObject(PDAC155698.H3.read, project="PDAC155698.H3", min.cells=3, min.features=200)
+PDAC155698.H4 <- CreateSeuratObject(PDAC155698.H4.read, project="PDAC155698.H4", min.cells=3, min.features=200)
+
+## Integrate datasets
+
+PDAC155698.all.list <- list(PDAC155698.1, PDAC155698.2, PDAC155698.3, PDAC155698.4, PDAC155698.5, PDAC155698.6, PDAC155698.7, PDAC155698.8, PDAC155698.9, PDAC155698.10, PDAC155698.11A, PDAC155698.11B, PDAC155698.12, PDAC155698.13, PDAC155698.15, PDAC155698.16, PDAC155698.H1, PDAC155698.H2, PDAC155698.H3, PDAC155698.H4)
+PDAC155698.all.anchors <- FindIntegrationAnchors(object.list=PDAC155698.all.list, dims=1:50)
+PDAC155698.all <- IntegrateData(anchorset=PDAC155698.all.anchors, dims=1:50)
+DefaultAssay(PDAC155698.all) <- "RNA"
+
+## Preprocessing
+
+PDAC155698.all <- preprocessing(PDAC155698.all)
+PDAC155698.all <- clustering(PDAC155698.all)
 
 ```
