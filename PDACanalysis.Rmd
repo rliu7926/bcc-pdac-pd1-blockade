@@ -13,6 +13,10 @@ library(cowplot)
 library(pracma)
 library(RColorBrewer)
 library(EnhancedVolcano)
+
+## Load functions
+source("ClusteringAnalysisFunctions.R", echo=TRUE)
+source("SeuratClusteringFunctions.R", echo=TRUE)
 ```
 
 

@@ -22,7 +22,12 @@ library(ggplot2)
 library(cowplot)
 library(pracma)
 library(RColorBrewer)
+library(gridExtra)
 library(EnhancedVolcano)
+
+## Load functions
+source("ClusteringAnalysisFunctions.R", echo=TRUE)
+source("SeuratClusteringFunctions.R", echo=TRUE)
 ```
 
 
@@ -276,21 +281,20 @@ BCCIO.su009 <- subset(BCCIO, idents=c("su009"))
 BCCIO.su010 <- subset(BCCIO, idents=c("su010"))
 BCCIO.su012 <- subset(BCCIO, idents=c("su012"))
 
-## Responders are 2, 3, 5 based on mutation count 
+## Responders are su001, su002, su003, su004, su009, su012
+## Nonresponders are su005, su006, su007, su008, su010
 
-BCCIO.su001.treatment.barchart <- ggplot_barcharts(BCCIO.su001@meta.data$treatment, BCCIO.su001@meta.data$seurat_clusters, colors="Set3") + NoLegend()
+BCCIO.su001.treatment.barchart <- ggplot_barcharts(BCCIO.su001@meta.data$treatment, BCCIO.su001@meta.data$seurat_clusters, colors="Paired") + NoLegend()
 BCCIO.su002.treatment.barchart <- ggplot_barcharts(BCCIO.su002@meta.data$treatment, BCCIO.su002@meta.data$seurat_clusters, colors="Paired") + NoLegend()
 BCCIO.su003.treatment.barchart <- ggplot_barcharts(BCCIO.su003@meta.data$treatment, BCCIO.su003@meta.data$seurat_clusters, colors="Paired") + NoLegend()
-BCCIO.su004.treatment.barchart <- ggplot_barcharts(BCCIO.su004@meta.data$treatment, BCCIO.su004@meta.data$seurat_clusters, colors="Set3") + NoLegend()
-BCCIO.su005.treatment.barchart <- ggplot_barcharts(BCCIO.su005@meta.data$treatment, BCCIO.su005@meta.data$seurat_clusters, colors="Paired") + NoLegend()
+BCCIO.su004.treatment.barchart <- ggplot_barcharts(BCCIO.su004@meta.data$treatment, BCCIO.su004@meta.data$seurat_clusters, colors="Paired") + NoLegend()
+BCCIO.su005.treatment.barchart <- ggplot_barcharts(BCCIO.su005@meta.data$treatment, BCCIO.su005@meta.data$seurat_clusters, colors="Set3") + NoLegend()
 BCCIO.su006.treatment.barchart <- ggplot_barcharts(BCCIO.su006@meta.data$treatment, BCCIO.su006@meta.data$seurat_clusters, colors="Set3") + NoLegend()
 BCCIO.su007.treatment.barchart <- ggplot_barcharts(BCCIO.su007@meta.data$treatment, BCCIO.su007@meta.data$seurat_clusters, colors="Set3") + NoLegend()
 BCCIO.su008.treatment.barchart <- ggplot_barcharts(BCCIO.su008@meta.data$treatment, BCCIO.su008@meta.data$seurat_clusters, colors="Set3") + NoLegend()
-BCCIO.su009.treatment.barchart <- ggplot_barcharts(BCCIO.su009@meta.data$treatment, BCCIO.su009@meta.data$seurat_clusters, colors="Set3") + NoLegend()
+BCCIO.su009.treatment.barchart <- ggplot_barcharts(BCCIO.su009@meta.data$treatment, BCCIO.su009@meta.data$seurat_clusters, colors="Paired") + NoLegend()
 BCCIO.su010.treatment.barchart <- ggplot_barcharts(BCCIO.su010@meta.data$treatment, BCCIO.su010@meta.data$seurat_clusters, colors="Set3") + NoLegend()
-BCCIO.su012.treatment.barchart <- ggplot_barcharts(BCCIO.su012@meta.data$treatment, BCCIO.su012@meta.data$seurat_clusters, colors="Set3") + NoLegend()
-
-library(gridExtra)
+BCCIO.su012.treatment.barchart <- ggplot_barcharts(BCCIO.su012@meta.data$treatment, BCCIO.su012@meta.data$seurat_clusters, colors="Paired") + NoLegend()
 
 grid.arrange(BCCIO.su001.treatment.barchart, BCCIO.su002.treatment.barchart, BCCIO.su003.treatment.barchart, BCCIO.su004.treatment.barchart, BCCIO.su005.treatment.barchart, BCCIO.su006.treatment.barchart, BCCIO.su007.treatment.barchart, BCCIO.su008.treatment.barchart, BCCIO.su009.treatment.barchart, BCCIO.su010.treatment.barchart, BCCIO.su012.treatment.barchart, nrow=3)
 
@@ -389,17 +393,6 @@ BCCIO.averages <- AverageExpression(BCCIO.subset)
 head(BCCIO.averages[["RNA"]][c("TCF7", "PDCD1", "CD274", "PDCD1LG2"),])
 
 ```
-
-
-
-Volcano Plots 
-
-```{r}
-
-
-
-```
-
 
 
 
