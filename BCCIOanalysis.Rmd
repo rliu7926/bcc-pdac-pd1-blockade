@@ -194,12 +194,6 @@ BCCIO.geneslist <- unique(unlist(top2[7]))
 BCCIO <- RunUMAP(BCCIO, dims = 1:50)
 DimPlot(BCCIO, reduction="umap", label=TRUE, pt.size = 0.1) + NoLegend() 
 
-## Checkpoint
-save(BCCIO, file="C:\\Users\\Ryan\\Downloads\\GSE 123813\\BCCIOwithUMAP")
-## To load: 
-memory.limit(size = 16000000) 
-load("C:\\Users\\Ryan\\Documents\\Nie Research Project\\GSE 123813\\BCCIOwithUMAP")
-
 ## New Labels
 labels <- c("CD8_memory", "CD4", "B cells", "Tregs", "CD8_activation", "CD8_exhausted", "Macrophages", "Plasma", "Tumor 1", "Misc.", "T_proliferation", "CAFs", "CD8_exhausted", "NK", "pDCs", "Tumor 2", "Tumor 1", "Misc.", "Plasma", "Endothelial", "DCs", "Macrophages", "Misc.", "Myofibroblasts", "Tumor 2", "Misc.", "Plasma", "Melanocytes", "Melanocytes")
 
@@ -208,6 +202,13 @@ names(labels) <- levels(BCCIO)
 BCCIO <- RenameIdents(BCCIO, labels)
 BCCIO@meta.data$seurat_clusters <- BCCIO@active.ident
 DimPlot(BCCIO, reduction="umap", label=TRUE, pt.size = 0.1) + NoLegend() 
+
+## Checkpoint
+save(BCCIO, file="C:\\Users\\Ryan\\Documents\\Nie Research Project\\GSE 123813\\BCCIOwithUMAP")
+
+## To load: 
+memory.limit(size = 16000000) 
+load("C:\\Users\\Ryan\\Documents\\Nie Research Project\\GSE 123813\\BCCIOwithUMAP")
 
 ```
 
@@ -300,8 +301,8 @@ grid.arrange(BCCIO.su001.treatment.barchart, BCCIO.su002.treatment.barchart, BCC
 
 ## Responders vs. Nonresponders
 
-BCCIO.responders <- subset(BCCIO, idents=c("su002", "su003", "su005"))
-BCCIO.nonresponders <- subset(BCCIO, idents=c("su001", "su004", "su006", "su007", "su008", "su009", "su010", "su012"))
+BCCIO.responders <- subset(BCCIO, idents=c("su001", "su002", "su003", "su004", "su009", "su012"))
+BCCIO.nonresponders <- subset(BCCIO, idents=c("su005", "su006", "su007", "su008", "su010"))
 
 BCCIO.responders.treatment.barchart <- ggplot_barcharts(BCCIO.responders@meta.data$treatment, BCCIO.responders@meta.data$seurat_clusters, colors="Paired") + NoLegend()
 BCCIO.nonresponders.treatment.barchart <- ggplot_barcharts(BCCIO.nonresponders@meta.data$treatment, BCCIO.nonresponders@meta.data$seurat_clusters, colors="Set3") + NoLegend()
@@ -394,18 +395,3 @@ head(BCCIO.averages[["RNA"]][c("TCF7", "PDCD1", "CD274", "PDCD1LG2"),])
 
 ```
 
-
-
-BCCIO Patient 1 Analysis
-
-```{r}
-
-Idents(BCCIO.su001) <- BCCIO.su001$seurat_clusters
-DimPlot(BCCIO.su001) + NoLegend()
-
-Idents(BCCIO.su001) <- BCCIO.su001$treatment
-DimPlot(BCCIO.su001) + NoLegend()
-
-treatment_count <- count(BCCIO.su001@meta.data, c("treatment"))
-treatment_count
-```

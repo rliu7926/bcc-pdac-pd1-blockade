@@ -16,21 +16,30 @@ library(pracma)
 library(RColorBrewer)
 library(EnhancedVolcano)
 
+memory.limit(size = 16000000)
+
 ## Integrated PDAC datasets 
 load("C:\\Users\\Ryan\\Documents\\Nie Research Project\\GSE 155698\\PDAC155698.integrated")
 
 ## BCCIO dataset
 load("C:\\Users\\Ryan\\Documents\\Nie Research Project\\GSE 123813\\BCCIOwithUMAP")
 
+## Merged dataset (5000 cells from PDAC and BCC, random sample)
+load("C:\\Users\\Ryan\\Documents\\Nie Research Project\\BCC.PDAC.merge")
+
+## Load functions
+source("ClusteringAnalysisFunctions.R", echo=TRUE)
+source("SeuratClusteringFunctions.R", echo=TRUE)
+
 ```
 
 
 
-Enhanced Volcano Plots
+Merge PDAC and BCC datasets (subset)
 
 ```{r}
 
-## Subset data and merge
+## Subset data 
 
 BCCIO@meta.data$cell.names <- rownames(BCCIO@meta.data)
 PDAC155698.integrated$cell.names <- rownames(PDAC155698.integrated@meta.data)
@@ -46,8 +55,7 @@ PDAC155698.integrated.subset <- subset(PDAC155698.integrated, cells = PDAC.sampl
 BCCIO.subset$cancer <- c("bcc")
 PDAC155698.integrated.subset$cancer <- c("pdac")
 
-Idents(BCCIO.subset) <- BCCIO.subset$seurat_clusters
-Idents(PDAC155698.integrated.subset) <- PDAC155698.integrated.subset$seurat_clusters
+## Merge datasets
 
 bcc.pdac.merge <- merge(BCCIO.subset, PDAC155698.integrated.subset, add.cell.ids = c("bcc", "pdac"))
 Idents(bcc.pdac.merge) <- bcc.pdac.merge@meta.data$seurat_clusters
@@ -55,12 +63,15 @@ Idents(bcc.pdac.merge) <- bcc.pdac.merge@meta.data$seurat_clusters
 bcc.pdac.merge@meta.data <- bcc.pdac.merge@meta.data[, -which(colnames(bcc.pdac.merge@meta.data) %in% c('cell', 'cell.names', 'sub_cluster'))]
 bcc.pdac.merge$orig.clusters <- bcc.pdac.merge$seurat_clusters
 
+## Save merged dataset
+
+save(bcc.pdac.merge, file="C:\\Users\\Ryan\\Documents\\Nie Research Project\\BCC.PDAC.merge")
 
 ```
 
 
 
-Enhanced Volcano Plots 
+Enhanced Volcano Plots (PDAC vs. BCC)
 
 ```{r}
 
@@ -70,7 +81,8 @@ Enhanced Volcano Plots
 ## Genes of interest: located on upper corners of plot
 
 
-## CD8 T cells
+## CD8 T cells 
+
 bcc.pdac.merge <- RenameIdents(bcc.pdac.merge, 'CD8_memory' = 'CD8+ T cells', 'CD8_activation' = 'CD8+ T cells', 'CD8_exhausted' = 'CD8+ T cells', 'CD4' = 'CD4+ T cells')
 
 CD8.markers <- FindMarkers(bcc.pdac.merge, subset.ident='CD8+ T cells', group.by='cancer', ident.1='bcc')
@@ -80,18 +92,199 @@ CD8.markers_tibble <- arrange(CD8.markers_tibble, avg_logFC)
 CD8.volcano <- EnhancedVolcano(CD8.markers_tibble,
                                lab = CD8.markers_tibble$GeneNames,
                                x = 'avg_logFC', y = 'p_val_adj',
-                               pCutoff = 0.05, FCcutoff = 0.5)
+                               pCutoff = 0.05, FCcutoff = 0.5,
+                               title= 'CD8+ T Cell DE: BCC vs. PDAC')
 CD8.volcano
 
 CD8.volcano.pd1 <- EnhancedVolcano(CD8.markers_tibble,
                                    lab = CD8.markers_tibble$GeneNames,
                                    x = 'avg_logFC', y = 'p_val_adj',
-                                   pCutoff= 0.99, FCcutoff = 0.5,
+                                   pCutoff= 0.05, FCcutoff = 0.5,
                                    selectLab = c('PDCD1', 'CD274', 'PDCD1LG2', 'TCF7', 'SIRPA', 'HAVCR2', 'LGALS9', 'CD80', 'HLA-DQA1', 'ICOSLG', 'CD40', 'PVR', 'TNFSF18', 'TBFSF4', 'CSF1', 'TIGIT', 'TNFRSF18', 'LAG3', 'CD47', 'CD70', 'CD27', 'TNFRSF4', 'CTLA4', 'CD40LG', 'ICOS', 'CD28'),
                                    title= 'CD8+ T Cell DE: BCC vs. PDAC')
 CD8.volcano.pd1
 
-## 
+
+## CD4 T cells
+
+bcc.pdac.merge <- RenameIdents(bcc.pdac.merge, 'CD8_memory' = 'CD8+ T cells', 'CD8_activation' = 'CD8+ T cells', 'CD8_exhausted' = 'CD8+ T cells', 'CD4' = 'CD4+ T cells')
+
+CD4.markers <- FindMarkers(bcc.pdac.merge, subset.ident='CD4+ T cells', group.by='cancer', ident.1='bcc')
+CD4.markers_tibble <- as_tibble(CD4.markers, rownames = "GeneNames")
+CD4.markers_tibble <- arrange(CD4.markers_tibble, avg_logFC)
+
+CD4.volcano <- EnhancedVolcano(CD4.markers_tibble,
+                               lab = CD4.markers_tibble$GeneNames,
+                               x = 'avg_logFC', y = 'p_val_adj',
+                               pCutoff = 0.05, FCcutoff = 0.5,
+                               title= 'CD4+ T Cell DE: BCC vs. PDAC')
+CD4.volcano
+
+CD4.volcano.pd1 <- EnhancedVolcano(CD4.markers_tibble,
+                                   lab = CD4.markers_tibble$GeneNames,
+                                   x = 'avg_logFC', y = 'p_val_adj',
+                                   pCutoff= 0.05, FCcutoff = 0.5,
+                                   selectLab = c('PDCD1', 'CD274', 'PDCD1LG2', 'TCF7', 'SIRPA', 'HAVCR2', 'LGALS9', 'CD80', 'HLA-DQA1', 'ICOSLG', 'CD40', 'PVR', 'TNFSF18', 'TBFSF4', 'CSF1', 'TIGIT', 'TNFRSF18', 'LAG3', 'CD47', 'CD70', 'CD27', 'TNFRSF4', 'CTLA4', 'CD40LG', 'ICOS', 'CD28'),
+                                   title= 'CD4+ T Cell DE: BCC vs. PDAC')
+CD4.volcano.pd1
+
+
+## Macrophages
+
+macrophage.markers <- FindMarkers(bcc.pdac.merge, subset.ident='Macrophages', group.by='cancer', ident.1='bcc')
+macrophage.markers_tibble <- as_tibble(macrophage.markers, rownames = "GeneNames")
+macrophage.markers_tibble <- arrange(macrophage.markers_tibble, avg_logFC)
+
+macrophage.volcano <- EnhancedVolcano(macrophage.markers_tibble,
+                               lab = macrophage.markers_tibble$GeneNames,
+                               x = 'avg_logFC', y = 'p_val_adj',
+                               pCutoff = 0.05, FCcutoff = 0.5,
+                               title= 'Macrophage DE: BCC vs. PDAC')
+macrophage.volcano
+
+macrophage.volcano.pd1 <- EnhancedVolcano(macrophage.markers_tibble,
+                                   lab = macrophage.markers_tibble$GeneNames,
+                                   x = 'avg_logFC', y = 'p_val_adj',
+                                   pCutoff= 0.05, FCcutoff = 0.5,
+                                   selectLab = c('PDCD1', 'CD274', 'PDCD1LG2', 'TCF7', 'SIRPA', 'HAVCR2', 'LGALS9', 'CD80', 'HLA-DQA1', 'ICOSLG', 'CD40', 'PVR', 'TNFSF18', 'TBFSF4', 'CSF1', 'TIGIT', 'TNFRSF18', 'LAG3', 'CD47', 'CD70', 'CD27', 'TNFRSF4', 'CTLA4', 'CD40LG', 'ICOS', 'CD28'),
+                                   title= 'Macrophage DE: BCC vs. PDAC')
+macrophage.volcano.pd1
+
+```
+
+
+
+Enhanced Volcano Plots (PDAC)
+
+```{r}
+
+pdac.macrophage.markers <- FindMarkers(PDAC155698.integrated, subset.ident='Macrophages', group.by='orig.ident', ident.1='PDAC155698.1')
+pdac.macrophage.markers_tibble <- as_tibble(pdac.macrophage.markers, rownames = "GeneNames")
+pdac.macrophage.markers_tibble <- arrange(pdac.macrophage.markers_tibble, avg_logFC)
+
+pdac.macrophage.volcano <- EnhancedVolcano(pdac.macrophage.markers_tibble,
+                               lab = pdac.macrophage.markers_tibble$GeneNames,
+                               x = 'avg_logFC', y = 'p_val_adj',
+                               pCutoff = 0.05, FCcutoff = 0.5,
+                               title= 'Macrophage DE: PDAC Patient 1 vs. Rest of Patients')
+pdac.macrophage.volcano
+
+```
+
+
+
+Compare BCC Responders vs. Nonresponders
+
+```{r}
+
+## Label BCC dataset with responders vs. nonresponders
+
+responders <- c("su001", "su002", "su003", "su004", "su009", "su012")
+nonresponders <- c("su005", "su006", "su007", "su008", "su010")
+
+for (patient in responders) {
+  BCCIO@meta.data$response[BCCIO$patient == patient] = "Responsive"
+}
+for (patient in nonresponders) {
+  BCCIO@meta.data$response[BCCIO$patient == patient] = "Nonresponsive"
+}
+
+## Enhanced Volcano Plots for T cells, B cells, and macrophages
+
+Idents(BCCIO) <- BCCIO$seurat_clusters
+
+bcc.cd4.responder.volcano <- bioc_volcano(BCCIO, c("CD4"), c("response"), c("Responsive"), c("Nonresponsive"))
+bcc.cd4.responder.volcano
+
+bcc.cd8_memory.responder.volcano <- bioc_volcano(BCCIO, c("CD8_memory"), c("response"), c("Responsive"), c("Nonresponsive"))
+bcc.cd8_memory.responder.volcano
+
+bcc.cd8_exhausted.responder.volcano <- bioc_volcano(BCCIO, c("CD8_exhausted"), c("response"), c("Responsive"), c("Nonresponsive"))
+bcc.cd8_exhausted.responder.volcano
+
+bcc.cd8_activation.responder.volcano <- bioc_volcano(BCCIO, c("CD8_activation"), c("response"), c("Responsive"), c("Nonresponsive"))
+bcc.cd8_activation.responder.volcano
+
+bcc.tregs.responder.volcano <- bioc_volcano(BCCIO, c("Tregs"), c("response"), c("Responsive"), c("Nonresponsive"))
+bcc.tregs.responder.volcano
+
+bcc.bcell.responder.volcano <- bioc_volcano(BCCIO, c("B cells"), c("response"), c("Responsive"), c("Nonresponsive"))
+bcc.bcell.responder.volcano
+
+```
+
+
+
+Look specifically at BCC pre-treatment 
+Goal: Determine predictors of PD1-blockade responsiveness
+
+```{r}
+
+## Split dataset into pre-treatment and post-treatment
+
+Idents(BCCIO) <- BCCIO$treatment
+
+BCCIO.pre <- subset(BCCIO, idents=c("pre"))
+BCCIO.post <- subset(BCCIO, idents=c("post"))
+
+## Enhanced Volcano plots (CD4, CD8, B, macrophage)
+
+interestingcelltypes <- c("CD8_memory", "CD8_activation", "CD8_exhausted", "CD4", "Tregs", "T_proliferation", "B cells", "Macrophages")
+
+Idents(BCCIO.pre) <- BCCIO.pre$seurat_clusters
+
+for(celltype in interestingcelltypes) {
+  bcc.pretreatment.responder.volcano <- bioc_volcano(BCCIO.pre, celltype, c("response"), c("Responsive"), c("Nonresponsive"))
+  assign(paste0("bcc.pretreatment.", celltype, ".responder.volcano"), bcc.pretreatment.responder.volcano)
+  bcc.pretreatment.responder.volcano
+}
+
+`bcc.pretreatment.B cells.responder.volcano`
+## Pretty much no difference
+
+`bcc.pretreatment.CD4.responder.volcano`
+## Nothing of interest (CXCL13 higher in responders -> bad clustering?)
+
+`bcc.pretreatment.CD8_activation.responder.volcano`
+## Nothing of interest
+
+`bcc.pretreatment.CD8_exhausted.responder.volcano`
+## Lots of significant differences
+## Higher amongst responders: CCL5 (associated with higher proliferation in melanoma)
+## Higher amongst nonresponders: HSP group 
+
+`bcc.pretreatment.CD8_memory.responder.volcano`
+## Higher amongst responders: VIM (EMT cell marker -> leads to metastasis)
+## Higher amongst nonresponders: HSP group, CCL4 (similar to CCL5)
+
+`bcc.pretreatment.Macrophages.responder.volcano`
+## Higher amongst responders: HLA genes (major role in immune regulation)
+
+`bcc.pretreatment.Tregs.responder.volcano`
+## Nothing of interest
+
+`bcc.pretreatment.T_proliferation.responder.volcano`
+## Higher amongst responders: HLA genes 
+
+```
+
+
+
+Conclusion?: look for higher expression of HLA genes in macrophages and T_proliferation 
+
+```{r}
+
+
+bcc.pretreatment.macrophage.markers <- FindMarkers(BCCIO.pre, subset.ident='Macrophages', group.by='response', ident.1='Responsive')
+
+bcc.pretreatment.macrophage.markers_tibble <- as_tibble(bcc.pretreatment.macrophage.markers, rownames = "GeneNames")
+
+
+bcc.pretreatment.macrophage.markers_tibble <- arrange(bcc.pretreatment.macrophage.markers_tibble, avg_logFC)
+
+bcc.pretreatment.macrophage.important.markers <- bcc.pretreatment.macrophage.markers_tibble[bcc.pretreatment.macrophage.markers_tibble$p_val_adj<0.05 &  bcc.pretreatment.macrophage.markers_tibble$avg_logFC< -0.5, ]z
+
+
 
 ```
 
@@ -102,3 +295,16 @@ CD8.volcano.pd1
 
 
 
+
+
+```{r}
+
+bcc.pdac.macrophage.volcano <- bioc_volcano(bcc.pdac.merge, c("Macrophages"), c("cancer"), c("bcc"), c("pdac"))
+
+
+bcc.cd8_memory.responder.volcano <- bioc_volcano(BCCIO, c("CD8_memory"), c("response"), c("Responsive"), c("Nonresponsive"))
+
+
+
+
+```
