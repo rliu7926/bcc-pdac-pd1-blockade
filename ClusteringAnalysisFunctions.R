@@ -30,12 +30,12 @@ prop_table <- function(distribution.table, uniqueclusters1, uniqueclusters2){
 
 
 
-ggplot_heatmap <- function(proportions.table, uniqueclusters1, uniqueclusters2, palette="Spectral", xlab, ylab) {
+ggplot_heatmap <- function(proportions.table, uniqueclusters1, uniqueclusters2, xlab, ylab) {
   x <- uniqueclusters1
   y <- uniqueclusters2
   data <- expand.grid(X=x, Y=y)
   data$Z <- proportions.table
-  ggplot(data, aes(X, Y, fill= Z)) + geom_tile() + scale_fill_distiller(palette=palette) + labs(x=xlab, y=ylab) + theme(axis.text.x = element_text(angle=45, hjust=1))
+  ggplot(data, aes(X, Y, fill= Z)) + geom_tile() + labs(x=xlab, y=ylab) + theme(axis.text.x = element_text(angle=45, hjust=1))
 }
 
 
