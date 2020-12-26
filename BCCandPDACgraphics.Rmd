@@ -147,108 +147,163 @@ BCC.UMAP.patient1.treatment <- DimPlot(object = BCCIO,
                                       label = FALSE,
                                       group.by = c("patient.treatment"),
                                       cells.highlight = list(BCC.patient001.pre.cells, BCC.patient001.post.cells),
-                                      cols.highlight = c("royalblue1", "cadetblue1"),
+                                      cols.highlight = c("royalblue1", "darkslategray1"),
                                       cols = c("grey90"),
                                       sizes.highlight = 0.1,
-                                      pt.size = 0.1) + NoLegend() + labs(title = "su001")
+                                      pt.size = 0.1) + NoLegend() + 
+                                      labs(title = "su001", x = "",  y = "") + 
+                                      theme(axis.line.y = element_blank(), axis.line.x = element_blank(),
+                                            axis.text.y = element_blank(), axis.text.x = element_blank(),
+                                            axis.ticks.y = element_blank(), axis.ticks.x = element_blank(),
+                                            plot.title = element_text(hjust = 0.5))
 BCC.UMAP.patient2.treatment <- DimPlot(object = BCCIO,
                                       reduction = "umap", 
                                       label = FALSE,
                                       group.by = c("patient.treatment"),
                                       cells.highlight = list(BCC.patient002.pre.cells, BCC.patient002.post.cells),
-                                      cols.highlight = c("royalblue1", "cadetblue1"),
+                                      cols.highlight = c("royalblue1", "darkslategray1"),
                                       cols = c("grey90"),
                                       sizes.highlight = 0.1,
-                                      pt.size = 0.1) + NoLegend() + labs(title = "su002")
+                                      pt.size = 0.1) + NoLegend() + 
+                                      labs(title = "su002", x = "",  y = "") + 
+                                      theme(axis.line.y = element_blank(), axis.line.x = element_blank(),
+                                            axis.text.y = element_blank(), axis.text.x = element_blank(),
+                                            axis.ticks.y = element_blank(), axis.ticks.x = element_blank(),
+                                            plot.title = element_text(hjust = 0.5))
 BCC.UMAP.patient3.treatment <- DimPlot(object = BCCIO,
                                       reduction = "umap", 
                                       label = FALSE,
                                       group.by = c("patient.treatment"),
                                       cells.highlight = list(BCC.patient003.pre.cells, BCC.patient003.post.cells),
-                                      cols.highlight = c("royalblue1", "cadetblue1"),
+                                      cols.highlight = c("royalblue1", "darkslategray1"),
                                       cols = c("grey90"),
                                       sizes.highlight = 0.1,
-                                      pt.size = 0.1) + NoLegend() + labs(title = "su003")
+                                      pt.size = 0.1) + NoLegend() + 
+                                      labs(title = "su003", x = "",  y = "") + 
+                                      theme(axis.line.y = element_blank(), axis.line.x = element_blank(),
+                                            axis.text.y = element_blank(), axis.text.x = element_blank(),
+                                            axis.ticks.y = element_blank(), axis.ticks.x = element_blank(),
+                                            plot.title = element_text(hjust = 0.5))
 BCC.UMAP.patient4.treatment <- DimPlot(object = BCCIO,
                                       reduction = "umap", 
                                       label = FALSE,
                                       group.by = c("patient.treatment"),
                                       cells.highlight = list(BCC.patient004.pre.cells, BCC.patient004.post.cells),
-                                      cols.highlight = c("royalblue1", "cadetblue1"),
+                                      cols.highlight = c("royalblue1", "darkslategray1"),
                                       cols = c("grey90"),
                                       sizes.highlight = 0.1,
-                                      pt.size = 0.1) + NoLegend() + labs(title = "su004")
+                                      pt.size = 0.1) + NoLegend() + 
+                                      labs(title = "su004", x = "",  y = "") + 
+                                      theme(axis.line.y = element_blank(), axis.line.x = element_blank(),
+                                            axis.text.y = element_blank(), axis.text.x = element_blank(),
+                                            axis.ticks.y = element_blank(), axis.ticks.x = element_blank(),
+                                            plot.title = element_text(hjust = 0.5))
 BCC.UMAP.patient5.treatment <- DimPlot(object = BCCIO,
                                       reduction = "umap", 
                                       label = FALSE,
                                       group.by = c("patient.treatment"),
                                       cells.highlight = list(BCC.patient005.pre.cells, BCC.patient005.post.cells),
-                                      cols.highlight = c("royalblue1", "cadetblue1"),
+                                      cols.highlight = c("royalblue1", "darkslategray1"),
                                       cols = c("grey90"),
                                       sizes.highlight = 0.1,
-                                      pt.size = 0.1) + NoLegend() + labs(title = "su005")
+                                      pt.size = 0.1) + NoLegend() + 
+                                      labs(title = "su005", x = "",  y = "") + 
+                                      theme(axis.line.y = element_blank(), axis.line.x = element_blank(),
+                                            axis.text.y = element_blank(), axis.text.x = element_blank(),
+                                            axis.ticks.y = element_blank(), axis.ticks.x = element_blank(),
+                                            plot.title = element_text(hjust = 0.5))
 BCC.UMAP.patient6.treatment <- DimPlot(object = BCCIO,
                                       reduction = "umap", 
                                       label = FALSE,
                                       group.by = c("patient.treatment"),
                                       cells.highlight = list(BCC.patient006.pre.cells, BCC.patient006.post.cells),
-                                      cols.highlight = c("royalblue1", "cadetblue1"),
+                                      cols.highlight = c("royalblue1", "darkslategray1"),
                                       cols = c("grey90"),
                                       sizes.highlight = 0.1,
-                                      pt.size = 0.1) + NoLegend() + labs(title = "su006")
+                                      pt.size = 0.1) + NoLegend() + 
+                                      labs(title = "su006", x = "",  y = "") + 
+                                      theme(axis.line.y = element_blank(), axis.line.x = element_blank(),
+                                            axis.text.y = element_blank(), axis.text.x = element_blank(),
+                                            axis.ticks.y = element_blank(), axis.ticks.x = element_blank(),
+                                            plot.title = element_text(hjust = 0.5))
 BCC.UMAP.patient7.treatment <- DimPlot(object = BCCIO,
                                       reduction = "umap", 
                                       label = FALSE,
                                       group.by = c("patient.treatment"),
                                       cells.highlight = list(BCC.patient007.pre.cells, BCC.patient007.post.cells),
-                                      cols.highlight = c("royalblue1", "cadetblue1"),
+                                      cols.highlight = c("royalblue1", "darkslategray1"),
                                       cols = c("grey90"),
                                       sizes.highlight = 0.1,
-                                      pt.size = 0.1) + NoLegend() + labs(title = "su007")
+                                      pt.size = 0.1) + NoLegend() + 
+                                      labs(title = "su007", x = "",  y = "") + 
+                                      theme(axis.line.y = element_blank(), axis.line.x = element_blank(),
+                                            axis.text.y = element_blank(), axis.text.x = element_blank(),
+                                            axis.ticks.y = element_blank(), axis.ticks.x = element_blank(),
+                                            plot.title = element_text(hjust = 0.5))
 BCC.UMAP.patient8.treatment <- DimPlot(object = BCCIO,
                                       reduction = "umap", 
                                       label = FALSE,
                                       group.by = c("patient.treatment"),
                                       cells.highlight = list(BCC.patient008.pre.cells, BCC.patient008.post.cells),
-                                      cols.highlight = c("royalblue1", "cadetblue1"),
+                                      cols.highlight = c("royalblue1", "darkslategray1"),
                                       cols = c("grey90"),
                                       sizes.highlight = 0.1,
-                                      pt.size = 0.1) + NoLegend() + labs(title = "su008")
+                                      pt.size = 0.1) + NoLegend() + 
+                                      labs(title = "su008", x = "",  y = "") + 
+                                      theme(axis.line.y = element_blank(), axis.line.x = element_blank(),
+                                            axis.text.y = element_blank(), axis.text.x = element_blank(),
+                                            axis.ticks.y = element_blank(), axis.ticks.x = element_blank(),
+                                            plot.title = element_text(hjust = 0.5))
 BCC.UMAP.patient9.treatment <- DimPlot(object = BCCIO,
                                       reduction = "umap", 
                                       label = FALSE,
                                       group.by = c("patient.treatment"),
                                       cells.highlight = list(BCC.patient009.pre.cells, BCC.patient009.post.cells),
-                                      cols.highlight = c("royalblue1", "cadetblue1"),
+                                      cols.highlight = c("royalblue1", "darkslategray1"),
                                       cols = c("grey90"),
                                       sizes.highlight = 0.1,
-                                      pt.size = 0.1) + NoLegend() + labs(title = "su009")
+                                      pt.size = 0.1) + NoLegend() + 
+                                      labs(title = "su009", x = "",  y = "") + 
+                                      theme(axis.line.y = element_blank(), axis.line.x = element_blank(),
+                                            axis.text.y = element_blank(), axis.text.x = element_blank(),
+                                            axis.ticks.y = element_blank(), axis.ticks.x = element_blank(),
+                                            plot.title = element_text(hjust = 0.5))
 BCC.UMAP.patient10.treatment <- DimPlot(object = BCCIO,
                                       reduction = "umap", 
                                       label = FALSE,
                                       group.by = c("patient.treatment"),
                                       cells.highlight = list(BCC.patient010.pre.cells, BCC.patient010.post.cells),
-                                      cols.highlight = c("royalblue1", "cadetblue1"),
+                                      cols.highlight = c("royalblue1", "darkslategray1"),
                                       cols = c("grey90"),
                                       sizes.highlight = 0.1,
-                                      pt.size = 0.1) + NoLegend() + labs(title = "su010")
+                                      pt.size = 0.1) + NoLegend() + 
+                                      labs(title = "su010", x = "",  y = "") + 
+                                      theme(axis.line.y = element_blank(), axis.line.x = element_blank(),
+                                            axis.text.y = element_blank(), axis.text.x = element_blank(),
+                                            axis.ticks.y = element_blank(), axis.ticks.x = element_blank(),
+                                            plot.title = element_text(hjust = 0.5))
 BCC.UMAP.patient12.treatment <- DimPlot(object = BCCIO,
                                       reduction = "umap", 
                                       label = FALSE,
                                       group.by = c("patient.treatment"),
                                       cells.highlight = list(BCC.patient012.pre.cells, BCC.patient012.post.cells),
-                                      cols.highlight = c("royalblue1", "cadetblue1"),
+                                      cols.highlight = c("royalblue1", "darkslategray1"),
                                       cols = c("grey90"),
                                       sizes.highlight = 0.1,
-                                      pt.size = 0.1) + NoLegend() + labs(title = "su012")
+                                      pt.size = 0.1) + NoLegend() + 
+                                      labs(title = "su012", x = "",  y = "") + 
+                                      theme(axis.line.y = element_blank(), axis.line.x = element_blank(),
+                                            axis.text.y = element_blank(), axis.text.x = element_blank(),
+                                            axis.ticks.y = element_blank(), axis.ticks.x = element_blank(),
+                                            plot.title = element_text(hjust = 0.5))
 
 BCC.UMAP.patient.treatment <- grid.arrange(BCC.UMAP.patient1.treatment, BCC.UMAP.patient2.treatment, BCC.UMAP.patient3.treatment, BCC.UMAP.patient4.treatment, BCC.UMAP.patient5.treatment, BCC.UMAP.patient6.treatment, BCC.UMAP.patient7.treatment, BCC.UMAP.patient8.treatment, BCC.UMAP.patient9.treatment, BCC.UMAP.patient10.treatment, BCC.UMAP.patient12.treatment,  nrow=2)
 
 BCC.UMAP.patient.treatment
 
-## Dimensions:
-## Post-processing to remove axes in powerpoint
-## Saved as:
+## Dimensions: width = 1500px, height = 500px
+## Post-processing to add legend in Powerpoint
+## Saved as: BCC_UMAP_Patient_Treatment.JPG
 
 ```
 
@@ -258,17 +313,40 @@ BCC Clustering Marker Genes
 
 ```{r}
 
-Idents(BCCIO) <- BCCIO$seurat_clusters
+BCC.cluster.order <- c('CD4+ T cells', 'CD8+ memory T cells', 'CD8+ activated T cells', 'CD8+ exhausted T cells', 'Proliferating T cells', 'Regulatory T cells', 'NK cells', 'B cells', 'Plasma cells', 'Macrophages', 'Dendritic cells', 'pDCs', 'Myofibroblasts', 'CAFs', 'Malignant cells 1', 'Malignant cells 2', 'Endothelial cells', 'Melanocytes', 'Other')
 
-features <- c('CD3G', 'CD3D', 'CD3E', 'CD2', 'CD8A', 'GZMA', 'CD4', 'FOXP3', 'KLRC1', 'KLRC3', 'CD19', 'CD79A', 'SLAMF7', 'IGKC', 'FCGR2A', 'CSF1R', 'FLT3', 'CLEC4C', 'COL1A2', 'MCAM', 'MYLK', 'FAP', 'PDPN', 'EPCAM', 'TP63', 'PECAM1', 'VWF', 'PMEL', 'MLANA')
+BCCIO <- RenameIdents(object = BCCIO, 
+                      'CD4+ T cells' = 'CD4+ T cells', 
+                      'CD8+ memory T cells' = 'CD8+ memory T cells',
+                      'CD8+ activated T cells' = 'CD8+ activated T cells',
+                      'CD8+ exhausted T cells' = 'CD8+ exhausted T cells',
+                      'Proliferating T cells' = 'Proliferating T cells',
+                      'Regulatory T cells' = 'Regulatory T cells',
+                      'NK cells' = 'NK cells',
+                      'B cells' = 'B cells',
+                      'Plasma cells' = 'Plasma cells',
+                      'Macrophages' = 'Macrophages',
+                      'Dendritic cells' = 'Dendritic cells',
+                      'pDCs' = 'pDCs', 
+                      'Myofibroblasts' = 'Myofibroblasts',
+                      'CAFs' = 'CAFs',
+                      'Malignant cells 1' = 'Malignant cells 1',
+                      'Malignant cells 2' = 'Malignant cells 2',
+                      'Endothelial cells' = 'Endothelial cells',
+                      'Melanocytes' = 'Melanocytes',
+                      'Other' = 'Other')
 
-BCC.markers <- DotPlot(BCCIO, features = features, cluster.idents = TRUE) + RotatedAxis()
+features <- c('CD3D', 'CD3E', 'CD2', 'CD8A', 'GZMA', 'GZMB', 'CD4', 'FOXP3', 'KLRC1', 'KLRC3', 'NKG7', 'CD19', 'CD79A', 'SLAMF7', 'IGKC', 'FCGR2A', 'CSF1R', 'FLT3', 'CLEC4C', 'COL1A2', 'MCAM', 'MYLK', 'FAP', 'PDPN', 'EPCAM', 'TP63', 'PECAM1', 'VWF', 'PMEL', 'MLANA')
 
-BCC.markers
+BCC.cluster.markers <- DotPlot(BCCIO, features = features, assay = 'RNA', cols = c('Azure', 'Blue')) + RotatedAxis() + xlab('Marker Genes')+ ylab('Clusters')
 
-features2 <- c('LAMP3', 'CCL22', 'TFF1', 'KRT18', 'KRT19', 'KRT8', 'CLU', 'MMP7', 'SPP1', 'REG1A', 'CTRB2', 'PRSS1', 'DCN', 'LUM', 'CPA3', 'TPSAB1', 'CDH5', 'VWF', 'PLVAP', 'IRF7', 'RGS5', 'PDGFRB', 'CD3E', 'NCAM1', 'NKG7', 'CD3D', 'CD14', 'HLA-DRA', 'GZMB', 'ITGAX', 'ITGAM', 'APOE', 'LYZ', 'IGJ', 'CD79A', 'MS4A1')
+BCC.cluster.markers
 
-BCC.markers2 <- DotPlot(BCCIO, features=features2) + RotatedAxis()
+## Dimensions: width = 1500px, height = 750px
+## Saved as BCC_Cluster_Markers.jpeg
 
-BCC.markers2
 ```
+
+
+
+BCC 
