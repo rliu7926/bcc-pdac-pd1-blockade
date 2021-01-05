@@ -411,6 +411,7 @@ PDAC155698.integrated.subset1.umap <- DimPlot(PDAC155698.integrated.subset1, red
 PDAC155698.integrated.subset1.umap
 
 FeaturePlot(PDAC155698.integrated.subset1, features=c("CD3E", "NCAM1", "NKG7", "CD3D", "FOXP3", "GZMB"))
+
 labels <- c("CD4+ T cells", "Tregs", "CD4+ T cells", "CD8+ T cells", "CD8+ T cells", "CD8+ T cells", "NK cells", "CD4+ T cells", "NK cells", "CD8+ T cells", "Other", "CD4+ T cells", "CD8+ T cells", "CD8+ T cells")
 names(labels) <- levels(PDAC155698.integrated.subset1)
 PDAC155698.integrated.subset1 <- RenameIdents(PDAC155698.integrated.subset1, labels)

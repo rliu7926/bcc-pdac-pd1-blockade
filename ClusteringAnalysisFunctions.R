@@ -50,7 +50,7 @@ ggplot_barcharts <- function(dataset.batch, dataset.clusters, colors="Spectral")
 
   colorCount = length(unique(dataset.batch))
   getPalette = colorRampPalette(brewer.pal(9, colors))
-    
+  
   ggplot(normalized_dataset, aes(x=Clusters, y=normalize, fill=Batch)) + 
       geom_col(position = 'fill') + 
       scale_fill_manual(values= getPalette(colorCount)) +
