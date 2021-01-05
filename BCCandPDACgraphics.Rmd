@@ -18,6 +18,8 @@ library(RColorBrewer)
 library(EnhancedVolcano)
 library(gridExtra)
 library(pals)
+library(stringr)
+library(viridis)
 
 memory.limit(size = 16000000)
 
@@ -349,4 +351,262 @@ BCC.cluster.markers
 
 
 
-BCC 
+BCC Clustering Comparison Heatmap
+
+```{r}
+
+load("C:\\Users\\Ryan\\Documents\\Nie Research Project\\GSE 123813\\BCCIOrawdata")
+
+BCCIO.meta.data1 <- BCCIO.meta.data[order(BCCIO.meta.data[, "sort"], -xtfrm(BCCIO.meta.data[, "treatment"])),]
+BCCIO.meta.data2 <- BCCIO@meta.data[order(BCCIO@meta.data[, "sort"]),]
+
+BCCIO.meta.data1["rownames"] <- rownames(BCCIO.meta.data1)
+BCCIO.meta.data2["rownames"] <- rownames(BCCIO.meta.data2)
+
+BCCIO.meta.data.merge <- merge(BCCIO.meta.data1, BCCIO.meta.data2, by.x=c("rownames"), by.y=c("rownames"))
+BCCIO.clustering.comparison <- BCCIO.meta.data.merge[c("cluster", "seurat_clusters")]
+
+uniqueclusters1 <- as.matrix(unique(BCCIO.clustering.comparison[,1]))
+uniqueclusters2 <- as.matrix(unique(BCCIO.clustering.comparison[,2]))
+
+BCCIO.distribution.table <- dist_table(BCCIO.clustering.comparison, uniqueclusters1, uniqueclusters2, 1, 2)
+
+BCCIO.proportion.table <- prop_table(BCCIO.distribution.table, uniqueclusters1, uniqueclusters2)
+
+clusterlabels1 <- c('CD8+ memory T cells', 'CD8+ exhausted T cells', 'Regulatory T cells', 'CD4+ T cells', 'Proliferating T cells', 'NK cells', 'B cells 1', 'CD8+ activated T cells', 'Macrophages', 'pDCs', 'Plasma cells', 'Dendritic cells', 'CAFs', 'Endothelial cells', 'Myofibroblasts', 'B cells 2', 'Melanocytes', 'Malignant cells 1', 'Malignant cells 2')
+
+clusterlabels2 <- c('CD8+ memory T cells', 'CD8+ exhausted T cells', 'Regulatory T cells', 'CD4+ T cells', 'Proliferating T cells', 'NK cells', 'Other', 'CD8+ activated T cells', 'B cells', 'Macrophages', 'pDCs', 'Plasma cells', 'Dendritic cells', 'CAFs', 'Endothelial cells', 'Myofibroblasts', 'Melanocytes', 'Malignant cells 1', 'Malignant cells 2')
+
+BCCIO.heatmap <- ggplot_heatmap(BCCIO.proportion.table, clusterlabels1, clusterlabels2, c("Metadata Clustering"), c("Unsupervised Clustering")) + 
+  theme(axis.text = element_text(size=10), axis.title = element_text(size=14)) + 
+  scale_fill_viridis(discrete=FALSE, name = "Proportion of \nsimilar cells")
+
+BCCIO.heatmap
+
+## Dimensions: width = 1000px (scale up)
+## Saved as BCC_Clustering_Heatmap.jpeg
+
+```
+
+
+
+BCC Pretreatment vs. Posttreatment Barcharts 
+
+```{r}
+
+## Separate into pretreatment and posttreatment batches
+
+Idents(BCCIO) <- BCCIO$treatment
+BCCIO.pre <- subset(BCCIO, idents=c("pre"))
+BCCIO.post <- subset(BCCIO, idents=c("post"))
+
+## Pre-treatment barchart
+
+dataframe <- data.frame("Batch" = BCCIO.pre@meta.data$patient, "Clusters" = BCCIO.pre@meta.data$seurat_clusters)
+tibble <- as_tibble(dataframe)
+  
+summary <- tibble %>% group_by(Clusters, Batch) %>% count()
+
+summary$cluster <- as.vector(summary$Clusters)
+
+summary[summary == "CD8_memory"] <- "CD8+ memory T cells"
+summary[summary == "CD4"] <- "CD4+ T cells"
+summary[summary == "Tregs"] <- "Regulatory T cells"
+summary[summary == "CD8_activation"] <- "CD8+ activated T cells"
+summary[summary == "CD8_exhausted"] <- "CD8+ exhausted T cells"
+summary[summary == "Plasma"] <- "Plasma cells"
+summary[summary == "Tumor 1"] <- "Malignant cells 1"
+summary[summary == "Tumor 2"] <- "Malignant cells 2"
+summary[summary == "T_proliferation"] <- "Proliferating T cells"
+summary[summary == "NK"] <- "NK cells"
+summary[summary == "Endothelial"] <- "Endothelial cells"
+summary[summary == "DCs"] <- "Dendritic cells"
+summary[summary == "Misc."] <- "Other"
+
+summary$Clusters <- as.factor(summary$cluster)
+summary <- subset(summary, select = -cluster)
+
+normalized_dataset <- summary %>% group_by(Batch) %>% mutate(normalize = n/sum(n))
+
+normalized_dataset$Clusters <- factor(normalized_dataset$Clusters,
+                                      levels = c("CD4+ T cells", "CD8+ memory T cells", "CD8+ activated T cells", "CD8+ exhausted T cells", "Regulatory T cells", "Proliferating T cells", "NK cells", "B cells", "Macrophages", "Dendritic cells", "pDCs", "Plasma cells", "CAFs", "Endothelial cells", "Myofibroblasts", "Melanocytes", "Malignant cells 1", "Malignant cells 2", "Other"))
+
+BCC.pre.patient.barchart <- ggplot(normalized_dataset, aes(x=Clusters, y=normalize, fill=Batch)) + 
+      geom_col(position = 'fill') + 
+      scale_fill_viridis(discrete=TRUE) +
+      theme_classic() +
+      theme(axis.text.x = element_text(angle=45, hjust=1)) + 
+      ylab("Cell Proportion Normalized by Batch") + 
+      ggtitle("Pre-treatment") +
+      theme(plot.title = element_text(hjust = 0.5))
+
+## Post-treatment barchart
+
+dataframe <- data.frame("Batch" = BCCIO.post@meta.data$patient, "Clusters" = BCCIO.post@meta.data$seurat_clusters)
+tibble <- as_tibble(dataframe)
+  
+summary <- tibble %>% group_by(Clusters, Batch) %>% count()
+
+summary$cluster <- as.vector(summary$Clusters)
+
+summary[summary == "CD8_memory"] <- "CD8+ memory T cells"
+summary[summary == "CD4"] <- "CD4+ T cells"
+summary[summary == "Tregs"] <- "Regulatory T cells"
+summary[summary == "CD8_activation"] <- "CD8+ activated T cells"
+summary[summary == "CD8_exhausted"] <- "CD8+ exhausted T cells"
+summary[summary == "Plasma"] <- "Plasma cells"
+summary[summary == "Tumor 1"] <- "Malignant cells 1"
+summary[summary == "Tumor 2"] <- "Malignant cells 2"
+summary[summary == "T_proliferation"] <- "Proliferating T cells"
+summary[summary == "NK"] <- "NK cells"
+summary[summary == "Endothelial"] <- "Endothelial cells"
+summary[summary == "DCs"] <- "Dendritic cells"
+summary[summary == "Misc."] <- "Other"
+
+summary$Clusters <- as.factor(summary$cluster)
+summary <- subset(summary, select = -cluster)
+
+normalized_dataset <- summary %>% group_by(Batch) %>% mutate(normalize = n/sum(n))
+
+normalized_dataset$Clusters <- factor(normalized_dataset$Clusters,
+                                      levels = c("CD4+ T cells", "CD8+ memory T cells", "CD8+ activated T cells", "CD8+ exhausted T cells", "Regulatory T cells", "Proliferating T cells", "NK cells", "B cells", "Macrophages", "Dendritic cells", "pDCs", "Plasma cells", "CAFs", "Endothelial cells", "Myofibroblasts", "Melanocytes", "Malignant cells 1", "Malignant cells 2", "Other"))
+
+BCC.post.patient.barchart <- ggplot(normalized_dataset, aes(x=Clusters, y=normalize, fill=Batch)) + 
+      geom_col(position = 'fill') + 
+      theme_classic() +
+      theme(axis.text.x = element_text(angle=45, hjust=1)) + 
+      ylab("Cell Proportion Normalized by Patient") + 
+      scale_fill_viridis(discrete=TRUE, name = "Patient") + 
+      ggtitle("Post-treatment") +
+      theme(plot.title = element_text(hjust = 0.5))
+
+
+BCC.pre.patient.barchart + NoLegend() +
+  BCC.post.patient.barchart
+
+## Dimensions: width= 1000px, height = 500px
+## Saved as BCC_Barcharts_Treatment.jpeg
+
+```
+
+
+
+BCC Responder vs. Non-responder Barcharts
+
+```{r}
+
+## Separate into pretreatment and posttreatment batches
+
+Idents(BCCIO) <- BCCIO$patient
+BCCIO.responders <- subset(BCCIO, idents=c("su001", "su002", "su003", "su004", "su009", "su012"))
+BCCIO.nonresponders <- subset(BCCIO, idents=c("su005", "su006", "su007", "su008", "su010"))
+
+## Responders barchart
+
+dataframe <- data.frame("Batch" = BCCIO.responders@meta.data$treatment, "Clusters" = BCCIO.responders@meta.data$seurat_clusters)
+tibble <- as_tibble(dataframe)
+  
+summary <- tibble %>% group_by(Clusters, Batch) %>% count()
+
+summary$cluster <- as.vector(summary$Clusters)
+summary$batches <- as.vector(summary$Batch)
+
+summary[summary == "CD8_memory"] <- "CD8+ memory T cells"
+summary[summary == "CD4"] <- "CD4+ T cells"
+summary[summary == "Tregs"] <- "Regulatory T cells"
+summary[summary == "CD8_activation"] <- "CD8+ activated T cells"
+summary[summary == "CD8_exhausted"] <- "CD8+ exhausted T cells"
+summary[summary == "Plasma"] <- "Plasma cells"
+summary[summary == "Tumor 1"] <- "Malignant cells 1"
+summary[summary == "Tumor 2"] <- "Malignant cells 2"
+summary[summary == "T_proliferation"] <- "Proliferating T cells"
+summary[summary == "NK"] <- "NK cells"
+summary[summary == "Endothelial"] <- "Endothelial cells"
+summary[summary == "DCs"] <- "Dendritic cells"
+summary[summary == "Misc."] <- "Other"
+summary[summary == "post"] <- "Post-treatment"
+summary[summary == "pre"] <- "Pre-treatment"
+
+summary$Clusters <- as.factor(summary$cluster)
+summary <- subset(summary, select = -cluster)
+summary$Batch <- as.factor(summary$batches)
+summary <- subset(summary, select = -batches)
+
+normalized_dataset <- summary %>% group_by(Batch) %>% mutate(normalize = n/sum(n))
+
+normalized_dataset$Clusters <- factor(normalized_dataset$Clusters,
+                                      levels = c("CD4+ T cells", "CD8+ memory T cells", "CD8+ activated T cells", "CD8+ exhausted T cells", "Regulatory T cells", "Proliferating T cells", "NK cells", "B cells", "Macrophages", "Dendritic cells", "pDCs", "Plasma cells", "CAFs", "Endothelial cells", "Myofibroblasts", "Melanocytes", "Malignant cells 1", "Malignant cells 2", "Other"))
+
+normalized_dataset$Batch <- factor(normalized_dataset$Batch, 
+                                   levels = c("Pre-treatment", "Post-treatment"))
+
+BCC.responders.barchart <- ggplot(normalized_dataset, aes(x=Clusters, y=normalize, fill=Batch)) + 
+      geom_col(position = 'fill') + 
+      scale_fill_manual(values = c("royalblue3", "lightskyblue1")) +
+      theme_classic() +
+      theme(axis.text.x = element_text(angle=45, hjust=1)) + 
+      ylab("Cell Proportion Normalized by Batch") + 
+      ggtitle("Responders") +
+      theme(plot.title = element_text(hjust = 0.5))
+
+## Nonresponders barchart
+
+dataframe <- data.frame("Batch" = BCCIO.nonresponders@meta.data$treatment, "Clusters" = BCCIO.nonresponders@meta.data$seurat_clusters)
+tibble <- as_tibble(dataframe)
+  
+summary <- tibble %>% group_by(Clusters, Batch) %>% count()
+
+summary$cluster <- as.vector(summary$Clusters)
+summary$batches <- as.vector(summary$Batch)
+
+summary[summary == "CD8_memory"] <- "CD8+ memory T cells"
+summary[summary == "CD4"] <- "CD4+ T cells"
+summary[summary == "Tregs"] <- "Regulatory T cells"
+summary[summary == "CD8_activation"] <- "CD8+ activated T cells"
+summary[summary == "CD8_exhausted"] <- "CD8+ exhausted T cells"
+summary[summary == "Plasma"] <- "Plasma cells"
+summary[summary == "Tumor 1"] <- "Malignant cells 1"
+summary[summary == "Tumor 2"] <- "Malignant cells 2"
+summary[summary == "T_proliferation"] <- "Proliferating T cells"
+summary[summary == "NK"] <- "NK cells"
+summary[summary == "Endothelial"] <- "Endothelial cells"
+summary[summary == "DCs"] <- "Dendritic cells"
+summary[summary == "Misc."] <- "Other"
+summary[summary == "post"] <- "Post-treatment"
+summary[summary == "pre"] <- "Pre-treatment"
+
+summary$Clusters <- as.factor(summary$cluster)
+summary <- subset(summary, select = -cluster)
+summary$Batch <- as.factor(summary$batches)
+summary <- subset(summary, select = -batches)
+
+normalized_dataset <- summary %>% group_by(Batch) %>% mutate(normalize = n/sum(n))
+
+normalized_dataset$Clusters <- factor(normalized_dataset$Clusters,
+                                      levels = c("CD4+ T cells", "CD8+ memory T cells", "CD8+ activated T cells", "CD8+ exhausted T cells", "Regulatory T cells", "Proliferating T cells", "NK cells", "B cells", "Macrophages", "Dendritic cells", "pDCs", "Plasma cells", "CAFs", "Endothelial cells", "Myofibroblasts", "Melanocytes", "Malignant cells 1", "Malignant cells 2", "Other"))
+
+normalized_dataset$Batch <- factor(normalized_dataset$Batch, 
+                                   levels = c("Pre-treatment", "Post-treatment"))
+
+BCC.nonresponders.barchart <- ggplot(normalized_dataset, aes(x=Clusters, y=normalize, fill=Batch)) + 
+      geom_col(position = 'fill') + 
+      scale_fill_manual(values = c("tomato4", "salmon1")) +
+      theme_classic() +
+      theme(axis.text.x = element_text(angle=45, hjust=1)) + 
+      ylab("Cell Proportion Normalized by Batch") + 
+      ggtitle("Nonresponders") +
+      theme(plot.title = element_text(hjust = 0.5))
+
+
+BCC.responders.barchart + BCC.nonresponders.barchart
+
+## Dimensions: width= 1200px, height = 500px
+## Post-processing to modify legend in Powerpoint
+## Saved as BCC_Barcharts_Responders.jpeg
+
+```
+
+
+
+BCC Barcharts by Patient
+
