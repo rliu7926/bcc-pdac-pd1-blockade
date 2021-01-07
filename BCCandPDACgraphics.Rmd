@@ -612,8 +612,163 @@ BCC Macrophage Pretreatment Enhanced Volcano Plot
 
 ```{r}
 
+Idents(BCCIO.pre) <- BCCIO.pre$seurat_clusters
 
+macrophage.markers <- FindMarkers(BCCIO.pre, subset.ident='Macrophages', group.by='response', ident.1='Responsive')
+macrophage.markers_tibble <- as_tibble(macrophage.markers, rownames = "GeneNames")
+macrophage.markers_tibble <- arrange(macrophage.markers_tibble, avg_logFC)
 
+macrophage.volcano <- EnhancedVolcano(macrophage.markers_tibble,
+                               lab = macrophage.markers_tibble$GeneNames,
+                               x = 'avg_logFC', y = 'p_val_adj',
+                               pCutoff = 0.05, FCcutoff = 0.5,
+                               title= 'Differential Expression of Macrophages: Responders vs. Nonresponders ',
+                               subtitle = 'Enhanced Volcano Plot',
+                               col = c('black', 'black', 'black', 'red3'), colAlpha = 1)
+macrophage.volcano
 
+## Dimensions: width = 1000px, height = 750px
+## Saved as BCC_macrophage_volcano.jpeg
 
 ```
+
+
+
+BCC Macrophage Responder Pretreatment vs. PDAC 
+
+```{r}
+
+Idents(bcc.pre.responders.pdac.merge) <- bcc.pre.responders.pdac.merge$seurat_clusters
+
+macrophage.comparison.markers <- FindMarkers(bcc.pre.responders.pdac.merge, subset.ident='Macrophages', group.by='response', ident.1='Responsive')
+macrophage.comparison.markers_tibble <- as_tibble(macrophage.comparison.markers, rownames = "GeneNames")
+macrophage.comparison.markers_tibble <- arrange(macrophage.comparison.markers_tibble, avg_logFC)
+
+macrophage.comparison.markers_tibble$p_val_adj[macrophage.comparison.markers_tibble$p_val_adj < 1.00e-50] <- 1.00e-50
+macrophage.comparison.markers_tibble$avg_logFC[macrophage.comparison.markers_tibble$avg_logFC < -2] <- -2
+macrophage.comparison.markers_tibble$avg_logFC[macrophage.comparison.markers_tibble$avg_logFC > 2] <- 2
+
+macrophage.comparison.volcano <- EnhancedVolcano(macrophage.comparison.markers_tibble,
+                               lab = macrophage.comparison.markers_tibble$GeneNames,
+                               x = 'avg_logFC', y = 'p_val_adj',
+                               pCutoff = 0.05, FCcutoff = 0.5,
+                               title= 'Differential Expression of Macrophages: BCC Responders vs. PDAC',
+                               subtitle = 'Enhanced Volcano Plot',
+                               col = c('black', 'black', 'black', 'red3'), colAlpha = 1)
+macrophage.comparison.volcano
+
+## Dimensions: width = 1000px, height = 750px
+## Saved as BCC_PDAC_macrophage_volcano.jpeg
+
+```
+
+
+
+PDAC Clustering UMAP
+
+```{r}
+
+PDAC155698.integrated <- RenameIdents(object = PDAC155698.integrated, 
+                      'Epithelial + Endocrine' = 'Epithelial and Endocrine cells',
+                      'Endothelial' = 'Endothelial cells',
+                      'Dendritic' = 'Dendritic cells',
+                      'Tregs' = 'Regulatory T cells')
+
+pdac.umap <- DimPlot(object = PDAC155698.integrated, 
+                    reduction ="umap", 
+                    label = TRUE, 
+                    pt.size = 0.3,
+                    label.size = 6) + NoLegend()
+pdac.umap
+
+## Dimensions: width= 1200px, height = 900px
+## Saved as PDAC_UMAP.jpeg
+
+```
+
+
+
+PDAC UMAPs by Patiet
+
+```{r}
+
+PDAC.UMAP.patient <- DimPlot(object = PDAC155698.integrated,
+                            reduction = "umap",
+                            label = FALSE,
+                            split.by = c("orig.ident"),
+                            pt.size = 0.1,
+                            ncol = 8) + NoAxes()
+PDAC.UMAP.patient
+
+## Dimensions: width = 1500px, height = 500px
+## Saved as PDAC_UMAP_patient.jpeg
+
+```
+
+
+
+PDAC Barchart by Patient 
+
+```{r}
+
+dataframe <- data.frame("Batch" = PDAC155698.integrated@meta.data$orig.ident, "Clusters" = PDAC155698.integrated@meta.data$seurat_clusters)
+tibble <- as_tibble(dataframe)
+  
+summary <- tibble %>% group_by(Clusters, Batch) %>% count()
+
+summary$cluster <- as.vector(summary$Clusters)
+
+summary$cluster[summary$cluster == 'Epithelial + Endocrine'] <- 'Epithelial and Endocrine cells'
+summary$cluster[summary$cluster == 'Endothelial'] <- 'Endothelial cells'
+summary$cluster[summary$cluster == 'Dendritic'] <- 'Dendritic cells'
+summary$cluster[summary$cluster == 'Tregs'] <- 'Regulatory T cells'
+
+summary$Clusters <- as.factor(summary$cluster)
+summary <- subset(summary, select = -cluster)
+
+normalized_dataset <- summary %>% group_by(Batch) %>% mutate(normalize = n/sum(n))
+
+normalized_dataset$Clusters <- factor(normalized_dataset$Clusters,
+                                      levels = c("CD4+ T cells", "CD8+ T cells", "Regulatory T cells", "NK cells", "B cells", "Macrophages", "Dendritic cells", "Plasma cells", "Endothelial cells", "Epithelial and Endocrine cells", "Fibroblasts", "Mast cells", "Pericytes", "Granulocytes", "Acinar cells"))
+
+pdac.patient.barchart <- ggplot(normalized_dataset, aes(x=Clusters, y=normalize, fill=Batch)) + 
+      geom_col(position = 'fill') + 
+      theme_classic() +
+      theme(axis.text.x = element_text(angle=45, hjust=1)) + 
+      ylab("Cell Proportion Normalized by Patient") + 
+      scale_fill_viridis(discrete=TRUE, name = "Patient") + 
+      ggtitle("Integrated PDAC Dataset") +
+      theme(plot.title = element_text(hjust = 0.5, size=16), 
+            axis.title = element_text(size=13), 
+            axis.text = element_text(size=11))
+
+pdac.patient.barchart
+
+## Dimensions: width = 1000px, height = 750px
+## Saved as PDAC_Barchart.jpeg
+
+```
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
