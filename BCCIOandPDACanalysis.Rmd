@@ -272,39 +272,173 @@ for(celltype in interestingcelltypes) {
 
 Conclusion?: look for higher expression of HLA genes in macrophages and T_proliferation 
 
+Use Gene Ontology to investigate markers and gene pathways 
+
 ```{r}
 
+## Macrophage markers
 
-bcc.pretreatment.macrophage.markers <- FindMarkers(BCCIO.pre, subset.ident='Macrophages', group.by='response', ident.1='Responsive')
+macrophage.markers <- FindMarkers(BCCIO.pre, subset.ident='Macrophages', group.by='response', ident.1='Responsive')
+macrophage.markers_tibble <- as_tibble(macrophage.markers, rownames = "GeneNames")
 
-bcc.pretreatment.macrophage.markers_tibble <- as_tibble(bcc.pretreatment.macrophage.markers, rownames = "GeneNames")
+macrophage.markers_tibble <- arrange(macrophage.markers_tibble, avg_logFC)
+ 
+macrophage.nonresponder.markers <- macrophage.markers_tibble[macrophage.markers_tibble$p_val_adj < 0.05 &  macrophage.markers_tibble$avg_logFC < -0.5, ]
+
+macrophage.responder.markers <- macrophage.markers_tibble[macrophage.markers_tibble$p_val_adj < 0.05 &  macrophage.markers_tibble$avg_logFC > 0.5, ]
+
+## Proliferated T cells markers 
+
+T_proliferation.markers <- FindMarkers(BCCIO.pre, subset.ident='T_proliferation', group.by='response', ident.1='Responsive')
+T_proliferation.markers_tibble <- as_tibble(T_proliferation.markers, rownames = "GeneNames")
+
+T_proliferation.markers_tibble <- arrange(T_proliferation.markers_tibble, avg_logFC)
+ 
+T_proliferation.nonresponder.markers <- T_proliferation.markers_tibble[T_proliferation.markers_tibble$p_val_adj < 0.05 &  T_proliferation.markers_tibble$avg_logFC < -0.5, ]
+
+T_proliferation.responder.markers <- T_proliferation.markers_tibble[T_proliferation.markers_tibble$p_val_adj < 0.05 &  T_proliferation.markers_tibble$avg_logFC > 0.5, ]
+
+```
 
 
-bcc.pretreatment.macrophage.markers_tibble <- arrange(bcc.pretreatment.macrophage.markers_tibble, avg_logFC)
 
-bcc.pretreatment.macrophage.important.markers <- bcc.pretreatment.macrophage.markers_tibble[bcc.pretreatment.macrophage.markers_tibble$p_val_adj<0.05 &  bcc.pretreatment.macrophage.markers_tibble$avg_logFC< -0.5, ]z
+Merge BCC pretreatment data with PDAC data
 
+```{r}
+
+BCCIO.pre@meta.data$cell.names <- rownames(BCCIO.pre@meta.data)
+PDAC155698.integrated$cell.names <- rownames(PDAC155698.integrated@meta.data)
+
+cells.to.sample <- 5000
+set.seed(111)
+BCCIO.pre.sampled.cells <- sample(x = BCCIO.pre@meta.data$cell.names, size=cells.to.sample, replace=F)
+PDAC.sampled.cells <- sample(x = PDAC155698.integrated@meta.data$cell.names, size=cells.to.sample, replace=F)
+
+BCCIO.pre.subset <- subset(BCCIO.pre, cells = BCCIO.pre.sampled.cells)
+PDAC155698.integrated.subset <- subset(PDAC155698.integrated, cells = PDAC.sampled.cells)
+
+BCCIO.pre.subset$cancer <- c("bcc.pre")
+PDAC155698.integrated.subset$cancer <- c("pdac")
+
+## Merge datasets
+
+bcc.pre.pdac.merge <- merge(BCCIO.pre.subset, PDAC155698.integrated.subset, add.cell.ids = c("bcc.pre", "pdac"))
+Idents(bcc.pre.pdac.merge) <- bcc.pdac.merge@meta.data$seurat_clusters
+
+bcc.pre.pdac.merge@meta.data <- bcc.pre.pdac.merge@meta.data[, -which(colnames(bcc.pre.pdac.merge@meta.data) %in% c('cell', 'cell.names', 'sub_cluster'))]
+bcc.pre.pdac.merge$orig.clusters <- bcc.pre.pdac.merge$seurat_clusters
+
+## Save merged dataset
+
+save(bcc.pre.pdac.merge, file="C:\\Users\\Ryan\\Documents\\Nie Research Project\\BCC.pre.PDAC.merge")
+
+```
+
+
+Enhanced Volcano plots for BCC pretreatment (responder) vs. PDAC
+
+```{r}
+
+## Subset dataset to only include BCC pretreatment repsonders
+
+Idents(bcc.pre.pdac.merge) <- bcc.pre.pdac.merge$response
+bcc.pre.pdac.merge$response[is.na(bcc.pre.pdac.merge$response)] <- "PDAC"
+Idents(bcc.pre.pdac.merge) <- bcc.pre.pdac.merge$response
+
+bcc.pre.responders.pdac.merge <- subset(bcc.pre.pdac.merge, idents = c("PDAC", "Responsive"))
+
+interestingcelltypes <- c("T_proliferation", "Macrophages")
+
+Idents(bcc.pre.responders.pdac.merge) <- bcc.pre.responders.pdac.merge$seurat_clusters
+
+for(celltype in interestingcelltypes) {
+  bcc.pdac.responder.volcano <- bioc_volcano(bcc.pre.responders.pdac.merge, celltype, c("response"), c("Responsive"), c("PDAC"))
+  assign(paste0("bcc.pdac.", celltype, ".responder.volcano"), bcc.pdac.responder.volcano)
+  bcc.pdac.responder.volcano
+}
+
+## Macrophages
+`bcc.pdac.Macrophages.responder.volcano`
+
+## Proliferated T cells
+`bcc.pdac.T_proliferation.responder.volcano`
 
 
 ```
 
 
 
-
-
-
-
-
-
+Enhanced Volcano plots for PDAC by patient vs. BCC responders
 
 ```{r}
 
-bcc.pdac.macrophage.volcano <- bioc_volcano(bcc.pdac.merge, c("Macrophages"), c("cancer"), c("bcc"), c("pdac"))
+## Add PDAC patient column
+
+bcc.pre.responders.pdac.merge$pdac.patient <- as.vector(bcc.pre.responders.pdac.merge$orig.ident)
+
+bcc.pre.responders.pdac.merge$pdac.patient[bcc.pre.responders.pdac.merge$pdac.patient == 'bcc.su001.pre'] <- 'BCC'
+bcc.pre.responders.pdac.merge$pdac.patient[bcc.pre.responders.pdac.merge$pdac.patient == 'bcc.su001.pre.tcell'] <- 'BCC'
+bcc.pre.responders.pdac.merge$pdac.patient[bcc.pre.responders.pdac.merge$pdac.patient == 'bcc.su001.pre.tumor.cd45'] <- 'BCC'
+bcc.pre.responders.pdac.merge$pdac.patient[bcc.pre.responders.pdac.merge$pdac.patient == 'bcc.su002.pre'] <- 'BCC'
+bcc.pre.responders.pdac.merge$pdac.patient[bcc.pre.responders.pdac.merge$pdac.patient == 'bcc.su003.pre'] <- 'BCC'
+bcc.pre.responders.pdac.merge$pdac.patient[bcc.pre.responders.pdac.merge$pdac.patient == 'bcc.su004.pre.tcell'] <- 'BCC'
+bcc.pre.responders.pdac.merge$pdac.patient[bcc.pre.responders.pdac.merge$pdac.patient == 'bcc.su004.pre.tumor.cd45'] <- 'BCC'
+bcc.pre.responders.pdac.merge$pdac.patient[bcc.pre.responders.pdac.merge$pdac.patient == 'bcc.su009.pre.tcell'] <- 'BCC'
+bcc.pre.responders.pdac.merge$pdac.patient[bcc.pre.responders.pdac.merge$pdac.patient == 'bcc.su012.pre.tcell'] <- 'BCC'
+
+## Create separate objects for each PDAC patient
+
+Idents(bcc.pre.responders.pdac.merge) <- bcc.pre.responders.pdac.merge$pdac.patient
+bcc.pdac.1 <- subset(bcc.pre.responders.pdac.merge, idents = c('PDAC155698.1', 'BCC'))
+bcc.pdac.2 <- subset(bcc.pre.responders.pdac.merge, idents = c('PDAC155698.2', 'BCC'))
+bcc.pdac.3 <- subset(bcc.pre.responders.pdac.merge, idents = c('PDAC155698.3', 'BCC'))
+bcc.pdac.4 <- subset(bcc.pre.responders.pdac.merge, idents = c('PDAC155698.4', 'BCC'))
+bcc.pdac.5 <- subset(bcc.pre.responders.pdac.merge, idents = c('PDAC155698.5', 'BCC'))
+bcc.pdac.6 <- subset(bcc.pre.responders.pdac.merge, idents = c('PDAC155698.6', 'BCC'))
+bcc.pdac.7 <- subset(bcc.pre.responders.pdac.merge, idents = c('PDAC155698.7', 'BCC'))
+bcc.pdac.8 <- subset(bcc.pre.responders.pdac.merge, idents = c('PDAC155698.8', 'BCC'))
+bcc.pdac.9 <- subset(bcc.pre.responders.pdac.merge, idents = c('PDAC155698.9', 'BCC'))
+bcc.pdac.10 <- subset(bcc.pre.responders.pdac.merge, idents = c('PDAC155698.10', 'BCC'))
+bcc.pdac.11A <- subset(bcc.pre.responders.pdac.merge, idents = c('PDAC155698.11A', 'BCC'))
+bcc.pdac.11B <- subset(bcc.pre.responders.pdac.merge, idents = c('PDAC155698.11B', 'BCC'))
+bcc.pdac.12 <- subset(bcc.pre.responders.pdac.merge, idents = c('PDAC155698.12', 'BCC'))
+bcc.pdac.13 <- subset(bcc.pre.responders.pdac.merge, idents = c('PDAC155698.13', 'BCC'))
+bcc.pdac.15 <- subset(bcc.pre.responders.pdac.merge, idents = c('PDAC155698.15', 'BCC'))
+bcc.pdac.16 <- subset(bcc.pre.responders.pdac.merge, idents = c('PDAC155698.16', 'BCC'))
+
+Idents(bcc.pdac.1) <- bcc.pdac.1$seurat_clusters
+Idents(bcc.pdac.2) <- bcc.pdac.2$seurat_clusters
+Idents(bcc.pdac.3) <- bcc.pdac.3$seurat_clusters
+Idents(bcc.pdac.4) <- bcc.pdac.4$seurat_clusters
+Idents(bcc.pdac.5) <- bcc.pdac.5$seurat_clusters
+Idents(bcc.pdac.6) <- bcc.pdac.6$seurat_clusters
+Idents(bcc.pdac.7) <- bcc.pdac.7$seurat_clusters
+Idents(bcc.pdac.8) <- bcc.pdac.8$seurat_clusters
+Idents(bcc.pdac.9) <- bcc.pdac.9$seurat_clusters
+Idents(bcc.pdac.10) <- bcc.pdac.10$seurat_clusters
+Idents(bcc.pdac.11A) <- bcc.pdac.11A$seurat_clusters
+Idents(bcc.pdac.11B) <- bcc.pdac.11B$seurat_clusters
+Idents(bcc.pdac.12) <- bcc.pdac.12$seurat_clusters
+Idents(bcc.pdac.13) <- bcc.pdac.13$seurat_clusters
+Idents(bcc.pdac.15) <- bcc.pdac.15$seurat_clusters
+Idents(bcc.pdac.16) <- bcc.pdac.16$seurat_clusters
 
 
-bcc.cd8_memory.responder.volcano <- bioc_volcano(BCCIO, c("CD8_memory"), c("response"), c("Responsive"), c("Nonresponsive"))
+## Enhanced Volcano Plots
+
+bcc.pdac.subsets <- list(bcc.pdac.1, bcc.pdac.2, bcc.pdac.3, bcc.pdac.4, bcc.pdac.5, bcc.pdac.6, bcc.pdac.7, bcc.pdac.8, bcc.pdac.9, bcc.pdac.10, bcc.pdac.11A, bcc.pdac.11B, bcc.pdac.12, bcc.pdac.13, bcc.pdac.15, bcc.pdac.16)
+
+bcc.pdac.1.volcano <- bioc_volcano(bcc.pdac.1, c("Macrophages"), c("pdac.patient"))
 
 
+
+
+## Doesn't work
+for(subset in bcc.pdac.subsets) {
+  volcano <- bioc_volcano(subset, c("Macrophages"), c("pdac.patient"), c("BCC"), paste0(subset))
+  assign(paste0(subset, ".volcano"), volcano)
+  volcano
+}
 
 
 ```
