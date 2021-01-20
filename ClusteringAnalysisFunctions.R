@@ -58,6 +58,19 @@ ggplot_barcharts <- function(dataset.batch, dataset.clusters, colors="Spectral")
       ylab("Cell Proportion Normalized by Batch")
 }
 
+
+bioc_markers <- function(dataset, celltype, group, ident, pCutoff=0.05, FCcutoff=0.5) {
+  
+  ## Find differentially expressed markers for Enhanced Volcano plot
+  
+  celltype.markers <- FindMarkers(dataset, subset.ident=celltype, group.by=group, ident.1=ident)
+  celltype.markers_tibble <- as_tibble(celltype.markers, rownames='GeneNames')
+  celltype.markers_tibble <- arrange(celltype.markers_tibble, avg_logFC)
+  
+  return(celltype.markers_tibble)
+}
+
+
 bioc_volcano <- function(dataset, celltype, group, ident, ident2, pCutoff=0.05, FCcutoff=0.5) {
   
   ## Create Enhanced Volcano plots from Bioconductor
