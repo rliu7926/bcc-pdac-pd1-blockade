@@ -312,16 +312,6 @@ BCCIO.responders.treatment.barchart + BCCIO.nonresponders.treatment.barchart
 ```
 
 
-
-Immune Cell Subset
-
-```{r}
-
-
-
-```
-
-
 Gene investigation 
 
 ```{r}
