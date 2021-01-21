@@ -67,7 +67,9 @@ bioc_markers <- function(dataset, celltype, group, ident, pCutoff=0.05, FCcutoff
   celltype.markers_tibble <- as_tibble(celltype.markers, rownames='GeneNames')
   celltype.markers_tibble <- arrange(celltype.markers_tibble, avg_logFC)
   
-  return(celltype.markers_tibble)
+  celltype.markers.de <- celltype.markers_tibble[celltype.markers_tibble$p_val_adj < 0.05 & celltype.markers_tibble$avg_logFC < -0.5 | celltype.markers_tibble$avg_logFC > 0.5, ]
+
+  return(celltype.markers.de)
 }
 
 
