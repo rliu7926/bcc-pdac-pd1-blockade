@@ -389,6 +389,7 @@ bcc.pre.responders.pdac.merge$pdac.patient[bcc.pre.responders.pdac.merge$pdac.pa
 ## Create separate objects for each PDAC patient
 
 Idents(bcc.pre.responders.pdac.merge) <- bcc.pre.responders.pdac.merge$pdac.patient
+
 bcc.pdac.1 <- subset(bcc.pre.responders.pdac.merge, idents = c('PDAC155698.1', 'BCC'))
 bcc.pdac.2 <- subset(bcc.pre.responders.pdac.merge, idents = c('PDAC155698.2', 'BCC'))
 bcc.pdac.3 <- subset(bcc.pre.responders.pdac.merge, idents = c('PDAC155698.3', 'BCC'))
@@ -423,22 +424,84 @@ Idents(bcc.pdac.13) <- bcc.pdac.13$seurat_clusters
 Idents(bcc.pdac.15) <- bcc.pdac.15$seurat_clusters
 Idents(bcc.pdac.16) <- bcc.pdac.16$seurat_clusters
 
+## Enhanced Volcano Plots (for loop doesn't work)
 
-## Enhanced Volcano Plots
+bcc.pdac.1.volcano <- bioc_volcano(bcc.pdac.1, c("Macrophages"), c("pdac.patient"), c("BCC"), c("PDAC Patient 1"))
+bcc.pdac.2.volcano <- bioc_volcano(bcc.pdac.2, c("Macrophages"), c("pdac.patient"), c("BCC"), c("PDAC Patient 2"))
+bcc.pdac.3.volcano <- bioc_volcano(bcc.pdac.3, c("Macrophages"), c("pdac.patient"), c("BCC"), c("PDAC Patient 3"))
+bcc.pdac.4.volcano <- bioc_volcano(bcc.pdac.4, c("Macrophages"), c("pdac.patient"), c("BCC"), c("PDAC Patient 4"))
+bcc.pdac.5.volcano <- bioc_volcano(bcc.pdac.5, c("Macrophages"), c("pdac.patient"), c("BCC"), c("PDAC Patient 5"))
+bcc.pdac.6.volcano <- bioc_volcano(bcc.pdac.6, c("Macrophages"), c("pdac.patient"), c("BCC"), c("PDAC Patient 6"))
+bcc.pdac.7.volcano <- bioc_volcano(bcc.pdac.7, c("Macrophages"), c("pdac.patient"), c("BCC"), c("PDAC Patient 7"))
+bcc.pdac.8.volcano <- bioc_volcano(bcc.pdac.8, c("Macrophages"), c("pdac.patient"), c("BCC"), c("PDAC Patient 8"))
+bcc.pdac.9.volcano <- bioc_volcano(bcc.pdac.9, c("Macrophages"), c("pdac.patient"), c("BCC"), c("PDAC Patient 9"))
+bcc.pdac.10.volcano <- bioc_volcano(bcc.pdac.10, c("Macrophages"), c("pdac.patient"), c("BCC"), c("PDAC Patient 10"))
+bcc.pdac.11A.volcano <- bioc_volcano(bcc.pdac.11A, c("Macrophages"), c("pdac.patient"), c("BCC"), c("PDAC Patient 11A"))
+bcc.pdac.11B.volcano <- bioc_volcano(bcc.pdac.11B, c("Macrophages"), c("pdac.patient"), c("BCC"), c("PDAC Patient 11B"))
+bcc.pdac.12.volcano <- bioc_volcano(bcc.pdac.12, c("Macrophages"), c("pdac.patient"), c("BCC"), c("PDAC Patient 12"))
+bcc.pdac.13.volcano <- bioc_volcano(bcc.pdac.13, c("Macrophages"), c("pdac.patient"), c("BCC"), c("PDAC Patient 13"))
+bcc.pdac.15.volcano <- bioc_volcano(bcc.pdac.15, c("Macrophages"), c("pdac.patient"), c("BCC"), c("PDAC Patient 15"))
+bcc.pdac.16.volcano <- bioc_volcano(bcc.pdac.16, c("Macrophages"), c("pdac.patient"), c("BCC"), c("PDAC Patient 16"))
+
+```
+
+
+
+Check DE gene expression of HLA genes by patient 
+
+```{r}
+## Differentially expressed genes
 
 bcc.pdac.subsets <- list(bcc.pdac.1, bcc.pdac.2, bcc.pdac.3, bcc.pdac.4, bcc.pdac.5, bcc.pdac.6, bcc.pdac.7, bcc.pdac.8, bcc.pdac.9, bcc.pdac.10, bcc.pdac.11A, bcc.pdac.11B, bcc.pdac.12, bcc.pdac.13, bcc.pdac.15, bcc.pdac.16)
 
-bcc.pdac.1.volcano <- bioc_volcano(bcc.pdac.1, c("Macrophages"), c("pdac.patient"))
+bcc.pdac.markers <- lapply(bcc.pdac.subsets, function(i) bioc_markers(i, c("Macrophages"), c("pdac.patient"), c("BCC")))
 
-
-
-
-## Doesn't work
-for(subset in bcc.pdac.subsets) {
-  volcano <- bioc_volcano(subset, c("Macrophages"), c("pdac.patient"), c("BCC"), paste0(subset))
-  assign(paste0(subset, ".volcano"), volcano)
-  volcano
+for (i in 1:length(bcc.pdac.markers)) {
+  assign(paste0("bcc.pdac.", i, ".markers"), bcc.pdac.markers[[i]])
 }
+
+bcc.pdac.11.markers <- bcc.pdac.11A.markers
+bcc.pdac.12.markers <- bcc.pdac.11B.markers
+bcc.pdac.13.markers <- bcc.pdac.12.markers
+bcc.pdac.14.markers <- bcc.pdac.13.markers
+
+## Segregate the HLA genes
+
+bcc.pdac.markers <- list(bcc.pdac.1.markers, bcc.pdac.2.markers, bcc.pdac.3.markers, bcc.pdac.4.markers, bcc.pdac.5.markers, bcc.pdac.6.markers, bcc.pdac.7.markers, bcc.pdac.8.markers, bcc.pdac.9.markers, bcc.pdac.10.markers, bcc.pdac.11A.markers, bcc.pdac.11B.markers, bcc.pdac.12.markers, bcc.pdac.13.markers, bcc.pdac.15.markers, bcc.pdac.16.markers)
+
+patient.ids <- c("1", "2", "3", "4", "5", "6", "7", "8", "9", "10", "11A", "11B", "12", "13", "15", "16")
+
+hla.markers <- NULL
+
+for (i in 1:length(bcc.pdac.markers)) {
+  bcc.pdac.markers[[i]]$gene.header <- substr(bcc.pdac.markers[[i]]$GeneNames, 0, 4)
+  bcc.pdac.markers[[i]]$patient <- (patient.ids[i])
+  hla.markers[[i]] <- subset(bcc.pdac.markers[[i]], gene.header == "HLA-")
+}
+
+for (i in 1:length(hla.markers)) {
+  assign(paste0("hla.markers.", i), hla.markers[[i]])
+}
+
+## Merge datasets together
+
+hla.markers <- list(hla.markers.1, hla.markers.2, hla.markers.3, hla.markers.4, hla.markers.5, hla.markers.6, hla.markers.7, hla.markers.8, hla.markers.9, hla.markers.10, hla.markers.11, hla.markers.12, hla.markers.13, hla.markers.14, hla.markers.15, hla.markers.16)
+
+hla.markers.by.patient <- do.call("rbind", hla.markers)
+
+
+
+```
+
+
+
+Miscellaneous things
+
+```{r}
+
+BCCIO.pre.responder <- subset(BCCIO.pre, idents=c("Responsive"))
+
+
 
 
 ```
