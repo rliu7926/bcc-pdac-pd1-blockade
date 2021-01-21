@@ -372,6 +372,11 @@ Enhanced Volcano plots for PDAC by patient vs. BCC responders
 
 ```{r}
 
+bcc.pre.pdac.merge$patient[is.na(bcc.pre.pdac.merge$patient)] <- c("pdac")
+Idents(bcc.pre.pdac.merge) <- bcc.pre.pdac.merge@meta.data$patient
+
+bcc.pre.responders.pdac.merge <- subset(bcc.pre.pdac.merge, idents=c("pdac", "su001", "su002", "su003", "su004", "su009", "su012"))
+
 ## Add PDAC patient column
 
 bcc.pre.responders.pdac.merge$pdac.patient <- as.vector(bcc.pre.responders.pdac.merge$orig.ident)
@@ -460,10 +465,10 @@ for (i in 1:length(bcc.pdac.markers)) {
   assign(paste0("bcc.pdac.", i, ".markers"), bcc.pdac.markers[[i]])
 }
 
-bcc.pdac.11.markers <- bcc.pdac.11A.markers
-bcc.pdac.12.markers <- bcc.pdac.11B.markers
-bcc.pdac.13.markers <- bcc.pdac.12.markers
-bcc.pdac.14.markers <- bcc.pdac.13.markers
+bcc.pdac.11A.markers <- bcc.pdac.11.markers
+bcc.pdac.11B.markers <- bcc.pdac.12.markers
+bcc.pdac.12.markers <- bcc.pdac.13.markers
+bcc.pdac.13.markers <- bcc.pdac.14.markers
 
 ## Segregate the HLA genes
 
@@ -489,19 +494,120 @@ hla.markers <- list(hla.markers.1, hla.markers.2, hla.markers.3, hla.markers.4, 
 
 hla.markers.by.patient <- do.call("rbind", hla.markers)
 
+## Plot results
 
+hla.markers.by.patient$log_pvaladj <- -log(hla.markers.by.patient$p_val_adj)
+#hla.markers.by.patient$loglog_pvaladj <- log(hla.markers.by.patient$log_pvaladj + 1)
+
+hla.markers.plot <- ggplot(hla.markers.by.patient, aes(x=log_pvaladj, y=avg_logFC, color=GeneNames, size=1.5)) + geom_point()
+hla.markers.plot
 
 ```
 
+Result: HLA-DRB5 and HLA-G have the greatest difference in response
 
-
-Miscellaneous things
+Look at difference in HLA expression between BCC nonresponders and responders pretreatment 
 
 ```{r}
 
-BCCIO.pre.responder <- subset(BCCIO.pre, idents=c("Responsive"))
+Idents(BCCIO) <- BCCIO@meta.data$treatment
+BCCIO.pre <- subset(BCCIO, idents=c("pre"))
+
+Idents(BCCIO.pre) <- BCCIO.pre$patient
+bcc.pre.responder.5 <- subset(BCCIO.pre, idents=c("su001", "su002", "su003", "su004", "su009", "su012", "su005"))
+bcc.pre.responder.6 <- subset(BCCIO.pre, idents=c("su001", "su002", "su003", "su004", "su009", "su012", "su006"))
+bcc.pre.responder.7 <- subset(BCCIO.pre, idents=c("su001", "su002", "su003", "su004", "su009", "su012", "su007"))
+bcc.pre.responder.8 <- subset(BCCIO.pre, idents=c("su001", "su002", "su003", "su004", "su009", "su012", "su008"))
+bcc.pre.responder.10 <- subset(BCCIO.pre, idents=c("su001", "su002", "su003", "su004", "su009", "su012", "su010"))
+
+Idents(bcc.pre.responder.5) <- bcc.pre.responder.5$seurat_clusters
+Idents(bcc.pre.responder.6) <- bcc.pre.responder.6$seurat_clusters
+Idents(bcc.pre.responder.7) <- bcc.pre.responder.7$seurat_clusters
+Idents(bcc.pre.responder.8) <- bcc.pre.responder.8$seurat_clusters
+Idents(bcc.pre.responder.10) <- bcc.pre.responder.10$seurat_clusters
+
+
+## Enhanced volcano plots by patient
+
+bcc.pre.response.volcano.5 <- bioc_volcano(bcc.pre.responder.5, c("Macrophages"), c("patient"), c("su005"), c("Responders"))
+bcc.pre.response.volcano.6 <- bioc_volcano(bcc.pre.responder.6, c("Macrophages"), c("patient"), c("su006"), c("Responders"))
+bcc.pre.response.volcano.7 <- bioc_volcano(bcc.pre.responder.7, c("Macrophages"), c("patient"), c("su007"), c("Responders"))
+bcc.pre.response.volcano.8 <- bioc_volcano(bcc.pre.responder.8, c("Macrophages"), c("patient"), c("su008"), c("Responders"))
+bcc.pre.response.volcano.10 <- bioc_volcano(bcc.pre.responder.10, c("Macrophages"), c("patient"), c("su010"), c("Responders")) # Doesn't work for some reason (very little cells anyways)
+
+bcc.pre.response.volcano.5
+bcc.pre.response.volcano.6
+bcc.pre.response.volcano.7
+bcc.pre.response.volcano.8
+
+## Differentially expressed genes by patient
+
+bcc.pre.response.markers.5 <- bioc_markers(bcc.pre.responder.5, c("Macrophages"), c("patient"), c("su005")) 
+bcc.pre.response.markers.6 <- bioc_markers(bcc.pre.responder.6, c("Macrophages"), c("patient"), c("su006")) 
+bcc.pre.response.markers.7 <- bioc_markers(bcc.pre.responder.7, c("Macrophages"), c("patient"), c("su007")) 
+bcc.pre.response.markers.8 <- bioc_markers(bcc.pre.responder.8, c("Macrophages"), c("patient"), c("su008")) 
+
+bcc.pre.response.markers <- list(bcc.pre.response.markers.5, bcc.pre.response.markers.6, bcc.pre.response.markers.7, bcc.pre.response.markers.8)
+
+patient.ids <- c("su005", "su006", "su007", "su008")
+bcc.hla.markers <- NULL
+
+for (i in 1:length(bcc.pre.response.markers)) {
+  bcc.pre.response.markers[[i]]$gene.header <- substr(bcc.pre.response.markers[[i]]$GeneNames, 0, 4)
+  bcc.pre.response.markers[[i]]$patient <- (patient.ids[i])
+  bcc.hla.markers[[i]] <- subset(bcc.pdac.markers[[i]], gene.header == "HLA-")
+}
+
+for (i in 1:length(bcc.hla.markers)) {
+  assign(paste0("bcc.hla.", patient.ids[i], ".markers"), bcc.hla.markers[[i]])
+}
+
+bcc.hla.markers <- list(bcc.hla.su005.markers, bcc.hla.su006.markers, bcc.hla.su007.markers, bcc.hla.su008.markers)
+bcc.hla.markers <- do.call("rbind", bcc.hla.markers)
+
+## Plot results
+
+bcc.hla.markers$log_pvaladj <- -log(bcc.hla.markers$p_val_adj)
+#hla.markers.by.patient$loglog_pvaladj <- log(hla.markers.by.patient$log_pvaladj + 1)
+
+bcc.hla.markers.plot <- ggplot(bcc.hla.markers, aes(x=log_pvaladj, y=avg_logFC, color=GeneNames, size=1.5)) + geom_point()
+bcc.hla.markers.plot
+
+```
+
+Result: HLA-DRB5 has greatest differential expression -- check to make sure same direction 
+
+Violin Plots for Gene Expression 
+
+```{r}
+
+Idents(bcc.pdac.merge) <-
+
+BCCIO.vlnplot.PDCD1 <- VlnPlot(BCCIO, "PDCD1")
+
+
+
+
+
+
 
 
 
 
 ```
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
