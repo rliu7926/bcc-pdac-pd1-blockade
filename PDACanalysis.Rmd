@@ -166,7 +166,7 @@ pdac.proportions.table <- prop_table(pdac.distribution.table, uniqueclusters1, u
 uniqueclusters2 <- c("Acinar", "Cancer clone A", "Ductal 4", "Cancer clone B", "Ductal 3", "Ductal 1", "Ductal 2", "Tuft", "T & NK", "Endothelial", "Macrophages", "Endocrine & RBCs", "B_Acinar", "B_Cancer clone A", "B_Ductal 4", "B_Ductal 3", "B_Ductal 2", "B_Tuft & Endocrine", "B_Macrophages", "B_Ductal 1", "B_Endothelial")
 
 pdac.comparison.heatmap <- ggplot_heatmap(pdac.proportions.table, uniqueclusters1, uniqueclusters2, c("RdGy"), c("Merged Clustering"), c("Individual Clustering"))
-
+  
 pdac.comparison.heatmap
 
 ```
@@ -364,6 +364,7 @@ DefaultAssay(PDAC155698.integrated) <- "RNA"
 ```
 
 
+
 Initial Analysis of GSE155698
 
 ```{r}
@@ -386,6 +387,8 @@ PDAC155698.integrated.umap <- DimPlot(PDAC155698.integrated, reduction="umap", l
 PDAC155698.integrated.umap
 
 ```
+
+
 
 Clustering Labels
 
@@ -430,13 +433,31 @@ PDAC155698.integrated.umap
 ## Checkpoint
 
 save(PDAC155698.integrated, file="C:\\Users\\Ryan\\Documents\\Nie Research Project\\GSE 155698\\PDAC155698.integrated")
-memory.limit(size=160000000)
-load("C:\\Users\\Ryan\\Documents\\Nie Research Project\\GSE 155698\\PDAC155698.integrated")
 
 PDAC155698.integrated.umap <- DimPlot(PDAC155698.integrated, reduction="umap", label=TRUE) + NoLegend()
 PDAC155698.integrated.umap
 
 ```
+
+
+
+Add patient labels
+
+```{r}
+
+Idents(PDAC155698.integrated) <- PDAC155698.integrated$orig.ident
+PDAC155698.integrated@meta.data$patient[is.na(PDAC155698.integrated@meta.data$patient)] <- PDAC155698.integrated$meta.data$orig.ident
+
+index = c("PDAC155698.1", "PDAC155698.2", "PDAC155698.3", "PDAC155698.4", "PDAC155698.5", "PDAC155698.6", "PDAC155698.7", "PDAC155698.8", "PDAC155698.9", "PDAC155698.10", "PDAC155698.11A", "PDAC155698.11B", "PDAC155698.12", "PDAC155698.13", "PDAC155698.15", "PDAC155698.16")
+
+values <- c("pdac1", "pdac2", "pdac3", "pdac4", "pdac5", "pdac6", "pdac7", "pdac8", "pdac9", "pdac10", "pdac11A", "pdac11B", "pdac12", "pdac13", "pdac15", "pdac16")
+
+PDAC155698.integrated@meta.data$patient <- values[match(PDAC155698.integrated@meta.data$orig.ident, index)]
+
+save(PDAC155698.integrated, file="C:\\Users\\Ryan\\Documents\\Nie Research Project\\GSE 155698\\PDAC155698.integrated")
+
+```
+
 
 
 Distribution of samples in integrated clustering
@@ -450,6 +471,29 @@ PDAC155698.tissue.barchart <- ggplot_barcharts(PDAC155698.integrated@meta.data$o
 PDAC155698.tissue.barchart
 
 ```
+
+
+
+Gene expression of PD-1 pathway
+
+```{r}
+
+set.seed(001)
+pdac.subset <- SubsetData(PDAC155698.integrated, max.cells.per.ident=100)
+
+pdac.subset$pdac <- "yes"
+
+Idents(pdac.subset) <- pdac.subset$orig.ident
+pdac.patient.averages <- AverageExpression(pdac.subset)
+head(pdac.patient.averages[["RNA"]][c("TCF7", "PDCD1", "CD274", "PDCD1LG2"),])
+
+Idents(pdac.subset) <- pdac.subset$pdac
+pdac.total.averages <- AverageExpression(pdac.subset)
+head(pdac.total.averages[["RNA"]][c("TCF7", "PDCD1", "CD274", "PDCD1LG2"),])
+
+
+```
+
 
 
 GSE155698 Healthy Pancreas Samples
