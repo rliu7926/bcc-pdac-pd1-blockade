@@ -376,12 +376,28 @@ BCCIO.CD8.markers <- FindAllMarkers(BCCIO.CD8, only.pos=TRUE, min.pct=0.25, logf
 BCCIO.CD8.markers %>% group_by(cluster) %>% top_n(n=20, wt=avg_logFC)
 FeaturePlot(BCCIO.CD8, features=c("TCF7", "PDCD1", "CD274", "PDCD1LG2"))
 
-## Average gene expression 
+```
+
+
+
+Average gene expression 
+
+```{r}
 
 set.seed(001)
-BCCIO.subset <- SubsetData(BCCIO, max.cells.per.ident=100)
-BCCIO.averages <- AverageExpression(BCCIO.subset)
-head(BCCIO.averages[["RNA"]][c("TCF7", "PDCD1", "CD274", "PDCD1LG2"),])
+bcc.subset <- SubsetData(BCCIO, max.cells.per.ident=100)
+
+Idents(bcc.subset) <- bcc.subset$treatment
+bcc.treatment.averages <- AverageExpression(bcc.subset)
+head(bcc.treatment.averages[["RNA"]][c("TCF7", "PDCD1", "CD274", "PDCD1LG2"),])
+
+Idents(bcc.subset) <- bcc.subset$patient
+bcc.patient.averages <- AverageExpression(bcc.subset)
+head(bcc.patient.averages[["RNA"]][c("TCF7", "PDCD1", "CD274", "PDCD1LG2"),])
+
+Idents(bcc.subset) <- bcc.subset$response
+bcc.response.averages <- AverageExpression(bcc.subset)
+head(bcc.response.averages[["RNA"]][c("TCF7", "PDCD1", "CD274", "PDCD1LG2"),])
 
 ```
 
