@@ -15,6 +15,7 @@ library(cowplot)
 library(pracma)
 library(RColorBrewer)
 library(EnhancedVolcano)
+library(gridExtra)
 
 memory.limit(size = 16000000)
 
@@ -651,9 +652,56 @@ pdac.macrophages <- subset(PDAC155698.integrated, idents= c("Macrophages"))
 
 bcc.pdac.macrophages <- merge(bcc.macrophages, pdac.macrophages, add.cell.ids = c("bcc", "pdac"))
 
+## Average gene expression per patient for HLA 
+
+hla.genes <- unique(hla.markers.by.patient$GeneNames)
+
+Idents(bcc.pdac.macrophages) <- bcc.pdac.macrophages$patient
+bcc.pdac.averages <- AverageExpression(bcc.pdac.macrophages)
+hla.averages <- bcc.pdac.averages[["RNA"]][hla.genes,]
+
+hla.averages <- rbind(hla.averages, c("R", "R", "R", "R", "NR", "NR", "NR", "NR", "R", "R", "PDAC", "PDAC", "PDAC", "PDAC", "PDAC", "PDAC", "PDAC", "PDAC", "PDAC", "PDAC", "PDAC", "PDAC", "PDAC", "PDAC", "PDAC", "PDAC"))
+
+rownames(hla.averages)[rownames(hla.averages) == "18"] <- "category"
+hla.averages <- as.data.frame(t(hla.averages))
+
+for (i in 1:17) {
+  hla.averages[,i] <- as.character(hla.averages[,i])
+  hla.averages[,i] <- as.numeric(hla.averages[,i])
+}
+
+## ANOVA test for HLA-DRB5
+
+hla.drb5.averages <- hla.averages[c("category", "HLA-DRB5")]
+hla.drb5.averages$`HLA-DRB5` <- as.numeric(hla.drb5.averages$`HLA-DRB5`)
+attach(hla.drb5.averages)
+
+ggplot(hla.drb5.averages, aes(Category, `HLA-DRB5`)) + geom_boxplot(aes(col=Category)) + labs(title="Boxplot of HLA-DRB5 Expression")
+
+hla.drb5.anova <- aov(`HLA-DRB5`~Category, data=hla.averages)
+summary(hla.drb5.anova)
+
+hla.drb5.tukey <- TukeyHSD(hla.drb5.anova, conf.level = 0.95)
+tuk_plot(hla.drb5.tukey, title = "HLA-DRB5")
+
+## ANOVA test for all HLA genes
+
+hla.anova.plots <- vector("list", length=17)
+
+for (i in 1:length(hla.genes)) {
+  colnames(hla.averages)[i] <- "gene"
+  plot <- anova_test(hla.averages, hla.genes[i], "Category")
+  hla.anova.plots[[i]] <- recordPlot()
+  plot.new()
+  colnames(hla.averages)[i] <- hla.genes[i]
+}
+
+names(hla.anova.plots) <- hla.genes
+
 
 ```
 
+Result: no significant 
 
 
 
