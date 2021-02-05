@@ -27,6 +27,9 @@ load("C:\\Users\\Ryan\\Documents\\Nie Research Project\\GSE 123813\\BCCIOwithUMA
 ## Merged dataset (5000 cells from PDAC and BCC, random sample)
 load("C:\\Users\\Ryan\\Documents\\Nie Research Project\\BCC.PDAC.merge")
 
+## Merged dataset (5000 cells from PDAC and BCC pretreatment, random sample)
+load("C:\\Users\\Ryan\\Documents\\Nie Research Project\\BCC.pre.PDAC.merge")
+
 ## Load functions
 source("ClusteringAnalysisFunctions.R", echo=TRUE)
 source("SeuratClusteringFunctions.R", echo=TRUE)
@@ -210,6 +213,9 @@ bcc.tregs.responder.volcano
 
 bcc.bcell.responder.volcano <- bioc_volcano(BCCIO, c("B cells"), c("response"), c("Responsive"), c("Nonresponsive"))
 bcc.bcell.responder.volcano
+
+bcc.macrophage.responder.volcano <- bioc_volcano(BCCIO, c("Macrophages"), c("response"), c("Responsive"), c("Nonresponsive"))
+bcc.macrophage.responder.volcano
 
 ```
 
@@ -485,6 +491,7 @@ for (i in 1:length(bcc.pdac.markers)) {
 }
 
 for (i in 1:length(hla.markers)) {
+  hla.markers[[i]]$patient
   assign(paste0("hla.markers.", i), hla.markers[[i]])
 }
 
@@ -499,7 +506,7 @@ hla.markers.by.patient <- do.call("rbind", hla.markers)
 hla.markers.by.patient$log_pvaladj <- -log(hla.markers.by.patient$p_val_adj)
 #hla.markers.by.patient$loglog_pvaladj <- log(hla.markers.by.patient$log_pvaladj + 1)
 
-hla.markers.plot <- ggplot(hla.markers.by.patient, aes(x=log_pvaladj, y=avg_logFC, color=GeneNames, size=1.5)) + geom_point()
+hla.markers.plot <- ggplot(hla.markers.by.patient, aes(x=log_pvaladj, y=avg_logFC, color=GeneNames, size=1)) + theme_minimal() + ggtitle("Differential Expression of HLA genes by patient: \n BCC Responders vs. PDAC") + xlab("-log10(P)") + ylab("Log2 fold change") + geom_point() + theme(plot.title = element_text(size=20), legend.text = element_text(size = 10), legend.title = element_text(size = 14))
 hla.markers.plot
 
 ```
@@ -570,8 +577,10 @@ bcc.hla.markers <- do.call("rbind", bcc.hla.markers)
 bcc.hla.markers$log_pvaladj <- -log(bcc.hla.markers$p_val_adj)
 #hla.markers.by.patient$loglog_pvaladj <- log(hla.markers.by.patient$log_pvaladj + 1)
 
-bcc.hla.markers.plot <- ggplot(bcc.hla.markers, aes(x=log_pvaladj, y=avg_logFC, color=GeneNames, size=1.5)) + geom_point()
+bcc.hla.markers.plot <- ggplot(bcc.hla.markers, aes(x=log_pvaladj, y=avg_logFC, color=GeneNames, size=1.5)) + theme_minimal() + ggtitle("Differential Expression of HLA genes by patient: \n BCC Responders vs. Nonresponders") + xlab("-log10(P)") + ylab("Log2 fold change") + geom_point() + theme(plot.title = element_text(size=20), legend.text = element_text(size=10), legend.title = element_text(size = 14))
 bcc.hla.markers.plot
+
+
 
 ```
 
@@ -581,24 +590,69 @@ Violin Plots for Gene Expression
 
 ```{r}
 
-Idents(bcc.pdac.merge) <-
+bcc.pdac.merge$patient[is.na(bcc.pdac.merge$patient)] <- "pdac"
+Idents(bcc.pdac.merge) <- bcc.pdac.merge@meta.data$patient
 
-BCCIO.vlnplot.PDCD1 <- VlnPlot(BCCIO, "PDCD1")
+Idents(BCCIO) <- BCCIO@meta.data$patient
+
+HLADRB5.bcc.vlnplot <- VlnPlot(BCCIO, "HLA-DRB5")
+HLADRB5.bcc.vlnplot
+
+HLADRB5.pdac.vlnplot <- VlnPlot(PDAC155698.integrated, "HLA-DRB5")
+
+View(PDAC155698.integrated@meta.data)
+
+#########################################################
+
+## Violin plots
+
+Idents(BCCIO) <- BCCIO@meta.data$seurat_clusters
+
+bcc.macrophages <- subset(BCCIO, idents = c("Macrophages"))
+Idents(bcc.macrophages) <- bcc.macrophages@meta.data$patient
 
 
+HLADRB5.bcc.macrophages.vlnplot <- VlnPlot(bcc.macrophages, "HLA-DRB5")
+HLADRB5.bcc.macrophages.vlnplot
 
+## Average expression for BCC
 
+set.seed(001)
 
+Idents(BCCIO) <- BCCIO@meta.data$patient
+BCCIO.subset <- subset(BCCIO, max.cells.per.ident=1000)
 
+BCCIO.averages <- AverageExpression(BCCIO.subset)
 
+head(BCCIO.averages[["RNA"]][c("HLA-DRB5"),])
 
+## Average expression for PDAC
 
+Idents(PDAC155698.integrated) <- PDAC155698.integrated@meta.data$orig.ident
+PDAC.averages <- AverageExpression(PDAC155698.integrated)
+
+head(PDAC.averages[["RNA"]][c("HLA-DRB5"),])
 
 ```
 
 
 
+Conduct ANOVA tests
 
+```{r}
+
+## Create Seurat object with all macrophages from both datasets
+
+Idents(BCCIO) <- BCCIO$seurat_clusters
+bcc.macrophages <- subset(BCCIO, idents = c("Macrophages"))
+
+Idents(PDAC155698.integrated) <- PDAC155698.integrated$seurat_clusters
+pdac.macrophages <- subset(PDAC155698.integrated, idents= c("Macrophages"))
+
+bcc.pdac.macrophages <- merge(bcc.macrophages, pdac.macrophages, add.cell.ids = c("bcc", "pdac"))
+
+
+```
 
 
 
