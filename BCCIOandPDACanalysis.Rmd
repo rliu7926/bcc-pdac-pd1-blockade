@@ -16,6 +16,7 @@ library(pracma)
 library(RColorBrewer)
 library(EnhancedVolcano)
 library(gridExtra)
+library(reshape2)
 
 memory.limit(size = 16000000)
 
@@ -34,6 +35,7 @@ load("C:\\Users\\Ryan\\Documents\\Nie Research Project\\BCC.pre.PDAC.merge")
 ## Load functions
 source("ClusteringAnalysisFunctions.R", echo=TRUE)
 source("SeuratClusteringFunctions.R", echo=TRUE)
+source("DifferentialExpressionFunctions.R", echo=TRUE)
 
 ```
 
@@ -674,7 +676,6 @@ for (i in 1:17) {
 
 hla.drb5.averages <- hla.averages[c("category", "HLA-DRB5")]
 hla.drb5.averages$`HLA-DRB5` <- as.numeric(hla.drb5.averages$`HLA-DRB5`)
-attach(hla.drb5.averages)
 
 ggplot(hla.drb5.averages, aes(Category, `HLA-DRB5`)) + geom_boxplot(aes(col=Category)) + labs(title="Boxplot of HLA-DRB5 Expression")
 
@@ -684,7 +685,7 @@ summary(hla.drb5.anova)
 hla.drb5.tukey <- TukeyHSD(hla.drb5.anova, conf.level = 0.95)
 tuk_plot(hla.drb5.tukey, title = "HLA-DRB5")
 
-## ANOVA test for all HLA genes
+## ANOVA test for all HLA genes at 95% confidence
 
 hla.anova.plots <- vector("list", length=17)
 
@@ -698,14 +699,80 @@ for (i in 1:length(hla.genes)) {
 
 names(hla.anova.plots) <- hla.genes
 
+## ANOVA test for all HLA genes at 90% confidence
+
+hla.anova.90.plots <- vector("list", length=17)
+
+for (i in 1:length(hla.genes)) {
+  colnames(hla.averages)[i] <- "gene"
+  plot <- anova_test(hla.averages, hla.genes[i], "Category", confidence = 0.90)
+  hla.anova.90.plots[[i]] <- recordPlot()
+  plot.new()
+  colnames(hla.averages)[i] <- hla.genes[i]
+}
+
+names(hla.anova.90.plots) <- hla.genes
 
 ```
 
-Result: no significant 
+Result: no significant different in mean expression between BCC responders and nonresponders for any HLA genes individually
+
+Analyze MHC I/II genes together 
+
+```{r}
+
+## MHC Class 1: HLA-A, HLA-B, HLA-C, HLA-E, HLA-G
+## MHC Class 2: Everything else (HLA-D__)
+
+## Arithmetic average score 
+
+hla.averages.score <- data.frame(matrix(ncol=2, nrow=26))
+colnames(hla.averages.score) <- c("MHC1", "MHC2")
+rownames(hla.averages.score) <- rownames(hla.averages)
+
+hla.averages.score$MHC1 <- (hla.averages$`HLA-A` + hla.averages$`HLA-B`+ hla.averages$`HLA-C` + hla.averages$`HLA-E` + hla.averages$`HLA-G`) / 5
+
+hla.averages.score$MHC2 <- (hla.averages$`HLA-DOA`+ hla.averages$`HLA-DQB2` + hla.averages$`HLA-DMA` + hla.averages$`HLA-DQA2` + hla.averages$`HLA-DRA` + hla.averages$`HLA-DPA1` + hla.averages$`HLA-DQB1` + hla.averages$`HLA-DPB1` + hla.averages$`HLA-DRB1` + hla.averages$`HLA-DRB5` + hla.averages$`HLA-DQA1` + hla.averages$`HLA-DMB`) / 12
+
+hla.averages.score$category <- hla.averages$category
+
+hla.scores <- melt(hla.averages.score, id.var="category")
+ggplot(data=hla.scores, aes(x=variable, y=value)) + geom_boxplot(aes(fill=category)) + facet_wrap(~variable,ncol=2)
+
+## Normalized arithmetic average score
+
+hla.averages.normalized <- hla.averages %>% mutate_at(hla.genes, ~(scale(.) %>% as.vector))
+
+hla.averages.score.norm <- data.frame(matrix(ncol=2, nrow=26))
+colnames(hla.averages.score.norm) <- c("MHC1", "MHC2")
+rownames(hla.averages.score.norm) <- rownames(hla.averages.normalized)
+
+hla.averages.score.norm$MHC1 <- (hla.averages.normalized$`HLA-A` + hla.averages.normalized$`HLA-B`+ hla.averages.normalized$`HLA-C` + hla.averages.normalized$`HLA-E` + hla.averages.normalized$`HLA-G`) / 5
+
+hla.averages.score.norm$MHC2 <- (hla.averages.normalized$`HLA-DOA`+ hla.averages.normalized$`HLA-DQB2` + hla.averages.normalized$`HLA-DMA` + hla.averages.normalized$`HLA-DQA2` + hla.averages.normalized$`HLA-DRA` + hla.averages.normalized$`HLA-DPA1` + hla.averages.normalized$`HLA-DQB1` + hla.averages.normalized$`HLA-DPB1` + hla.averages.normalized$`HLA-DRB1` + hla.averages.normalized$`HLA-DRB5` + hla.averages.normalized$`HLA-DQA1` + hla.averages.normalized$`HLA-DMB`) / 12
+
+hla.averages.score.norm$category <- hla.averages$category
+
+hla.scores.norm <- melt(hla.averages.score.norm, id.var="category")
+ggplot(data=hla.scores.norm, aes(x=variable, y=value)) + geom_boxplot(aes(fill=category)) + facet_wrap(~variable,ncol=2)
+
+## Plot: x-axis is genes, y-axis is expression per patient, colors stratified by cancer
+
+# For geometric mean
+BCCIO@assays$RNA@counts
+colMean()
+
+library(psych)
+Geom.mean()
 
 
+ggpubr + stat_compare_means()
+
+Df = tibble(Cancer, Gene, Patient, Expression)
+ggplot(Df, aes(x = Gene, y = Expression, fill = Cancer) + geom_boxplot()
 
 
+```
 
 
 
