@@ -4,9 +4,9 @@ bioc_markers <- function(dataset, celltype, group, ident, pCutoff=0.05, FCcutoff
   
   celltype.markers <- FindMarkers(dataset, subset.ident=celltype, group.by=group, ident.1=ident)
   celltype.markers_tibble <- as_tibble(celltype.markers, rownames='GeneNames')
-  celltype.markers_tibble <- arrange(celltype.markers_tibble, avg_logFC)
+  celltype.markers_tibble <- arrange(celltype.markers_tibble, avg_log2FC)
   
-  celltype.markers.de <- celltype.markers_tibble[celltype.markers_tibble$p_val_adj < 0.05 & celltype.markers_tibble$avg_logFC < -0.5 | celltype.markers_tibble$avg_logFC > 0.5, ]
+  celltype.markers.de <- celltype.markers_tibble[celltype.markers_tibble$p_val_adj < 0.05 & celltype.markers_tibble$avg_log2FC < -0.5 | celltype.markers_tibble$avg_log2FC > 0.5, ]
   
   return(celltype.markers.de)
 }
@@ -22,7 +22,7 @@ bioc_volcano <- function(dataset, celltype, group, ident, ident2, pCutoff=0.05, 
   
   celltype.markers <- FindMarkers(dataset, subset.ident=celltype, group.by=group, ident.1=ident)
   celltype.markers_tibble <- as_tibble(celltype.markers, rownames='GeneNames')
-  celltype.markers_tibble <- arrange(celltype.markers_tibble, avg_logFC)
+  celltype.markers_tibble <- arrange(celltype.markers_tibble, avg_log2FC)
   
   celltype.volcano <- EnhancedVolcano(celltype.markers_tibble,
                                       lab = celltype.markers_tibble$GeneNames,
