@@ -50,10 +50,9 @@ Merge PDAC and BCC datasets (subset)
 BCCIO@meta.data$cell.names <- rownames(BCCIO@meta.data)
 PDAC155698.integrated$cell.names <- rownames(PDAC155698.integrated@meta.data)
 
-cells.to.sample <- 5000
 set.seed(111)
-BCCIO.sampled.cells <- sample(x = BCCIO@meta.data$cell.names, size=cells.to.sample, replace=F)
-PDAC.sampled.cells <- sample(x = PDAC155698.integrated@meta.data$cell.names, size=cells.to.sample, replace=F)
+BCCIO.sampled.cells <- sample(x = BCCIO@meta.data$cell.names, size=5000, replace=F)
+PDAC.sampled.cells <- sample(x = PDAC155698.integrated@meta.data$cell.names, size=5000, replace=F)
 
 BCCIO.subset <- subset(BCCIO, cells = BCCIO.sampled.cells)
 PDAC155698.integrated.subset <- subset(PDAC155698.integrated, cells = PDAC.sampled.cells)
@@ -509,7 +508,7 @@ hla.markers.by.patient <- do.call("rbind", hla.markers)
 hla.markers.by.patient$log_pvaladj <- -log(hla.markers.by.patient$p_val_adj)
 #hla.markers.by.patient$loglog_pvaladj <- log(hla.markers.by.patient$log_pvaladj + 1)
 
-hla.markers.plot <- ggplot(hla.markers.by.patient, aes(x=log_pvaladj, y=avg_logFC, color=GeneNames, size=1)) + theme_minimal() + ggtitle("Differential Expression of HLA genes by patient: \n BCC Responders vs. PDAC") + xlab("-log10(P)") + ylab("Log2 fold change") + geom_point() + theme(plot.title = element_text(size=20), legend.text = element_text(size = 10), legend.title = element_text(size = 14))
+hla.markers.plot <- ggplot(hla.markers.by.patient, aes(x=log_pvaladj, y=avg_log2FC, color=GeneNames, size=1)) + theme_minimal() + ggtitle("Differential Expression of HLA genes by patient: \n BCC Responders vs. PDAC") + xlab("-log10(P)") + ylab("Log2 fold change") + geom_point() + theme(plot.title = element_text(size=20), legend.text = element_text(size = 10), legend.title = element_text(size = 14))
 hla.markers.plot
 
 ```
@@ -580,7 +579,7 @@ bcc.hla.markers <- do.call("rbind", bcc.hla.markers)
 bcc.hla.markers$log_pvaladj <- -log(bcc.hla.markers$p_val_adj)
 #hla.markers.by.patient$loglog_pvaladj <- log(hla.markers.by.patient$log_pvaladj + 1)
 
-bcc.hla.markers.plot <- ggplot(bcc.hla.markers, aes(x=log_pvaladj, y=avg_logFC, color=GeneNames, size=1.5)) + theme_minimal() + ggtitle("Differential Expression of HLA genes by patient: \n BCC Responders vs. Nonresponders") + xlab("-log10(P)") + ylab("Log2 fold change") + geom_point() + theme(plot.title = element_text(size=20), legend.text = element_text(size=10), legend.title = element_text(size = 14))
+bcc.hla.markers.plot <- ggplot(bcc.hla.markers, aes(x=log_pvaladj, y=avg_log2FC, color=GeneNames, size=1.5)) + theme_minimal() + ggtitle("Differential Expression of HLA genes by patient: \n BCC Responders vs. Nonresponders") + xlab("-log10(P)") + ylab("Log2 fold change") + geom_point() + theme(plot.title = element_text(size=20), legend.text = element_text(size=10), legend.title = element_text(size = 14))
 bcc.hla.markers.plot
 
 
@@ -605,8 +604,6 @@ HLADRB5.pdac.vlnplot <- VlnPlot(PDAC155698.integrated, "HLA-DRB5")
 
 View(PDAC155698.integrated@meta.data)
 
-#########################################################
-
 ## Violin plots
 
 Idents(BCCIO) <- BCCIO@meta.data$seurat_clusters
@@ -623,7 +620,7 @@ HLADRB5.bcc.macrophages.vlnplot
 set.seed(001)
 
 Idents(BCCIO) <- BCCIO@meta.data$patient
-BCCIO.subset <- subset(BCCIO, max.cells.per.ident=1000)
+BCCIO.subset <- BCCIO[, sample(colnames(BCCIO), size=5000, replace=F)]
 
 BCCIO.averages <- AverageExpression(BCCIO.subset)
 
@@ -646,8 +643,8 @@ Conduct ANOVA tests
 
 ## Create Seurat object with all macrophages from both datasets
 
-Idents(BCCIO) <- BCCIO$seurat_clusters
-bcc.macrophages <- subset(BCCIO, idents = c("Macrophages"))
+Idents(BCCIO.pre) <- BCCIO.pre$seurat_clusters
+bcc.macrophages <- subset(BCCIO.pre, idents = c("Macrophages"))
 
 Idents(PDAC155698.integrated) <- PDAC155698.integrated$seurat_clusters
 pdac.macrophages <- subset(PDAC155698.integrated, idents= c("Macrophages"))
@@ -662,28 +659,18 @@ Idents(bcc.pdac.macrophages) <- bcc.pdac.macrophages$patient
 bcc.pdac.averages <- AverageExpression(bcc.pdac.macrophages)
 hla.averages <- bcc.pdac.averages[["RNA"]][hla.genes,]
 
-hla.averages <- rbind(hla.averages, c("R", "R", "R", "R", "NR", "NR", "NR", "NR", "R", "R", "PDAC", "PDAC", "PDAC", "PDAC", "PDAC", "PDAC", "PDAC", "PDAC", "PDAC", "PDAC", "PDAC", "PDAC", "PDAC", "PDAC", "PDAC", "PDAC"))
+hla.averages <- rbind(hla.averages, c("R", "R", "R", "R", "NR", "NR", "NR", "NR", "R", "PDAC", "PDAC", "PDAC", "PDAC", "PDAC", "PDAC", "PDAC", "PDAC", "PDAC", "PDAC", "PDAC", "PDAC", "PDAC", "PDAC", "PDAC", "PDAC"))
 
 rownames(hla.averages)[rownames(hla.averages) == "18"] <- "category"
 hla.averages <- as.data.frame(t(hla.averages))
 
-for (i in 1:17) {
+for (i in 1:18) {
   hla.averages[,i] <- as.character(hla.averages[,i])
   hla.averages[,i] <- as.numeric(hla.averages[,i])
 }
 
-## ANOVA test for HLA-DRB5
 
-hla.drb5.averages <- hla.averages[c("category", "HLA-DRB5")]
-hla.drb5.averages$`HLA-DRB5` <- as.numeric(hla.drb5.averages$`HLA-DRB5`)
-
-ggplot(hla.drb5.averages, aes(Category, `HLA-DRB5`)) + geom_boxplot(aes(col=Category)) + labs(title="Boxplot of HLA-DRB5 Expression")
-
-hla.drb5.anova <- aov(`HLA-DRB5`~Category, data=hla.averages)
-summary(hla.drb5.anova)
-
-hla.drb5.tukey <- TukeyHSD(hla.drb5.anova, conf.level = 0.95)
-tuk_plot(hla.drb5.tukey, title = "HLA-DRB5")
+save(hla.averages, file="C:\\Users\\Ryan\\Documents\\Nie Research Project\\hla.averages")
 
 ## ANOVA test for all HLA genes at 95% confidence
 
@@ -737,7 +724,7 @@ hla.averages.score$MHC2 <- (hla.averages$`HLA-DOA`+ hla.averages$`HLA-DQB2` + hl
 hla.averages.score$category <- hla.averages$category
 
 hla.scores <- melt(hla.averages.score, id.var="category")
-ggplot(data=hla.scores, aes(x=variable, y=value)) + geom_boxplot(aes(fill=category)) + facet_wrap(~variable,ncol=2)
+ggplot(data=hla.scores, aes(x=variable, y=value)) + geom_boxplot(aes(fill=category))
 
 ## Normalized arithmetic average score
 
@@ -754,22 +741,317 @@ hla.averages.score.norm$MHC2 <- (hla.averages.normalized$`HLA-DOA`+ hla.averages
 hla.averages.score.norm$category <- hla.averages$category
 
 hla.scores.norm <- melt(hla.averages.score.norm, id.var="category")
-ggplot(data=hla.scores.norm, aes(x=variable, y=value)) + geom_boxplot(aes(fill=category)) + facet_wrap(~variable,ncol=2)
+ggplot(data=hla.scores.norm, aes(x=variable, y=value)) + geom_boxplot(aes(fill=category))
 
-## Plot: x-axis is genes, y-axis is expression per patient, colors stratified by cancer
+## Boxplots for each gene
 
-# For geometric mean
-BCCIO@assays$RNA@counts
-colMean()
+hla.norm <- melt(hla.averages.normalized, id.var="category")
+ggplot(data=hla.norm, aes(x=variable, y=value)) + geom_boxplot(aes(fill=category))
 
-library(psych)
-Geom.mean()
+## ANOVA Test on MHC Scores
+
+mhc1.anova <- aov(MHC1~category, data=hla.averages.score)
+mhc2.anova <- aov(MHC2~category, data=hla.averages.score)
+
+mhc1.tukey <- TukeyHSD(mhc1.anova, conf.level = 0.95)
+mhc2.tukey <- TukeyHSD(mhc2.anova, conf.level = 0.95)
+
+tuk_plot(mhc1.tukey, title = "MHC I") + tuk_plot(mhc2.tukey, title = "MHC II")
+
+## ANOVA Test on Normalized MHC Scores
+
+mhc1.normalized.anova <- aov(MHC1~category, data=hla.averages.score.norm)
+mhc2.normalized.anova <- aov(MHC2~category, data=hla.averages.score.norm)
+
+mhc1.normalized.tukey <- TukeyHSD(mhc1.normalized.anova, conf.level=0.95)
+mhc2.normalized.tukey <- TukeyHSD(mhc2.normalized.anova, conf.level=0.95)
+
+tuk_plot(mhc1.normalized.tukey, title = "MHC I") + tuk_plot(mhc2.normalized.tukey, title = "MHC II")
 
 
-ggpubr + stat_compare_means()
 
-Df = tibble(Cancer, Gene, Patient, Expression)
-ggplot(Df, aes(x = Gene, y = Expression, fill = Cancer) + geom_boxplot()
+```
+
+Result: NR and PDAC have lower scores on MHC I compared to R; differences inconclusive for MHC II
+Function of MHC Class I genes: display intracellular proteins to cytotoxic T cells (function to kill cancer cells)
+
+Check MHC scores for all cell populations
+
+```{r}
+
+## Subset malignant cell populations for BCC, combine with all PDAC cells
+
+Idents(BCCIO) <- BCCIO$seurat_clusters
+bcc.malignant <- subset(BCCIO, idents = c("Macrophages", "Tumor 1", "Tumor 2"))
+
+Idents(PDAC155698.integrated) <- PDAC155698.integrated$seurat_clusters
+PDAC.subset <- subset(PDAC155698.integrated, idents = c("Acinar cells", "Epithelial + Endocrine"))
+PDAC.subset$response <- "PDAC"
+
+bcc.pdac.malignant <- merge(bcc.malignant, PDAC.subset, add.cell.ids = c("bcc", "pdac"))
+bcc.pdac.malignant$category <- paste0(bcc.pdac.malignant$response, " ", bcc.pdac.malignant$seurat_clusters)
+
+
+## Average gene expression per patient for HLA 
+
+Idents(bcc.pdac.malignant) <- bcc.pdac.malignant$patient
+bcc.pdac.malignant.averages <- AverageExpression(bcc.pdac.malignant)
+hla.malignant.averages <- bcc.pdac.malignant.averages[["RNA"]][hla.genes,]
+
+rownames(hla.malignant.averages)[rownames(hla.malignant.averages) == "18"] <- "category"
+hla.malignant.averages <- as.data.frame(t(hla.malignant.averages))
+
+for (i in 1:17) {
+  hla.malignant.averages[,i] <- as.character(hla.malignant.averages[,i])
+  hla.malignant.averages[,i] <- as.numeric(hla.malignant.averages[,i])
+}
+
+hla.malignant.averages <- cbind(hla.malignant.averages, c("R", "R", "R", "R", "NR", "NR", "NR", "NR", "R", "NR", "R", "PDAC", "PDAC", "PDAC", "PDAC", "PDAC", "PDAC", "PDAC", "PDAC", "PDAC", "PDAC", "PDAC", "PDAC", "PDAC", "PDAC", "PDAC", "PDAC"))
+
+colnames(hla.malignant.averages)[18] <- "category"
+
+save(hla.malignant.averages, file="C:\\Users\\Ryan\\Documents\\Nie Research Project\\hla.malignant.averages")
+
+## MHC Class I Score 
+
+hla.malignant.averages.score <- data.frame(matrix(ncol=2, nrow=27))
+colnames(hla.malignant.averages.score) <- c("MHC1", "MHC2")
+rownames(hla.malignant.averages.score) <- rownames(hla.malignant.averages)[1:27]
+
+hla.malignant.averages.score$MHC1 <- (hla.malignant.averages$`HLA-A` + hla.malignant.averages$`HLA-B`+ hla.malignant.averages$`HLA-C` + hla.malignant.averages$`HLA-E` + hla.malignant.averages$`HLA-G`) / 5
+
+hla.malignant.averages.score$MHC2 <- (hla.malignant.averages$`HLA-DOA`+ hla.malignant.averages$`HLA-DQB2` + hla.malignant.averages$`HLA-DMA` + hla.malignant.averages$`HLA-DQA2` + hla.malignant.averages$`HLA-DRA` + hla.malignant.averages$`HLA-DPA1` + hla.malignant.averages$`HLA-DQB1` + hla.malignant.averages$`HLA-DPB1` + hla.malignant.averages$`HLA-DRB1` + hla.malignant.averages$`HLA-DRB5` + hla.malignant.averages$`HLA-DQA1` + hla.malignant.averages$`HLA-DMB`) / 12
+
+hla.malignant.averages.score$category <- c("R", "R", "R", "R", "NR", "NR", "NR", "NR", "R", "NR", "R", "PDAC", "PDAC", "PDAC", "PDAC", "PDAC", "PDAC", "PDAC", "PDAC", "PDAC", "PDAC", "PDAC", "PDAC", "PDAC", "PDAC", "PDAC", "PDAC")
+
+hla.malignant.scores <- melt(hla.malignant.averages.score, id.var="category")
+ggplot(data=hla.malignant.scores, aes(x=variable, y=value)) + geom_boxplot(aes(fill=category))
+
+## ANOVA tests
+
+mhc1.malignant.anova <- aov(MHC1~category, data=hla.malignant.averages.score)
+mhc2.malignant.anova <- aov(MHC2~category, data=hla.malignant.averages.score)
+
+mhc1.malignant.tukey <- TukeyHSD(mhc1.malignant.anova, conf.level = 0.95)
+mhc2.malignant.tukey <- TukeyHSD(mhc2.malignant.anova, conf.level = 0.95)
+
+tuk_plot(mhc1.malignant.tukey, title = "MHC I") + tuk_plot(mhc2.malignant.tukey, title = "MHC II")
+
+mhc1.malignant.tukey
+mhc2.malignant.tukey
+
+```
+
+Result: MHC Class I and Class II lower in PDAC vs. responders and nonresponders 
+MHC Class II in PDAC --> essentially no expression, much lower than responders or nonresponders
+
+
+
+HSP Genes Differential Expression: Responders vs. PDAC 
+
+```{r}
+
+## Segregate the HSP genes
+
+bcc.pdac.markers <- list(bcc.pdac.1.markers, bcc.pdac.2.markers, bcc.pdac.3.markers, bcc.pdac.4.markers, bcc.pdac.5.markers, bcc.pdac.6.markers, bcc.pdac.7.markers, bcc.pdac.8.markers, bcc.pdac.9.markers, bcc.pdac.10.markers, bcc.pdac.11A.markers, bcc.pdac.11B.markers, bcc.pdac.12.markers, bcc.pdac.13.markers, bcc.pdac.15.markers, bcc.pdac.16.markers)
+
+patient.ids <- c("1", "2", "3", "4", "5", "6", "7", "8", "9", "10", "11A", "11B", "12", "13", "15", "16")
+
+hsp.markers <- NULL
+
+for (i in 1:length(bcc.pdac.markers)) {
+  bcc.pdac.markers[[i]]$gene.header <- substr(bcc.pdac.markers[[i]]$GeneNames, 0, 3)
+  bcc.pdac.markers[[i]]$patient <- (patient.ids[i])
+  hsp.markers[[i]] <- subset(bcc.pdac.markers[[i]], gene.header == "HSP")
+}
+
+for (i in 1:length(hsp.markers)) {
+  hsp.markers[[i]]$patient
+  assign(paste0("hsp.markers.", i), hsp.markers[[i]])
+}
+
+## Merge datasets together
+
+hsp.markers <- list(hsp.markers.1, hsp.markers.2, hsp.markers.3, hsp.markers.4, hsp.markers.5, hsp.markers.6, hsp.markers.7, hsp.markers.8, hsp.markers.9, hsp.markers.10, hsp.markers.11, hsp.markers.12, hsp.markers.13, hsp.markers.14, hsp.markers.15, hsp.markers.16)
+
+hsp.markers.by.patient <- do.call("rbind", hsp.markers)
+
+## Plot results
+
+hsp.markers.by.patient$log_pvaladj <- -log(hsp.markers.by.patient$p_val_adj)
+#hsp.markers.by.patient$loglog_pvaladj <- log(hsp.markers.by.patient$log_pvaladj + 1)
+
+hsp.markers.plot <- ggplot(hsp.markers.by.patient, aes(x=log_pvaladj, y=avg_log2FC, color=GeneNames, size=1)) + theme_minimal() + ggtitle("Differential Expression of HSP genes by patient: \n BCC Responders vs. PDAC") + xlab("-log10(P)") + ylab("Log2 fold change") + geom_point() + theme(plot.title = element_text(size=20), legend.text = element_text(size = 10), legend.title = element_text(size = 14))
+hsp.markers.plot
+
+```
+
+
+
+HSP Genes Differential Expression: Responders vs. Nonresponders
+
+```{r}
+
+## Differentially expressed genes by patient
+
+patient.ids <- c("su005", "su006", "su007", "su008")
+bcc.hsp.markers <- NULL
+
+for (i in 1:length(bcc.pre.response.markers)) {
+  bcc.pre.response.markers[[i]]$gene.header <- substr(bcc.pre.response.markers[[i]]$GeneNames, 0, 3)
+  bcc.pre.response.markers[[i]]$patient <- (patient.ids[i])
+  bcc.hsp.markers[[i]] <- subset(bcc.pre.response.markers[[i]], gene.header == "HSP")
+}
+
+
+
+for (i in 1:length(bcc.hsp.markers)) {
+  assign(paste0("bcc.hsp.", patient.ids[i], ".markers"), bcc.hsp.markers[[i]])
+}
+
+bcc.hsp.markers <- list(bcc.hsp.su005.markers, bcc.hsp.su006.markers, bcc.hsp.su007.markers, bcc.hsp.su008.markers)
+bcc.hsp.markers <- do.call("rbind", bcc.hsp.markers)
+
+## Plot results
+
+bcc.hsp.markers$log_pvaladj <- -log(bcc.hsp.markers$p_val_adj)
+
+bcc.hsp.markers.plot <- ggplot(bcc.hsp.markers, aes(x=log_pvaladj, y=avg_log2FC, color=GeneNames, size=1.5)) + theme_minimal() + ggtitle("Differential Expression of HSP genes by patient: \n BCC Responders vs. Nonresponders") + xlab("-log10(P)") + ylab("Log2 fold change") + geom_point() + theme(plot.title = element_text(size=20), legend.text = element_text(size=10), legend.title = element_text(size = 14))
+bcc.hsp.markers.plot
+
+```
+
+Result: no clear trends, opposite direction from responder vs. PDAC
+
+HSP Score Analysis
+
+```{r}
+
+## Average gene expression per patient for HSP
+
+hsp.genes <- unique(hsp.markers.by.patient$GeneNames)
+
+Idents(bcc.pdac.macrophages) <- bcc.pdac.macrophages$patient
+bcc.pdac.averages <- AverageExpression(bcc.pdac.macrophages)
+hsp.averages <- bcc.pdac.averages[["RNA"]][hsp.genes,]
+
+hsp.averages <- rbind(hsp.averages, c("R", "R", "R", "R", "NR", "NR", "NR", "NR", "R", "PDAC", "PDAC", "PDAC", "PDAC", "PDAC", "PDAC", "PDAC", "PDAC", "PDAC", "PDAC", "PDAC", "PDAC", "PDAC", "PDAC", "PDAC", "PDAC"))
+
+rownames(hsp.averages)[rownames(hsp.averages) == "15"] <- "category"
+hsp.averages <- as.data.frame(t(hsp.averages))
+
+for (i in 1:14) {
+  hsp.averages[,i] <- as.character(hsp.averages[,i])
+  hsp.averages[,i] <- as.numeric(hsp.averages[,i])
+}
+
+colnames(hsp.averages)[15] <- "category"
+
+save(hsp.averages, file="C:\\Users\\Ryan\\Documents\\Nie Research Project\\hsp.averages")
+
+## Calculate HSP score (arithmetic average)
+
+hsp.averages.score <- data.frame(matrix(ncol=2, nrow=25))
+colnames(hsp.averages.score) <- c("HSP", "category")
+rownames(hsp.averages.score) <- rownames(hsp.averages)
+
+hsp.averages.score$HSP <- rowSums(hsp.averages[,-15]) / 14
+
+hsp.averages.score$category <- hsp.averages$category
+
+hsp.scores <- melt(hsp.averages.score, id.var="category")
+ggplot(data=hsp.scores, aes(x=variable, y=value)) + geom_boxplot(aes(fill=category))
+
+hsp.anova <- aov(HSP~category, data=hsp.averages.score)
+hsp.tukey <- TukeyHSD(hsp.anova, conf.level = 0.95)
+
+tuk_plot(hsp.tukey, title = "HSP")
+
+
+
+
+```
+
+
+
+
+####################################################################################################################################
+
+
+```{r}
+
+Idents(BCCIO) <- BCCIO$seurat_clusters
+bcc.averages.celltype <- AverageExpression(BCCIO)
+bcc.hla.averages.celltype <- bcc.averages.celltype[["RNA"]][hla.genes,]
+colnames(bcc.hla.averages.celltype) <- paste0("bcc ", colnames(bcc.hla.averages.celltype))
+bcc.hla.averages.celltype$gene <- rownames(bcc.hla.averages.celltype)
+
+Idents(PDAC155698.integrated) <- PDAC155698.integrated$seurat_clusters
+pdac.averages.celltype <- AverageExpression(PDAC155698.integrated)
+pdac.hla.averages.celltype <- pdac.averages.celltype[["RNA"]][hla.genes,]
+colnames(pdac.hla.averages.celltype) <- paste0("pdac ", colnames(pdac.hla.averages.celltype))
+pdac.hla.averages.celltype$gene <- rownames(pdac.hla.averages.celltype)
+
+hla.averages.celltype <- merge(bcc.hla.averages.celltype, pdac.hla.averages.celltype, by="gene")
+hla.averages.celltype <- t(hla.averages.celltype)
+colnames(hla.averages.celltype) <- hla.averages.celltype[1,]
+hla.averages.celltype <- hla.averages.celltype[-1,]
+
+
+
+
+```
+
+####################################################################################################################################
+
+
+Explore CellChat
+
+```{r}
+
+## Create cellchat objects for BCC and PDAC
+
+BCC.cellchat <- createCellChat(object = BCCIO, meta = BCCIO@meta.data, group.by = "seurat_clusters")
+
+PDAC.cellchat <- createCellChat(object = PDAC155698.integrated, meta= PDAC155698.integrated@meta.data, group.by="sub_cluster")
+
+## Select MHC interactions
+
+CellChatDB <- CellChatDB.human
+CellChatDB.use <- subsetDB(CellChatDB, search = "Cell-Cell Adhesion")
+
+BCC.cellchat@DB <- CellChatDB.use
+PDAC.cellchat@DB <- CellChatDB.use
+
+## Preprocessing 
+
+BCC.cellchat <- subsetData(BCC.cellchat)
+PDAC.cellchat <- subsetData(PDAC.cellchat)
+
+BCC.cellchat <- identifyOverExpressedGenes(BCC.cellchat)
+BCC.cellchat <- identifyOverExpressedInteractions(BCC.cellchat)
+BCC.cellchat <- projectData(BCC.cellchat, PPI.human)
+
+PDAC.cellchat <- identifyOverExpressedGenes(PDAC.cellchat)
+PDAC.cellchat <- identifyOverExpressedInteractions(PDAC.cellchat)
+PDAC.cellchat <- projectData(PDAC.cellchat, PPI.human)
+
+```
+
+
+
+Explore cell-cell communication networks for BCC and PDAC
+
+```{r}
+
+## Compute communication probability
+
+BCC.cellchat <- computeCommunProb(BCC.cellchat, raw.use = TRUE)
+BCC.cellchat <- filterCommunication(BCC.cellchat, min.cells = 10)
+
+PDAC.cellchat <- computeCommunProb(PDAC.cellchat, raw.use = TRUE)
+PDAC.cellchat <- filterCommunication(PDAC.cellchat, min.cells = 10)
+
 
 
 ```
@@ -780,3 +1062,9 @@ ggplot(Df, aes(x = Gene, y = Expression, fill = Cancer) + geom_boxplot()
 
 
 
+
+
+
+
+wilcoxon test
+ks test
