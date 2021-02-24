@@ -182,7 +182,7 @@ Full DE Testing (UMAP) for r=0.4, test=wilcox
 BCCIO <- FindNeighbors(BCCIO, dims = 1:50)
 BCCIO <- FindClusters(BCCIO, resolution = 0.4, algorithm = 3)
 BCCIO.markers <- FindAllMarkers(BCCIO, test.use = 'wilcox', min.pct = 0.25, logfc.threshold = 0.25, max.cells.per.ident = 500) ## Run through all cells
-top5 <- BCCIO.markers %>% group_by(cluster) %>% top_n(n=5, wt=avg_logFC)
+top5 <- BCCIO.markers %>% group_by(cluster) %>% top_n(n=5, wt=avg_log2FC)
 DoHeatmap(BCCIO,features = top5$gene, size = 3) ## Heatmap with all cells
 
 top25 <- BCCIO.markers %>% group_by(cluster) %>% top_n(n=25, wt=avg_logFC)
@@ -327,23 +327,23 @@ FeaturePlot(BCCIO, features=c("TCF7", "PDCD1", "CD274", "PDCD1LG2"))
 ## PD1 protein
 Idents(BCCIO.pre) <- BCCIO.pre$seurat_clusters
 Idents(BCCIO.post) <- BCCIO.post$seurat_clusters
-BCCIO.pre.vlnplot.PDCD1 <- VlnPlot(BCCIO.pre, "PDCD1") + NoLegend()
-BCCIO.post.vlnplot.PDCD1 <- VlnPlot(BCCIO.post, "PDCD1") + NoLegend()
+BCCIO.pre.vlnplot.PDCD1 <- VlnPlot(BCCIO.pre, "PDCD1", pt.size = 0) + NoLegend()
+BCCIO.post.vlnplot.PDCD1 <- VlnPlot(BCCIO.post, "PDCD1", pt.size = 0) + NoLegend()
 BCCIO.pre.vlnplot.PDCD1 + BCCIO.post.vlnplot.PDCD1
 
 ## PD-L1 protein
-BCCIO.pre.vlnplot.CD274 <- VlnPlot(BCCIO.pre, "CD274") + NoLegend()
-BCCIO.post.vlnplot.CD274 <- VlnPlot(BCCIO.post, "CD274") + NoLegend()
+BCCIO.pre.vlnplot.CD274 <- VlnPlot(BCCIO.pre, "CD274", pt.size = 0) + NoLegend()
+BCCIO.post.vlnplot.CD274 <- VlnPlot(BCCIO.post, "CD274", pt.size = 0) + NoLegend()
 BCCIO.pre.vlnplot.CD274 + BCCIO.post.vlnplot.CD274
 
 ## PD-L2 protein 
-BCCIO.pre.vlnplot.PDCD1LG2 <- VlnPlot(BCCIO.pre, "PDCD1LG2") + NoLegend()
-BCCIO.post.vlnplot.PDCD1LG2 <- VlnPlot(BCCIO.post, "PDCD1LG2") + NoLegend()
+BCCIO.pre.vlnplot.PDCD1LG2 <- VlnPlot(BCCIO.pre, "PDCD1LG2", pt.size = 0) + NoLegend()
+BCCIO.post.vlnplot.PDCD1LG2 <- VlnPlot(BCCIO.post, "PDCD1LG2", pt.size = 0) + NoLegend()
 BCCIO.pre.vlnplot.PDCD1LG2 + BCCIO.post.vlnplot.PDCD1LG2
 
 ## TCF7 protein
-BCCIO.pre.vlnplot.TCF7 <- VlnPlot(BCCIO.pre, "TCF7") + NoLegend()
-BCCIO.post.vlnplot.TCF7 <- VlnPlot(BCCIO.post, "TCF7") + NoLegend()
+BCCIO.pre.vlnplot.TCF7 <- VlnPlot(BCCIO.pre, "TCF7", pt.size = 0) + NoLegend()
+BCCIO.post.vlnplot.TCF7 <- VlnPlot(BCCIO.post, "TCF7", pt.size= 0) + NoLegend()
 BCCIO.pre.vlnplot.TCF7 + BCCIO.post.vlnplot.TCF7
 
 ## DE pre vs. post 
@@ -385,7 +385,7 @@ Average gene expression
 ```{r}
 
 set.seed(001)
-bcc.subset <- SubsetData(BCCIO, max.cells.per.ident=100)
+bcc.subset <- subset(BCCIO, max.cells.per.ident=100)
 
 Idents(bcc.subset) <- bcc.subset$treatment
 bcc.treatment.averages <- AverageExpression(bcc.subset)
@@ -398,6 +398,25 @@ head(bcc.patient.averages[["RNA"]][c("TCF7", "PDCD1", "CD274", "PDCD1LG2"),])
 Idents(bcc.subset) <- bcc.subset$response
 bcc.response.averages <- AverageExpression(bcc.subset)
 head(bcc.response.averages[["RNA"]][c("TCF7", "PDCD1", "CD274", "PDCD1LG2"),])
+
+## Determine if differences are significant
+
+bcc.pd1.averages <- head(bcc.patient.averages[["RNA"]][c("TCF7", "PDCD1", "CD274", "PDCD1LG2"),])
+bcc.pd1.averages <- as.data.frame(t(bcc.pd1.averages))
+
+bcc.pd1.averages$Response <- NULL
+bcc.pd1.averages$Response <- c("Responsive", "Responsive", "Responsive", "Responsive", "Nonresponsive", "Nonresponsive", "Nonresponsive", "Nonresponsive", "Responsive", "Nonresponsive", "Responsive")
+
+bcc.pd1.comparison <- ggboxplot(bcc.pd1.averages, x = "Response", y = "PDCD1", palette = c("Red", "Blue"), add = "jitter") + 
+  stat_compare_means(method = "anova")
+bcc.pdl1.comparison <- ggboxplot(bcc.pd1.averages, x = "Response", y = "CD274", palette = c("Red", "Blue"), add = "jitter") + 
+  stat_compare_means(method = "anova")
+bcc.pdl2.comparison <- ggboxplot(bcc.pd1.averages, x = "Response", y = "PDCD1LG2", palette = c("Red", "Blue"), add = "jitter") + 
+  stat_compare_means(method = "anova")
+bcc.tcf7.comparison <- ggboxplot(bcc.pd1.averages, x = "Response", y = "TCF7", palette = c("Red", "Blue"), add = "jitter") + 
+  stat_compare_means(method = "anova")
+
+bcc.pd1.comparison + bcc.pdl1.comparison + bcc.pdl2.comparison + bcc.tcf7.comparison
 
 ```
 
