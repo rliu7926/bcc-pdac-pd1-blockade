@@ -1,0 +1,190 @@
+---
+title: "CellChat Analysis"
+output: html_notebook
+---
+
+Load Packages and Data
+** R STUDIO 3.6.2 USED HERE (V 4 ELSEWHERE)
+
+```{r}
+## Load packages
+library(dplyr)
+library(Seurat)
+library(patchwork)
+library(ggplot2)
+library(cowplot)
+library(pracma)
+library(RColorBrewer)
+library(EnhancedVolcano)
+library(gridExtra)
+library(reshape2)
+library(CellChat)
+
+memory.limit(size = 16000000)
+
+## BCC Cellchat Object
+load("C:\\Users\\Ryan\\Documents\\Nie Research Project\\BCC.cellchat")
+
+## PDAC Integrated Cellchat Object
+load("C:\\Users\\Ryan\\Documents\\Nie Research Project\\PDAC.cellchat")
+
+## Load functions
+source("ClusteringAnalysisFunctions.R", echo=TRUE)
+source("SeuratClusteringFunctions.R", echo=TRUE)
+source("DifferentialExpressionFunctions.R", echo=TRUE)
+```
+
+
+
+Explore CellChat
+
+```{r}
+
+## Create cellchat objects for BCC and PDAC
+
+BCC.cellchat <- createCellChat(object = BCCIO, meta = BCCIO@meta.data, group.by = "seurat_clusters")
+
+PDAC.cellchat <- createCellChat(object = PDAC155698.integrated, meta= PDAC155698.integrated@meta.data, group.by="sub_cluster")
+
+## Select MHC interactions
+
+CellChatDB <- CellChatDB.human
+CellChatDB.use <- subsetDB(CellChatDB, search = "Cell-Cell Adhesion")
+CellChatDB.use <- CellChatDB
+
+BCC.cellchat@DB <- CellChatDB.use
+PDAC.cellchat@DB <- CellChatDB.use
+
+## Preprocessing 
+
+BCC.cellchat <- subsetData(BCC.cellchat)
+PDAC.cellchat <- subsetData(PDAC.cellchat)
+
+BCC.cellchat <- identifyOverExpressedGenes(BCC.cellchat)
+BCC.cellchat <- identifyOverExpressedInteractions(BCC.cellchat)
+BCC.cellchat <- projectData(BCC.cellchat, PPI.human)
+
+save(BCC.cellchat, file="C:\\Users\\Ryan\\Documents\\Nie Research Project\\BCC.cellchat")
+
+
+PDAC.cellchat <- identifyOverExpressedGenes(PDAC.cellchat)
+PDAC.cellchat <- identifyOverExpressedInteractions(PDAC.cellchat)
+PDAC.cellchat <- projectData(PDAC.cellchat, PPI.human)
+
+save(PDAC.cellchat, file="C:\\Users\\Ryan\\Documents\\Nie Research Project\\PDAC.cellchat")
+
+```
+
+
+
+Explore cell-cell communication networks for BCC and PDAC: Communication probabilities between clusters (cell-cell adhesion)
+
+```{r}
+
+## Compute communication probability
+
+BCC.cellchat <- computeCommunProb(BCC.cellchat, raw.use = TRUE)
+BCC.cellchat <- filterCommunication(BCC.cellchat, min.cells = 10)
+
+PDAC.cellchat <- computeCommunProb(PDAC.cellchat, raw.use = TRUE)
+PDAC.cellchat <- filterCommunication(PDAC.cellchat, min.cells = 10)
+
+## Infer cell-cell communication at signaling pathway level
+
+BCC.cellchat <- computeCommunProbPathway(BCC.cellchat)
+PDAC.cellchat <- computeCommunProbPathway(PDAC.cellchat)
+
+## Calculate and visualize aggregated cell-cell communication network
+
+BCC.cellchat <- aggregateNet(BCC.cellchat)
+groupSize <- as.numeric(table(BCC.cellchat@idents))
+netVisual_circle(BCC.cellchat@net$count, vertex.weight = groupSize, weight.scale = T, label.edge = F, title.name = "Number of Interactions")
+netVisual_circle(BCC.cellchat@net$weight, vertex.weight = groupSize, weight.scale = T, label.edge = F, title.name = "Interaction weights/strength")
+
+PDAC.cellchat <- aggregateNet(PDAC.cellchat)
+groupSize <- as.numeric(table(PDAC.cellchat@idents))
+netVisual_circle(PDAC.cellchat@net$count, vertex.weight = groupSize, weight.scale = T, label.edge = F, title.name = "Number of Interactions")
+netVisual_circle(PDAC.cellchat@net$weight, vertex.weight = groupSize, weight.scale = T, label.edge = F, title.name = "Interaction weights/strength")
+
+## Visualize each cluster separately
+
+BCC.weights <- BCC.cellchat@net$weight
+par(mfrow = c(4,5), mar= c(1, 1, 1, 1))
+plots <- vector(mode = "list", length = 20)
+matrix <- matrix(0, nrow = nrow(BCC.weights), ncol=ncol(BCC.weights), dimnames = dimnames(BCC.weights))
+for (i in 1:nrow(BCC.weights)) {
+  matrix <- matrix(0, nrow = nrow(BCC.weights), ncol=ncol(BCC.weights), dimnames = dimnames(BCC.weights))
+  matrix[i, ] <- BCC.weights[i, ]
+  netVisual_circle(matrix, vertex.weight = groupSize, weight.scale = T, edge.weight.max = max(BCC.weights), title.name = rownames(BCC.weights)[i])
+}
+
+PDAC.weights <- PDAC.cellchat@net$weight
+par(mfrow = c(4,4), mar= c(1, 1, 1, 1))
+plots <- vector(mode = "list", length = 20)
+matrix <- matrix(0, nrow = nrow(PDAC.weights), ncol=ncol(PDAC.weights), dimnames = dimnames(PDAC.weights))
+for (i in 1:nrow(PDAC.weights)) {
+  matrix <- matrix(0, nrow = nrow(PDAC.weights), ncol=ncol(PDAC.weights), dimnames = dimnames(PDAC.weights))
+  matrix[i, ] <- PDAC.weights[i, ]
+  netVisual_circle(matrix, vertex.weight = groupSize, weight.scale = T, edge.weight.max = max(PDAC.weights), title.name = rownames(PDAC.weights)[i])
+}
+
+```
+
+
+
+Visualization of cell-cell communication network, looking specifically at MHC-I, MHC-II, PD-L1, PDL2
+
+```{R}
+
+pathway <- c("MHC-I", "MHC-II", "PD-L1", "PDL2")
+
+## Circle plots
+
+par(mfrow = c(1,4), mar = c(1,1,1,1))
+for (i in 1:length(pathway)) {
+  netVisual_aggregate(BCC.cellchat, signaling = pathway[i], layout = "circle")
+}
+
+par(mfrow = c(1,4), mar = c(1,1,1,1))
+for (i in 1:length(pathway)) {
+  netVisual_aggregate(PDAC.cellchat, signaling = pathway[i], layout = "circle")
+}
+
+## Compare contribution of ligand-receptor pair to overall signaling pathway in MHC
+
+par(mfrow = c(2,4), mar = c(1,1,1,1))
+
+# For loop did not work
+netAnalysis_contribution(BCC.cellchat, signaling = pathway[1], title = paste0("Contribution of L-R Pairs: ", pathway[1], " (BCC)"))
+netAnalysis_contribution(BCC.cellchat, signaling = pathway[2], title = paste0("Contribution of L-R Pairs: ", pathway[2], " (BCC)"))
+netAnalysis_contribution(BCC.cellchat, signaling = pathway[3], title = paste0("Contribution of L-R Pairs: ", pathway[3], " (BCC)"))
+netAnalysis_contribution(BCC.cellchat, signaling = pathway[4], title = paste0("Contribution of L-R Pairs: ", pathway[4], " (BCC)"))
+
+netAnalysis_contribution(PDAC.cellchat, signaling = pathway[1], title = paste0("Contribution of L-R Pairs: ", pathway[1], " (PDAC)"))
+netAnalysis_contribution(PDAC.cellchat, signaling = pathway[2], title = paste0("Contribution of L-R Pairs: ", pathway[2], " (PDAC)"))
+netAnalysis_contribution(PDAC.cellchat, signaling = pathway[3], title = paste0("Contribution of L-R Pairs: ", pathway[3], " (PDAC)"))
+netAnalysis_contribution(PDAC.cellchat, signaling = pathway[4], title = paste0("Contribution of L-R Pairs: ", pathway[4], " (PDAC)"))
+
+## Plot signaling gene expression distribution 
+
+plotGeneExpression(BCC.cellchat, signaling = "MHC-I")
+plotGeneExpression(PDAC.cellchat, signaling = "MHC-I")
+
+plotGeneExpression(BCC.cellchat, signaling = "MHC-II")
+plotGeneExpression(PDAC.cellchat, signaling = "MHC-II")
+
+## Bubble plot of all significant interactions
+
+# Macrophages
+netVisual_bubble(BCC.cellchat, sources.use = 7, targets.use = c(1, 2, 4, 5, 6, 11, 9, 15), remove.isolate = FALSE)
+netVisual_bubble(PDAC.cellchat, sources.use = 10, targets.use = c(1, 3, 4), remove.isolate = FALSE)
+
+
+
+
+
+```
+
+
+```
+
