@@ -26,7 +26,7 @@ bioc_volcano <- function(dataset, celltype, group, ident, ident2, pCutoff=0.05, 
   
   celltype.volcano <- EnhancedVolcano(celltype.markers_tibble,
                                       lab = celltype.markers_tibble$GeneNames,
-                                      x = 'avg_logFC', y = 'p_val_adj',
+                                      x = 'avg_log2FC', y = 'p_val_adj',
                                       pCutoff = pCutoff, FCcutoff = FCcutoff,
                                       title = paste(celltype, "DE:", ident, "vs.", ident2))
   

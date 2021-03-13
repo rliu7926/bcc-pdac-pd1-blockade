@@ -479,18 +479,29 @@ Gene expression of PD-1 pathway
 ```{r}
 
 set.seed(001)
-pdac.subset <- SubsetData(PDAC155698.integrated, max.cells.per.ident=100)
+pdac.subset <- PDAC155698.integrated[, sample(colnames(PDAC155698.integrated), size = 5000)]
 
 pdac.subset$pdac <- "yes"
 
 Idents(pdac.subset) <- pdac.subset$orig.ident
 pdac.patient.averages <- AverageExpression(pdac.subset)
-head(pdac.patient.averages[["RNA"]][c("TCF7", "PDCD1", "CD274", "PDCD1LG2"),])
+pdac.patient.averages.pd1 <- pdac.patient.averages[["RNA"]][c("TCF7", "PDCD1", "CD274", "PDCD1LG2"),]
+pdac.patient.averages.pd1 <- as.data.frame(pdac.patient.averages.pd1)
+pdac.patient.averages.pd1$mean <- rowMeans(pdac.patient.averages.pd1)
+View(pdac.patient.averages.pd1)
 
 Idents(pdac.subset) <- pdac.subset$pdac
 pdac.total.averages <- AverageExpression(pdac.subset)
 head(pdac.total.averages[["RNA"]][c("TCF7", "PDCD1", "CD274", "PDCD1LG2"),])
 
+## Violin plots
+
+PDAC.vlnplot.PD1 <- VlnPlot(pdac.subset, "PDCD1", pt.size = 0.1) + NoLegend()
+PDAC.vlnplot.PDL1  <- VlnPlot(pdac.subset, "CD274", pt.size = 0.1) + NoLegend()
+PDAC.vlnplot.PDL2  <- VlnPlot(pdac.subset, "PDCD1LG2", pt.size = 0.1) + NoLegend()
+PDAC.vlnplot.TCF7  <- VlnPlot(pdac.subset, "TCF7", pt.size = 0.1) + NoLegend()
+
+grid.arrange(PDAC.vlnplot.PD1, PDAC.vlnplot.PDL1, PDAC.vlnplot.PDL2, PDAC.vlnplot.TCF7, ncol=4)
 
 ```
 

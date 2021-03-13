@@ -92,18 +92,18 @@ bcc.pdac.merge <- RenameIdents(bcc.pdac.merge, 'CD8_memory' = 'CD8+ T cells', 'C
 
 CD8.markers <- FindMarkers(bcc.pdac.merge, subset.ident='CD8+ T cells', group.by='cancer', ident.1='bcc')
 CD8.markers_tibble <- as_tibble(CD8.markers, rownames = "GeneNames")
-CD8.markers_tibble <- arrange(CD8.markers_tibble, avg_logFC)
+CD8.markers_tibble <- arrange(CD8.markers_tibble, avg_log2FC)
 
 CD8.volcano <- EnhancedVolcano(CD8.markers_tibble,
                                lab = CD8.markers_tibble$GeneNames,
-                               x = 'avg_logFC', y = 'p_val_adj',
+                               x = 'avg_log2FC', y = 'p_val_adj',
                                pCutoff = 0.05, FCcutoff = 0.5,
                                title= 'CD8+ T Cell DE: BCC vs. PDAC')
 CD8.volcano
 
 CD8.volcano.pd1 <- EnhancedVolcano(CD8.markers_tibble,
                                    lab = CD8.markers_tibble$GeneNames,
-                                   x = 'avg_logFC', y = 'p_val_adj',
+                                   x = 'avg_log2FC', y = 'p_val_adj',
                                    pCutoff= 0.05, FCcutoff = 0.5,
                                    selectLab = c('PDCD1', 'CD274', 'PDCD1LG2', 'TCF7', 'SIRPA', 'HAVCR2', 'LGALS9', 'CD80', 'HLA-DQA1', 'ICOSLG', 'CD40', 'PVR', 'TNFSF18', 'TBFSF4', 'CSF1', 'TIGIT', 'TNFRSF18', 'LAG3', 'CD47', 'CD70', 'CD27', 'TNFRSF4', 'CTLA4', 'CD40LG', 'ICOS', 'CD28'),
                                    title= 'CD8+ T Cell DE: BCC vs. PDAC')
@@ -112,22 +112,20 @@ CD8.volcano.pd1
 
 ## CD4 T cells
 
-bcc.pdac.merge <- RenameIdents(bcc.pdac.merge, 'CD8_memory' = 'CD8+ T cells', 'CD8_activation' = 'CD8+ T cells', 'CD8_exhausted' = 'CD8+ T cells', 'CD4' = 'CD4+ T cells')
-
 CD4.markers <- FindMarkers(bcc.pdac.merge, subset.ident='CD4+ T cells', group.by='cancer', ident.1='bcc')
 CD4.markers_tibble <- as_tibble(CD4.markers, rownames = "GeneNames")
-CD4.markers_tibble <- arrange(CD4.markers_tibble, avg_logFC)
+CD4.markers_tibble <- arrange(CD4.markers_tibble, avg_log2FC)
 
 CD4.volcano <- EnhancedVolcano(CD4.markers_tibble,
                                lab = CD4.markers_tibble$GeneNames,
-                               x = 'avg_logFC', y = 'p_val_adj',
+                               x = 'avg_log2FC', y = 'p_val_adj',
                                pCutoff = 0.05, FCcutoff = 0.5,
                                title= 'CD4+ T Cell DE: BCC vs. PDAC')
 CD4.volcano
 
 CD4.volcano.pd1 <- EnhancedVolcano(CD4.markers_tibble,
                                    lab = CD4.markers_tibble$GeneNames,
-                                   x = 'avg_logFC', y = 'p_val_adj',
+                                   x = 'avg_log2FC', y = 'p_val_adj',
                                    pCutoff= 0.05, FCcutoff = 0.5,
                                    selectLab = c('PDCD1', 'CD274', 'PDCD1LG2', 'TCF7', 'SIRPA', 'HAVCR2', 'LGALS9', 'CD80', 'HLA-DQA1', 'ICOSLG', 'CD40', 'PVR', 'TNFSF18', 'TBFSF4', 'CSF1', 'TIGIT', 'TNFRSF18', 'LAG3', 'CD47', 'CD70', 'CD27', 'TNFRSF4', 'CTLA4', 'CD40LG', 'ICOS', 'CD28'),
                                    title= 'CD4+ T Cell DE: BCC vs. PDAC')
@@ -138,18 +136,18 @@ CD4.volcano.pd1
 
 macrophage.markers <- FindMarkers(bcc.pdac.merge, subset.ident='Macrophages', group.by='cancer', ident.1='bcc')
 macrophage.markers_tibble <- as_tibble(macrophage.markers, rownames = "GeneNames")
-macrophage.markers_tibble <- arrange(macrophage.markers_tibble, avg_logFC)
+macrophage.markers_tibble <- arrange(macrophage.markers_tibble, avg_log2FC)
 
 macrophage.volcano <- EnhancedVolcano(macrophage.markers_tibble,
                                lab = macrophage.markers_tibble$GeneNames,
-                               x = 'avg_logFC', y = 'p_val_adj',
+                               x = 'avg_log2FC', y = 'p_val_adj',
                                pCutoff = 0.05, FCcutoff = 0.5,
                                title= 'Macrophage DE: BCC vs. PDAC')
 macrophage.volcano
 
 macrophage.volcano.pd1 <- EnhancedVolcano(macrophage.markers_tibble,
                                    lab = macrophage.markers_tibble$GeneNames,
-                                   x = 'avg_logFC', y = 'p_val_adj',
+                                   x = 'avg_log2FC', y = 'p_val_adj',
                                    pCutoff= 0.05, FCcutoff = 0.5,
                                    selectLab = c('PDCD1', 'CD274', 'PDCD1LG2', 'TCF7', 'SIRPA', 'HAVCR2', 'LGALS9', 'CD80', 'HLA-DQA1', 'ICOSLG', 'CD40', 'PVR', 'TNFSF18', 'TBFSF4', 'CSF1', 'TIGIT', 'TNFRSF18', 'LAG3', 'CD47', 'CD70', 'CD27', 'TNFRSF4', 'CTLA4', 'CD40LG', 'ICOS', 'CD28'),
                                    title= 'Macrophage DE: BCC vs. PDAC')
@@ -165,11 +163,11 @@ Enhanced Volcano Plots (PDAC)
 
 pdac.macrophage.markers <- FindMarkers(PDAC155698.integrated, subset.ident='Macrophages', group.by='orig.ident', ident.1='PDAC155698.1')
 pdac.macrophage.markers_tibble <- as_tibble(pdac.macrophage.markers, rownames = "GeneNames")
-pdac.macrophage.markers_tibble <- arrange(pdac.macrophage.markers_tibble, avg_logFC)
+pdac.macrophage.markers_tibble <- arrange(pdac.macrophage.markers_tibble, avg_log2FC)
 
 pdac.macrophage.volcano <- EnhancedVolcano(pdac.macrophage.markers_tibble,
                                lab = pdac.macrophage.markers_tibble$GeneNames,
-                               x = 'avg_logFC', y = 'p_val_adj',
+                               x = 'avg_log2FC', y = 'p_val_adj',
                                pCutoff = 0.05, FCcutoff = 0.5,
                                title= 'Macrophage DE: PDAC Patient 1 vs. Rest of Patients')
 pdac.macrophage.volcano
@@ -218,6 +216,8 @@ bcc.bcell.responder.volcano
 
 bcc.macrophage.responder.volcano <- bioc_volcano(BCCIO, c("Macrophages"), c("response"), c("Responsive"), c("Nonresponsive"))
 bcc.macrophage.responder.volcano
+
+grid.arrange(bcc.cd4.responder.volcano, bcc.cd8_memory.responder.volcano, bcc.cd8_exhausted.responder.volcano, bcc.cd8_activation.responder.volcano, bcc.tregs.responder.volcano, bcc.bcell.responder.volcano, bcc.macrophage.responder.volcano, ncol=3)
 
 ```
 
@@ -289,22 +289,22 @@ Use Gene Ontology to investigate markers and gene pathways
 macrophage.markers <- FindMarkers(BCCIO.pre, subset.ident='Macrophages', group.by='response', ident.1='Responsive')
 macrophage.markers_tibble <- as_tibble(macrophage.markers, rownames = "GeneNames")
 
-macrophage.markers_tibble <- arrange(macrophage.markers_tibble, avg_logFC)
+macrophage.markers_tibble <- arrange(macrophage.markers_tibble, avg_log2FC)
  
-macrophage.nonresponder.markers <- macrophage.markers_tibble[macrophage.markers_tibble$p_val_adj < 0.05 &  macrophage.markers_tibble$avg_logFC < -0.5, ]
+macrophage.nonresponder.markers <- macrophage.markers_tibble[macrophage.markers_tibble$p_val_adj < 0.05 &  macrophage.markers_tibble$avg_log2FC < -0.5, ]
 
-macrophage.responder.markers <- macrophage.markers_tibble[macrophage.markers_tibble$p_val_adj < 0.05 &  macrophage.markers_tibble$avg_logFC > 0.5, ]
+macrophage.responder.markers <- macrophage.markers_tibble[macrophage.markers_tibble$p_val_adj < 0.05 &  macrophage.markers_tibble$avg_log2FC > 0.5, ]
 
 ## Proliferated T cells markers 
 
 T_proliferation.markers <- FindMarkers(BCCIO.pre, subset.ident='T_proliferation', group.by='response', ident.1='Responsive')
 T_proliferation.markers_tibble <- as_tibble(T_proliferation.markers, rownames = "GeneNames")
 
-T_proliferation.markers_tibble <- arrange(T_proliferation.markers_tibble, avg_logFC)
+T_proliferation.markers_tibble <- arrange(T_proliferation.markers_tibble, avg_log2FC)
  
-T_proliferation.nonresponder.markers <- T_proliferation.markers_tibble[T_proliferation.markers_tibble$p_val_adj < 0.05 &  T_proliferation.markers_tibble$avg_logFC < -0.5, ]
+T_proliferation.nonresponder.markers <- T_proliferation.markers_tibble[T_proliferation.markers_tibble$p_val_adj < 0.05 &  T_proliferation.markers_tibble$avg_log2FC < -0.5, ]
 
-T_proliferation.responder.markers <- T_proliferation.markers_tibble[T_proliferation.markers_tibble$p_val_adj < 0.05 &  T_proliferation.markers_tibble$avg_logFC > 0.5, ]
+T_proliferation.responder.markers <- T_proliferation.markers_tibble[T_proliferation.markers_tibble$p_val_adj < 0.05 &  T_proliferation.markers_tibble$avg_log2FC > 0.5, ]
 
 ```
 
@@ -464,10 +464,10 @@ Check DE gene expression of HLA genes by patient
 
 ```{r}
 ## Differentially expressed genes
-
+`
 bcc.pdac.subsets <- list(bcc.pdac.1, bcc.pdac.2, bcc.pdac.3, bcc.pdac.4, bcc.pdac.5, bcc.pdac.6, bcc.pdac.7, bcc.pdac.8, bcc.pdac.9, bcc.pdac.10, bcc.pdac.11A, bcc.pdac.11B, bcc.pdac.12, bcc.pdac.13, bcc.pdac.15, bcc.pdac.16)
 
-bcc.pdac.markers <- lapply(bcc.pdac.subsets, function(i) bioc_markers(i, c("Macrophages"), c("pdac.patient"), c("BCC")))
+bcc.pdac.markers <- lapply(bcc.pdac.subsets, function(i) bioc_markers(i, c("Macrophages"), c("pdac.patient"), c("BCC"), pCutoff = 1, FCcutoff = 0.01))
 
 for (i in 1:length(bcc.pdac.markers)) {
   assign(paste0("bcc.pdac.", i, ".markers"), bcc.pdac.markers[[i]])
@@ -500,6 +500,12 @@ for (i in 1:length(hla.markers)) {
 ## Merge datasets together
 
 hla.markers <- list(hla.markers.1, hla.markers.2, hla.markers.3, hla.markers.4, hla.markers.5, hla.markers.6, hla.markers.7, hla.markers.8, hla.markers.9, hla.markers.10, hla.markers.11, hla.markers.12, hla.markers.13, hla.markers.14, hla.markers.15, hla.markers.16)
+
+patient.ids <- c('1', '2', '3', '4', '5', '6', '7', '8', '9', '10', '11A', '11B', '12', '13', '15', '16')
+
+for (i in 1:length(hla.markers)) {
+  hla.markers[[i]]$patient <- patient.ids[i]
+}
 
 hla.markers.by.patient <- do.call("rbind", hla.markers)
 
@@ -680,11 +686,16 @@ for (i in 1:length(hla.genes)) {
   colnames(hla.averages)[i] <- "gene"
   plot <- anova_test(hla.averages, hla.genes[i], "Category")
   hla.anova.plots[[i]] <- recordPlot()
+  assign(paste0("hla.anova.plots.", hla.genes[i]), hla.anova.plots[[i]])
   plot.new()
   colnames(hla.averages)[i] <- hla.genes[i]
 }
 
 names(hla.anova.plots) <- hla.genes
+
+hla.anova.plots <- list(hla.anova.plots[[1]], hla.anova.plots[[2]], hla.anova.plots[[3]], hla.anova.plots[[4]], hla.anova.plots[[5]], hla.anova.plots[[6]], hla.anova.plots[[7]], hla.anova.plots[[8]], hla.anova.plots[[9]], hla.anova.plots[[10]], hla.anova.plots[[11]], hla.anova.plots[[12]], hla.anova.plots[[13]], hla.anova.plots[[14]], hla.anova.plots[[15]], hla.anova.plots[[16]], hla.anova.plots[[17]])
+
+grid.arrange(`hla.anova.plotsHLA-A`, `hla.anova.plotsHLA-B`)
 
 ## ANOVA test for all HLA genes at 90% confidence
 
@@ -775,7 +786,7 @@ tuk_plot(mhc1.normalized.tukey, title = "MHC I") + tuk_plot(mhc2.normalized.tuke
 Result: NR and PDAC have lower scores on MHC I compared to R; differences inconclusive for MHC II
 Function of MHC Class I genes: display intracellular proteins to cytotoxic T cells (function to kill cancer cells)
 
-Check MHC scores for all cell populations
+Check MHC scores for malignant cell populations
 
 ```{r}
 
@@ -967,8 +978,53 @@ hsp.tukey <- TukeyHSD(hsp.anova, conf.level = 0.95)
 
 tuk_plot(hsp.tukey, title = "HSP")
 
+```
 
 
+
+HSP Score Analysis: Malignant Cells
+
+```{r}
+
+## Average gene expression for HSP malignant cells
+
+hsp.genes <- unique(hsp.markers.by.patient$GeneNames)
+
+Idents(bcc.pdac.malignant) <- bcc.pdac.malignant$patient
+bcc.pdac.malignant.averages <- AverageExpression(bcc.pdac.malignant)
+hsp.malignant.averages <- bcc.pdac.malignant.averages[["RNA"]][hsp.genes,]
+
+hsp.malignant.averages <- rbind(hsp.malignant.averages, c("R", "R", "R", "R", "NR", "NR", "NR", "NR", "R", "NR", "R", "PDAC", "PDAC", "PDAC", "PDAC", "PDAC", "PDAC", "PDAC", "PDAC", "PDAC", "PDAC", "PDAC", "PDAC", "PDAC", "PDAC", "PDAC", "PDAC"))
+
+rownames(hsp.malignant.averages)[rownames(hsp.malignant.averages) == "18"] <- "category"
+hsp.malignant.averages <- as.data.frame(t(hsp.malignant.averages))
+
+for (i in 1:17) {
+  hsp.malignant.averages[,i] <- as.character(hsp.malignant.averages[,i])
+  hsp.malignant.averages[,i] <- as.numeric(hsp.malignant.averages[,i])
+}
+
+colnames(hsp.malignant.averages)[18] <- "category"
+
+save(hsp.malignant.averages, file="C:\\Users\\Ryan\\Documents\\Nie Research Project\\hsp.malignant.averages")
+
+## Calculate HSP score (arithmetic average)
+
+hsp.malignant.averages.score <- data.frame(matrix(ncol=2, nrow=27))
+colnames(hsp.malignant.averages.score) <- c("HSP", "category")
+rownames(hsp.malignant.averages.score) <- rownames(hsp.malignant.averages)
+
+hsp.malignant.averages.score$HSP <- rowSums(hsp.malignant.averages[,-18]) / 17
+
+hsp.malignant.averages.score$category <- hsp.malignant.averages$category
+
+hsp.malignant.scores <- melt(hsp.malignant.averages.score, id.var="category")
+ggplot(data=hsp.malignant.scores, aes(x=variable, y=value)) + geom_boxplot(aes(fill=category))
+
+hsp.malignant.anova <- aov(HSP~category, data=hsp.malignant.averages.score)
+hsp.malignant.tukey <- TukeyHSD(hsp.malignant.anova, conf.level = 0.95)
+
+tuk_plot(hsp.malignant.tukey, title = "HSP")
 
 ```
 
@@ -1003,65 +1059,6 @@ hla.averages.celltype <- hla.averages.celltype[-1,]
 ```
 
 ####################################################################################################################################
-
-
-Explore CellChat
-
-```{r}
-
-## Create cellchat objects for BCC and PDAC
-
-BCC.cellchat <- createCellChat(object = BCCIO, meta = BCCIO@meta.data, group.by = "seurat_clusters")
-
-PDAC.cellchat <- createCellChat(object = PDAC155698.integrated, meta= PDAC155698.integrated@meta.data, group.by="sub_cluster")
-
-## Select MHC interactions
-
-CellChatDB <- CellChatDB.human
-CellChatDB.use <- subsetDB(CellChatDB, search = "Cell-Cell Adhesion")
-
-BCC.cellchat@DB <- CellChatDB.use
-PDAC.cellchat@DB <- CellChatDB.use
-
-## Preprocessing 
-
-BCC.cellchat <- subsetData(BCC.cellchat)
-PDAC.cellchat <- subsetData(PDAC.cellchat)
-
-BCC.cellchat <- identifyOverExpressedGenes(BCC.cellchat)
-BCC.cellchat <- identifyOverExpressedInteractions(BCC.cellchat)
-BCC.cellchat <- projectData(BCC.cellchat, PPI.human)
-
-PDAC.cellchat <- identifyOverExpressedGenes(PDAC.cellchat)
-PDAC.cellchat <- identifyOverExpressedInteractions(PDAC.cellchat)
-PDAC.cellchat <- projectData(PDAC.cellchat, PPI.human)
-
-```
-
-
-
-Explore cell-cell communication networks for BCC and PDAC
-
-```{r}
-
-## Compute communication probability
-
-BCC.cellchat <- computeCommunProb(BCC.cellchat, raw.use = TRUE)
-BCC.cellchat <- filterCommunication(BCC.cellchat, min.cells = 10)
-
-PDAC.cellchat <- computeCommunProb(PDAC.cellchat, raw.use = TRUE)
-PDAC.cellchat <- filterCommunication(PDAC.cellchat, min.cells = 10)
-
-
-
-```
-
-
-
-
-
-
-
 
 
 

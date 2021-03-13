@@ -105,28 +105,28 @@ BCCIO <- FindNeighbors(BCCIO, dims = 1:15)
 ## Start with r = 0.3 (overclustered)
 
 BCCIO <- FindClusters(BCCIO, resolution = 0.3, algorithm = 3)
-BCCIO.markers <- FindAllMarkers(BCCIO, test.use = 'wilcox', min.pct = 0.25, logfc.threshold = 0.50, max.cells.per.ident = 500)
+BCCIO.markers <- FindAllMarkers(BCCIO, test.use = 'wilcox', min.pct = 0.25, logfc.threshold = 0.50, max.cells.per.ident = 200)
 top5 <- BCCIO.markers %>% group_by(cluster) %>% top_n(n=5, wt=avg_logFC)
 DoHeatmap(BCCIO,features = top5$gene, size = 3)
 
 ## Try r = 0.2 (overclustered)
 
 BCCIO <- FindClusters(BCCIO, resolution = 0.2, algorithm = 3)
-BCCIO.markers <- FindAllMarkers(BCCIO, test.use = 'wilcox', min.pct = 0.25, logfc.threshold = 0.50, max.cells.per.ident = 500)
+BCCIO.markers <- FindAllMarkers(BCCIO, test.use = 'wilcox', min.pct = 0.25, logfc.threshold = 0.50, max.cells.per.ident = 200)
 top5 <- BCCIO.markers %>% group_by(cluster) %>% top_n(n=5, wt=avg_logFC)
 DoHeatmap(BCCIO,features = top5$gene, size = 3)
 
 ## Try r = 0.1 (overclustered)
 
 BCCIO <- FindClusters(BCCIO, resolution = 0.1, algorithm = 3)
-BCCIO.markers <- FindAllMarkers(BCCIO, test.use = 'wilcox', min.pct = 0.25, logfc.threshold = 0.50, max.cells.per.ident = 500)
+BCCIO.markers <- FindAllMarkers(BCCIO, test.use = 'wilcox', min.pct = 0.25, logfc.threshold = 0.50, max.cells.per.ident = 200)
 top5 <- BCCIO.markers %>% group_by(cluster) %>% top_n(n=5, wt=avg_logFC)
 DoHeatmap(BCCIO,features = top5$gene, size = 3)
 
 ## Try r = 0.05 (looks okay)
 
 BCCIO <- FindClusters(BCCIO, resolution = 0.05, algorithm = 3)
-BCCIO.markers <- FindAllMarkers(BCCIO, test.use = 'wilcox', min.pct = 0.25, logfc.threshold = 0.50, max.cells.per.ident = 500)
+BCCIO.markers <- FindAllMarkers(BCCIO, test.use = 'wilcox', min.pct = 0.25, logfc.threshold = 0.50, max.cells.per.ident = 200)
 top5 <- BCCIO.markers %>% group_by(cluster) %>% top_n(n=5, wt=avg_logFC)
 DoHeatmap(BCCIO,features = top5$gene, size = 3)
 
@@ -134,42 +134,42 @@ DoHeatmap(BCCIO,features = top5$gene, size = 3)
 ## Try r = 0.03 (around the same as 0.05)
 
 BCCIO <- FindClusters(BCCIO, resolution = 0.04, algorithm = 3)
-BCCIO.markers <- FindAllMarkers(BCCIO, test.use = 'wilcox', min.pct = 0.25, logfc.threshold = 0.50, max.cells.per.ident = 500)
+BCCIO.markers <- FindAllMarkers(BCCIO, test.use = 'wilcox', min.pct = 0.25, logfc.threshold = 0.50, max.cells.per.ident = 200)
 top5 <- BCCIO.markers %>% group_by(cluster) %>% top_n(n=5, wt=avg_logFC)
 DoHeatmap(BCCIO,features = top5$gene, size = 3)
 
 ## Try r = 0.3, bimod test (identical to wilcox)
 
 BCCIO <- FindClusters(BCCIO, resolution = 0.3, algorithm = 3)
-BCCIO.markers <- FindAllMarkers(BCCIO, test.use = 'bimod', min.pct = 0.25, logfc.threshold = 0.50, max.cells.per.ident = 500)
+BCCIO.markers <- FindAllMarkers(BCCIO, test.use = 'bimod', min.pct = 0.25, logfc.threshold = 0.50, max.cells.per.ident = 200)
 top5 <- BCCIO.markers %>% group_by(cluster) %>% top_n(n=5, wt=avg_logFC)
 DoHeatmap(BCCIO,features = top5$gene, size = 3)
 
 ## Try r = 0.3, roc test (error)
 
 BCCIO <- FindClusters(BCCIO, resolution = 0.3, algorithm = 3)
-BCCIO.markers <- FindAllMarkers(BCCIO, test.use = 'roc', min.pct = 0.25, logfc.threshold = 0.50, max.cells.per.ident = 500)
+BCCIO.markers <- FindAllMarkers(BCCIO, test.use = 'roc', min.pct = 0.25, logfc.threshold = 0.50, max.cells.per.ident = 200)
 top5 <- BCCIO.markers %>% group_by(cluster) %>% top_n(n=5, wt=avg_logFC)
 DoHeatmap(BCCIO,features = top5$gene, size = 3)
 
 ## Try r = 0.3, t test (identical to wilcox)
 
 BCCIO <- FindClusters(BCCIO, resolution = 0.3, algorithm = 3)
-BCCIO.markers <- FindAllMarkers(BCCIO, test.use = 't', min.pct = 0.25, logfc.threshold = 0.50, max.cells.per.ident = 500)
+BCCIO.markers <- FindAllMarkers(BCCIO, test.use = 't', min.pct = 0.25, logfc.threshold = 0.50, max.cells.per.ident = 200)
 top5 <- BCCIO.markers %>% group_by(cluster) %>% top_n(n=5, wt=avg_logFC)
 DoHeatmap(BCCIO,features = top5$gene, size = 3)
 
 ## Try r = 0.3, LR test (identical to wilcox)
 
 BCCIO <- FindClusters(BCCIO, resolution = 0.3, algorithm = 3)
-BCCIO.markers <- FindAllMarkers(BCCIO, test.use = 'LR', min.pct = 0.25, logfc.threshold = 0.50, max.cells.per.ident = 500)
+BCCIO.markers <- FindAllMarkers(BCCIO, test.use = 'LR', min.pct = 0.25, logfc.threshold = 0.50, max.cells.per.ident = 200)
 top5 <- BCCIO.markers %>% group_by(cluster) %>% top_n(n=5, wt=avg_logFC)
 DoHeatmap(BCCIO,features = top5$gene, size = 3)
 
 ## Start with r = 0.4
 
 BCCIO <- FindClusters(BCCIO, resolution = 0.4, algorithm = 3)
-BCCIO.markers <- FindAllMarkers(BCCIO, test.use = 'wilcox', min.pct = 0.25, logfc.threshold = 0.50, max.cells.per.ident = 500)
+BCCIO.markers <- FindAllMarkers(BCCIO, test.use = 'wilcox', min.pct = 0.25, logfc.threshold = 0.50, max.cells.per.ident = 200)
 top5 <- BCCIO.markers %>% group_by(cluster) %>% top_n(n=5, wt=avg_logFC)
 DoHeatmap(BCCIO,features = top5$gene, size = 3)
 
@@ -385,7 +385,7 @@ Average gene expression
 ```{r}
 
 set.seed(001)
-bcc.subset <- subset(BCCIO, max.cells.per.ident=100)
+bcc.subset <- BCCIO[, sample(colnames(BCCIO), size = 5000)]
 
 Idents(bcc.subset) <- bcc.subset$treatment
 bcc.treatment.averages <- AverageExpression(bcc.subset)
@@ -393,11 +393,13 @@ head(bcc.treatment.averages[["RNA"]][c("TCF7", "PDCD1", "CD274", "PDCD1LG2"),])
 
 Idents(bcc.subset) <- bcc.subset$patient
 bcc.patient.averages <- AverageExpression(bcc.subset)
-head(bcc.patient.averages[["RNA"]][c("TCF7", "PDCD1", "CD274", "PDCD1LG2"),])
+bcc.patient.averages.pd1 <- bcc.patient.averages[["RNA"]][c("TCF7", "PDCD1", "CD274", "PDCD1LG2"),]
+View(bcc.patient.averages.pd1)
 
 Idents(bcc.subset) <- bcc.subset$response
 bcc.response.averages <- AverageExpression(bcc.subset)
-head(bcc.response.averages[["RNA"]][c("TCF7", "PDCD1", "CD274", "PDCD1LG2"),])
+bcc.response.averages.pd1 <- bcc.response.averages[["RNA"]][c("TCF7", "PDCD1", "CD274", "PDCD1LG2"),]
+View(bcc.response.averages.pd1)
 
 ## Determine if differences are significant
 
@@ -407,16 +409,88 @@ bcc.pd1.averages <- as.data.frame(t(bcc.pd1.averages))
 bcc.pd1.averages$Response <- NULL
 bcc.pd1.averages$Response <- c("Responsive", "Responsive", "Responsive", "Responsive", "Nonresponsive", "Nonresponsive", "Nonresponsive", "Nonresponsive", "Responsive", "Nonresponsive", "Responsive")
 
-bcc.pd1.comparison <- ggboxplot(bcc.pd1.averages, x = "Response", y = "PDCD1", palette = c("Red", "Blue"), add = "jitter") + 
+bcc.pd1.comparison <- ggboxplot(bcc.pd1.averages, x = "Response", y = "PDCD1", color = "Response", palette = c("Red", "Blue"), add = "jitter") + 
   stat_compare_means(method = "anova")
-bcc.pdl1.comparison <- ggboxplot(bcc.pd1.averages, x = "Response", y = "CD274", palette = c("Red", "Blue"), add = "jitter") + 
+bcc.pdl1.comparison <- ggboxplot(bcc.pd1.averages, x = "Response", y = "CD274", color = "Response", palette = c("Red", "Blue"), add = "jitter") + 
   stat_compare_means(method = "anova")
-bcc.pdl2.comparison <- ggboxplot(bcc.pd1.averages, x = "Response", y = "PDCD1LG2", palette = c("Red", "Blue"), add = "jitter") + 
+bcc.pdl2.comparison <- ggboxplot(bcc.pd1.averages, x = "Response", y = "PDCD1LG2", color = "Response", palette = c("Red", "Blue"), add = "jitter") + 
   stat_compare_means(method = "anova")
-bcc.tcf7.comparison <- ggboxplot(bcc.pd1.averages, x = "Response", y = "TCF7", palette = c("Red", "Blue"), add = "jitter") + 
+bcc.tcf7.comparison <- ggboxplot(bcc.pd1.averages, x = "Response", y = "TCF7", color = "Response", palette = c("Red", "Blue"), add = "jitter") + 
   stat_compare_means(method = "anova")
 
-bcc.pd1.comparison + bcc.pdl1.comparison + bcc.pdl2.comparison + bcc.tcf7.comparison
+grid.arrange(bcc.pd1.comparison, bcc.pdl1.comparison, bcc.pdl2.comparison, bcc.tcf7.comparison, ncol=4)
 
 ```
 
+
+
+Average gene expression divided by celltype
+
+```{r}
+
+levels(Idents(BCCIO)) <- BCCIO$seurat_clusters
+
+## Cell populations of interest: T cells, B cells, malignant cells, macrophages
+
+bcc.tcells <- subset(BCCIO, idents=c("CD8_memory", "CD4", "Tregs", "CD8_activation", "CD8_exhausted", "T_proliferation"))
+bcc.bcells <- subset(BCCIO, idents=c("B cells"))
+bcc.tumor <- subset(BCCIO, idents=c("Tumor 1", "Tumor 2"))
+bcc.macrophages <- subset(BCCIO, idents=c("Macrophages"))
+
+Idents(bcc.tcells) <- bcc.tcells$patient
+bcc.tcells.averages <- AverageExpression(bcc.tcells)
+bcc.tcells.pd1.averages <- bcc.tcells.averages[["RNA"]][c("TCF7", "PDCD1", "CD274", "PDCD1LG2"),]
+
+Idents(bcc.bcells) <- bcc.bcells$patient
+bcc.bcells.averages <- AverageExpression(bcc.bcells)
+bcc.bcells.pd1.averages <- bcc.bcells.averages[["RNA"]][c("TCF7", "PDCD1", "CD274", "PDCD1LG2"),]
+
+Idents(bcc.tumor) <- bcc.tumor$patient
+bcc.tumor.averages <- AverageExpression(bcc.tumor)
+bcc.tumor.pd1.averages <- bcc.tumor.averages[["RNA"]][c("TCF7", "PDCD1", "CD274", "PDCD1LG2"),]
+
+Idents(bcc.macrophages) <- bcc.macrophages$patient
+bcc.macrophages.averages <- AverageExpression(bcc.macrophages)
+bcc.macrophages.pd1.averages <- bcc.macrophages.averages[["RNA"]][c("TCF7", "PDCD1", "CD274", "PDCD1LG2"),]
+
+bcc.tcells.pd1.averages <- as.data.frame(t(bcc.tcells.pd1.averages))
+bcc.bcells.pd1.averages <- as.data.frame(t(bcc.bcells.pd1.averages))
+bcc.tumor.pd1.averages <- as.data.frame(t(bcc.tumor.pd1.averages))
+bcc.macrophages.pd1.averages <- as.data.frame(t(bcc.macrophages.pd1.averages))
+
+
+bcc.tcells.pd1.averages$Patients <- c("Responsive", "Responsive", "Responsive", "Responsive", "Nonresponsive", "Nonresponsive", "Nonresponsive", "Nonresponsive", "Responsive", "Nonresponsive", "Responsive")
+bcc.bcells.pd1.averages$Patients <- c("Responsive", "Responsive", "Responsive", "Responsive", "Nonresponsive", "Nonresponsive", "Nonresponsive", "Nonresponsive")
+bcc.tumor.pd1.averages$Patients <- c("Responsive", "Responsive", "Responsive", "Responsive", "Nonresponsive", "Nonresponsive", "Nonresponsive", "Nonresponsive", "Nonresponsive")
+bcc.macrophages.pd1.averages$Patients <- c("Responsive", "Responsive", "Responsive", "Responsive", "Nonresponsive", "Nonresponsive", "Nonresponsive", "Nonresponsive", "Responsive", "Responsive")
+
+bcc.tcells.pd1.averages$Patient.ID <- rownames(bcc.tcells.pd1.averages)
+bcc.bcells.pd1.averages$Patient.ID <- rownames(bcc.bcells.pd1.averages)
+bcc.tumor.pd1.averages$Patient.ID <- rownames(bcc.tumor.pd1.averages)
+bcc.macrophages.pd1.averages$Patient.ID <- rownames(bcc.macrophages.pd1.averages)
+
+bcc.tcells.pd1.averages.test <- melt(bcc.tcells.pd1.averages, id.vars = c("Patient.ID", "Patients"), measure.vars = c("PDCD1", "CD274", "PDCD1LG2", "TCF7"))
+
+bcc.tcells.pd1.comparison <- ggboxplot(bcc.tcells.pd1.averages, x = "Patients", y = "PDCD1", color = "Patients", palette = c("Red", "Blue"), add = "jitter") + stat_compare_means(method = "t.test")
+bcc.tcells.pdl1.comparison <- ggboxplot(bcc.tcells.pd1.averages, x = "Patients", y = "CD274", color = "Patients", palette = c("Red", "Blue"), add = "jitter") + stat_compare_means(method = "t.test")
+bcc.tcells.pdl2.comparison <- ggboxplot(bcc.tcells.pd1.averages, x = "Patients", y = "PDCD1LG2", color = "Patients", palette = c("Red", "Blue"), add = "jitter") + stat_compare_means(method = "t.test")
+bcc.tcells.tcf7.comparison <- ggboxplot(bcc.tcells.pd1.averages, x = "Patients", y = "TCF7", color = "Patients", palette = c("Red", "Blue"), add = "jitter") + stat_compare_means(method = "t.test")
+
+bcc.bcells.pd1.comparison <- ggboxplot(bcc.bcells.pd1.averages, x = "Patients", y = "PDCD1", color = "Patients", palette = c("Red", "Blue"), add = "jitter") + stat_compare_means(method = "t.test")
+bcc.bcells.pdl1.comparison <- ggboxplot(bcc.bcells.pd1.averages, x = "Patients", y = "CD274", color = "Patients", palette = c("Red", "Blue"), add = "jitter") + stat_compare_means(method = "t.test")
+bcc.bcells.pdl2.comparison <- ggboxplot(bcc.bcells.pd1.averages, x = "Patients", y = "PDCD1LG2", color = "Patients", palette = c("Red", "Blue"), add = "jitter") + stat_compare_means(method = "t.test")
+bcc.bcells.tcf7.comparison <- ggboxplot(bcc.bcells.pd1.averages, x = "Patients", y = "TCF7", color = "Patients", palette = c("Red", "Blue"), add = "jitter") + stat_compare_means(method = "t.test")
+
+bcc.tumor.pd1.comparison <- ggboxplot(bcc.tumor.pd1.averages, x = "Patients", y = "PDCD1", color = "Patients", palette = c("Red", "Blue"), add = "jitter") + stat_compare_means(method = "t.test")
+bcc.tumor.pdl1.comparison <- ggboxplot(bcc.tumor.pd1.averages, x = "Patients", y = "CD274", color = "Patients", palette = c("Red", "Blue"), add = "jitter") + stat_compare_means(method = "t.test")
+bcc.tumor.pdl2.comparison <- ggboxplot(bcc.tumor.pd1.averages, x = "Patients", y = "PDCD1LG2", color = "Patients", palette = c("Red", "Blue"), add = "jitter") + stat_compare_means(method = "t.test")
+bcc.tumor.tcf7.comparison <- ggboxplot(bcc.tumor.pd1.averages, x = "Patients", y = "TCF7", color = "Patients", palette = c("Red", "Blue"), add = "jitter") + stat_compare_means(method = "t.test")
+
+bcc.macrophages.pd1.comparison <- ggboxplot(bcc.macrophages.pd1.averages, x = "Patients", y = "PDCD1", color = "Patients", palette = c("Red", "Blue"), add = "jitter") + stat_compare_means(method = "t.test")
+bcc.macrophages.pdl1.comparison <- ggboxplot(bcc.macrophages.pd1.averages, x = "Patients", y = "CD274", color = "Patients", palette = c("Red", "Blue"), add = "jitter") + stat_compare_means(method = "t.test")
+bcc.macrophages.pdl2.comparison <- ggboxplot(bcc.macrophages.pd1.averages, x = "Patients", y = "PDCD1LG2", color = "Patients", palette = c("Red", "Blue"), add = "jitter") + stat_compare_means(method = "t.test")
+bcc.macrophages.tcf7.comparison <- ggboxplot(bcc.macrophages.pd1.averages, x = "Patients", y = "TCF7", color = "Patients", palette = c("Red", "Blue"), add = "jitter") + stat_compare_means(method = "t.test")
+
+grid.arrange(bcc.tcells.pd1.comparison, bcc.tcells.pdl1.comparison, bcc.tcells.pdl2.comparison, bcc.tcells.tcf7.comparison, ncol=4, top = "T Cells")
+
+```
