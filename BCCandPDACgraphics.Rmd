@@ -1012,8 +1012,3 @@ grid.arrange(bcc.tcells.pd1.graphic, bcc.bcells.pd1.graphic, bcc.macrophages.pd1
 
 
 
-
-
-
-
-
