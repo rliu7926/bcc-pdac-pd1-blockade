@@ -24,10 +24,24 @@ library(pracma)
 library(RColorBrewer)
 library(gridExtra)
 library(EnhancedVolcano)
+library(ggpubr)
+library(CellChat)
+library(grid)
 
 ## Load functions
 source("ClusteringAnalysisFunctions.R", echo=TRUE)
 source("SeuratClusteringFunctions.R", echo=TRUE)
+
+## Load subsetteed data
+load("C:\\Users\\Ryan\\Documents\\Nie Research Project\\GSE 123813\\BCCresponderpre")
+load("C:\\Users\\Ryan\\Documents\\Nie Research Project\\GSE 123813\\BCCresponderpost")
+
+load("C:\\Users\\Ryan\\Documents\\Nie Research Project\\GSE 123813\\BCCnonresponderpre")
+load("C:\\Users\\Ryan\\Documents\\Nie Research Project\\GSE 123813\\BCCnonresponderpost")
+
+## Load BCC object
+load("C:\\Users\\Ryan\\Documents\\Nie Research Project\\GSE 123813\\BCCIOwithUMAP")
+
 ```
 
 
@@ -492,5 +506,192 @@ bcc.macrophages.pdl2.comparison <- ggboxplot(bcc.macrophages.pd1.averages, x = "
 bcc.macrophages.tcf7.comparison <- ggboxplot(bcc.macrophages.pd1.averages, x = "Patients", y = "TCF7", color = "Patients", palette = c("Red", "Blue"), add = "jitter") + stat_compare_means(method = "t.test")
 
 grid.arrange(bcc.tcells.pd1.comparison, bcc.tcells.pdl1.comparison, bcc.tcells.pdl2.comparison, bcc.tcells.tcf7.comparison, ncol=4, top = "T Cells")
+
+```
+
+
+
+
+
+##################################################################################################################################
+
+Examine differences between pretreatment and posttreatment of responders and nonresponders
+
+Create objects
+
+```{r}
+
+Idents(BCCIO) <- BCCIO$response
+
+BCC.responder <- subset(BCCIO, idents="Responsive")
+BCC.nonresponder <- subset(BCCIO, idents="Nonresponsive")
+
+remove(BCCIO)
+
+Idents(BCC.responder) <- BCC.responder$treatment
+Idents(BCC.nonresponder) <- BCC.nonresponder$treatment
+  
+BCC.responder.pre <- subset(BCC.responder, idents="pre")
+BCC.responder.post <- subset(BCC.responder, idents="post")
+
+remove(BCC.responder)
+
+BCC.nonresponder.pre <- subset(BCC.nonresponder, idents="pre")
+BCC.nonresponder.post <- subset(BCC.nonresponder, idents="post")
+
+remove(BCC.nonresponder)
+
+save(BCC.responder.pre, file="C:\\Users\\Ryan\\Documents\\Nie Research Project\\GSE 123813\\BCCresponderpre")
+save(BCC.responder.post, file-"C:\\Users\\Ryan\\Documents\\Nie Research Project\\GSE 123813\\BCCresponderpost")
+
+save(BCC.nonresponder.pre, file="C:\\Users\\Ryan\\Documents\\Nie Research Project\\GSE 123813\\BCCrnonesponderpre")
+save(BCC.nonresponder.post, file="C:\\Users\\Ryan\\Documents\\Nie Research Project\\GSE 123813\\BCCnonresponderpost")
+```
+
+
+
+Comparison of BCC Responder vs. Nonresponder, Pretreatment vs. Posttreatment for all cells 
+
+```{r}
+
+## Set idents to analyze by patient
+
+Idents(BCC.responder.pre) <- BCC.responder.pre$patient
+Idents(BCC.responder.post) <- BCC.responder.post$patient
+
+Idents(BCC.nonresponder.pre) <- BCC.nonresponder.pre$patient
+Idents(BCC.nonresponder.post) <- BCC.nonresponder.post$patient
+
+## Determine average expression of genes
+
+BCC.responder.pre.averages <- AverageExpression(BCC.responder.pre)
+BCC.responder.post.averages <- AverageExpression(BCC.responder.post)
+BCC.nonresponder.pre.averages <- AverageExpression(BCC.nonresponder.pre)
+BCC.nonresponder.post.averages <- AverageExpression(BCC.nonresponder.post)
+
+BCC.responder.pre.averages <- BCC.responder.pre.averages$RNA
+BCC.responder.post.averages <- BCC.responder.post.averages$RNA
+BCC.nonresponder.pre.averages <- BCC.nonresponder.pre.averages$RNA
+BCC.nonresponder.post.averages <- BCC.nonresponder.post.averages$RNA
+
+## Filter out important genes
+
+MHC1.genes <- c('HLA-A', 'HLA-B', 'HLA-C', 'HLA-E', 'HLA-F', 'HLA-G')
+MHC2.genes <- c('HLA-DMA', 'HLA-DMB', 'HLA-DOA', 'HLA-DOB', 'HLA-DPA1', 'HLA-DPB1', 'HLA-DQA1', 'HLA-DQA2', 'HLA-DQB1', 'HLA-DQB1-AS1', 'HLA-DQB2', 'HLA-DRA', 'HLA-DRB1', 'HLA-DRB5')
+HSP.genes <- c('HSP90AA1', 'HSP90AB1', 'HSP90B1', 'HPSA12A', 'HSPA12B', 'HSPA13', 'HSPA14', 'HPSA1A', 'HSPA1B', 'HSPA1L', 'HSPA2', 'HSPA4', 'HSPA4L', 'HSPA5', 'HSPA6', 'HSPA8', 'HSPA9', 'HSPB1', 'HSPB11', 'HSPB2', 'HSPB3', 'HSPB6', 'HSPB7', 'HSPB8', 'HSPB9', 'HSPBAP1', 'HSPBP1', 'HSPD1', 'HSPE1', 'HSPE1-MOB4', 'HSPG2', 'HSPH1')
+
+BCC.responder.pre.averages.mhc1 <- BCC.responder.pre.averages[MHC1.genes,]
+BCC.responder.pre.averages.mhc2 <- BCC.responder.pre.averages[MHC2.genes,]
+BCC.responder.pre.averages.hsp <- BCC.responder.pre.averages[HSP.genes,]
+
+BCC.responder.post.averages.mhc1 <- BCC.responder.post.averages[MHC1.genes,]
+BCC.responder.post.averages.mhc2 <- BCC.responder.post.averages[MHC2.genes,]
+BCC.responder.post.averages.hsp <- BCC.responder.post.averages[HSP.genes,]
+
+BCC.nonresponder.pre.averages.mhc1 <- BCC.nonresponder.pre.averages[MHC1.genes,]
+BCC.nonresponder.pre.averages.mhc2 <- BCC.nonresponder.pre.averages[MHC2.genes,]
+BCC.nonresponder.pre.averages.hsp <- BCC.nonresponder.pre.averages[HSP.genes,]
+
+BCC.nonresponder.post.averages.mhc1 <- BCC.nonresponder.post.averages[MHC1.genes,]
+BCC.nonresponder.post.averages.mhc2 <- BCC.nonresponder.post.averages[MHC2.genes,]
+BCC.nonresponder.post.averages.hsp <- BCC.nonresponder.post.averages[HSP.genes,]
+
+## Calculate scores (arithmetic mean)
+
+BCC.responder.pre.averages.mhc1$gene <- NULL
+BCC.responder.pre.averages.mhc2$gene <- NULL
+BCC.responder.pre.averages.hsp$gene <- NULL
+
+BCC.responder.post.averages.mhc1$gene <- NULL
+BCC.responder.post.averages.mhc2$gene <- NULL
+BCC.responder.post.averages.hsp$gene <- NULL
+
+BCC.nonresponder.pre.averages.mhc1$gene <- NULL
+BCC.nonresponder.pre.averages.mhc2$gene <- NULL
+BCC.nonresponder.pre.averages.hsp$gene <- NULL
+
+BCC.nonresponder.post.averages.mhc1$gene <- NULL
+BCC.nonresponder.post.averages.mhc2$gene <- NULL
+BCC.nonresponder.post.averages.hsp$gene <- NULL
+
+BCC.responder.pre.averages.mhc1.score <- as.data.frame(colMeans(BCC.responder.pre.averages.mhc1, na.rm=TRUE))
+BCC.responder.pre.averages.mhc2.score <- as.data.frame(colMeans(BCC.responder.pre.averages.mhc2, na.rm=TRUE))
+BCC.responder.pre.averages.hsp.score <- as.data.frame(colMeans(BCC.responder.pre.averages.hsp, na.rm=TRUE))
+
+BCC.responder.post.averages.mhc1.score <- as.data.frame(colMeans(BCC.responder.post.averages.mhc1, na.rm=TRUE))
+BCC.responder.post.averages.mhc2.score <- as.data.frame(colMeans(BCC.responder.post.averages.mhc2, na.rm=TRUE))
+BCC.responder.post.averages.hsp.score <- as.data.frame(colMeans(BCC.responder.post.averages.hsp, na.rm=TRUE))
+
+BCC.nonresponder.pre.averages.mhc1.score <- as.data.frame(colMeans(BCC.nonresponder.pre.averages.mhc1, na.rm=TRUE))
+BCC.nonresponder.pre.averages.mhc2.score <- as.data.frame(colMeans(BCC.nonresponder.pre.averages.mhc2, na.rm=TRUE))
+BCC.nonresponder.pre.averages.hsp.score <- as.data.frame(colMeans(BCC.nonresponder.pre.averages.hsp, na.rm=TRUE))
+
+BCC.nonresponder.post.averages.mhc1.score <- as.data.frame(colMeans(BCC.nonresponder.post.averages.mhc1, na.rm=TRUE))
+BCC.nonresponder.post.averages.mhc2.score <- as.data.frame(colMeans(BCC.nonresponder.post.averages.mhc2, na.rm=TRUE))
+BCC.nonresponder.post.averages.hsp.score <- as.data.frame(colMeans(BCC.nonresponder.post.averages.hsp, na.rm=TRUE))
+
+## Create dataframe to store all scores
+
+BCC.averages.score <- data.frame()
+BCC.averages.score[1:6,1] <- BCC.responder.pre.averages.mhc1.score
+BCC.averages.score[1:6,2] <- BCC.responder.pre.averages.mhc2.score
+BCC.averages.score[1:6,3] <- BCC.responder.pre.averages.hsp.score
+BCC.averages.score[7:12,1] <- BCC.responder.post.averages.mhc1.score
+BCC.averages.score[7:12,2] <- BCC.responder.post.averages.mhc2.score
+BCC.averages.score[7:12,3] <- BCC.responder.post.averages.hsp.score
+
+BCC.averages.score[13:17,1] <- BCC.nonresponder.pre.averages.mhc1.score
+BCC.averages.score[13:17,2] <- BCC.nonresponder.pre.averages.mhc2.score
+BCC.averages.score[13:17,3] <- BCC.nonresponder.pre.averages.hsp.score
+BCC.averages.score[18:22,1] <- BCC.nonresponder.post.averages.mhc1.score
+BCC.averages.score[18:22,2] <- BCC.nonresponder.post.averages.mhc2.score
+BCC.averages.score[18:22,3] <- BCC.nonresponder.post.averages.hsp.score
+
+colnames(BCC.averages.score) <- c("MHC1", "MHC2", "HSP")
+
+BCC.averages.score$Response <- c("Responsive.Pre", "Responsive.Pre", "Responsive.Pre", "Responsive.Pre", "Responsive.Pre", "Responsive.Pre", "Responsive.Post", "Responsive.Post", "Responsive.Post", "Responsive.Post", "Responsive.Post", "Responsive.Post",  "Nonresponsive.Pre", "Nonresponsive.Pre", "Nonresponsive.Pre", "Nonresponsive.Pre", "Nonresponsive.Pre", "Nonresponsive.Post", "Nonresponsive.Post", "Nonresponsive.Post", "Nonresponsive.Post", "Nonresponsive.Post")
+
+BCC.averages.score$Patient <- rownames(BCC.averages.score)
+
+BCC.averages.score.melt <- melt(BCC.averages.score, id=c("Response", "Patient"))
+
+BCC.averages.score.melt.MHC1 <- BCC.averages.score.melt[c(1:22),]
+BCC.averages.score.melt.MHC2 <- BCC.averages.score.melt[c(23:44),]
+BCC.averages.score.melt.HSP <- BCC.averages.score.melt[c(45:66),]
+
+## Plot scores
+
+comparisons <- list(c("Responsive.Pre", "Responsive.Post"), c("Nonresponsive.Pre", "Nonresponsive.Post"), c("Responsive.Pre", "Nonresponsive.Pre"), c("Responsive.Post", "Nonresponsive.Post"))
+
+BCC.averages.score.graph.MHC1 <- ggboxplot(BCC.averages.score.melt.MHC1, x="Response", y="value", color="Response", add = "jitter") + stat_compare_means(comparisons = comparisons)
+
+BCC.averages.score.graph.MHC2 <- ggboxplot(BCC.averages.score.melt.MHC2, x="Response", y="value", color="Response", add = "jitter") + stat_compare_means(comparisons = comparisons)
+
+BCC.averages.score.graph.HSP <- ggboxplot(BCC.averages.score.melt.HSP, x="Response", y="value", color="Response", add = "jitter") + stat_compare_means(comparisons = comparisons)
+
+BCC.averages.score.graph.MHC1 + BCC.averages.score.graph.MHC2 + BCC.averages.score.graph.HSP
+  
+```
+
+
+
+Comparison of BCC Responder vs. Nonresponder, Pretreatment vs. Posttreatment for proliferating T cells
+
+```{r}
+
+## Celltypes that are interesting: CD8_activation, CD8_exhausted, CD8_memory, CD4, Tregs, T_proliferation, Macrophages, Tumor 1, Tumor 2, B cells, NK
+
+CD8activated_graph <- fourway_diffexpression_MHCandHSP("CD8_activation", "Activated CD8+ T cells")
+CD8exhausted_graph <- fourway_diffexpression_MHCandHSP("CD8_exhausted", "Exhausted CD8+ T cells")
+
+CD8memory_graph <- fourway_diffexpression_MHCandHSP("CD8_memory", "Memory CD8+ T cells")
+CD4_graph <- fourway_diffexpression_MHCandHSP("CD4", "CD4+ T cells")
+Tregs_graph <- fourway_diffexpression_MHCandHSP("Tregs", "Regulatory T cells")
+Tproliferation_graph <- fourway_diffexpression_MHCandHSP("T_proliferation", "Proliferating T cells")
+
+Macrophage_graph <- fourway_diffexpression_MHCandHSP("Macrophages", "Macrophages")
+Malignant_graph <- fourway_diffexpression_MHCandHSP(c("Tumor 1", "Tumor 2"), "Malignant cells")
+Bcell_graph <- fourway_diffexpression_MHCandHSP("B cells", "B cells")
+NK_graph <- fourway_diffexpression_MHCandHSP("NK", "NK cells")
 
 ```
