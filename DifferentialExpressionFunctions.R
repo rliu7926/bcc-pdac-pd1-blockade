@@ -12,7 +12,7 @@ bioc_markers <- function(dataset, celltype, group, ident, pCutoff=0.05, FCcutoff
 }
 
 
-bioc_volcano <- function(dataset, celltype, group, ident, ident2, pCutoff=0.05, FCcutoff=0.5) {
+bioc_volcano <- function(dataset, celltype, group, ident, ident2, pCutoff=0.05, FCcutoff=0.5, title) {
   
   ## Create Enhanced Volcano plots from Bioconductor
   ## celltype: cluster (ex. macrophages)
@@ -22,13 +22,13 @@ bioc_volcano <- function(dataset, celltype, group, ident, ident2, pCutoff=0.05, 
   
   celltype.markers <- FindMarkers(dataset, subset.ident=celltype, group.by=group, ident.1=ident)
   celltype.markers_tibble <- as_tibble(celltype.markers, rownames='GeneNames')
-  celltype.markers_tibble <- arrange(celltype.markers_tibble, avg_log2FC)
+  celltype.markers_tibble <- arrange(celltype.markers_tibble, avg_logFC)
   
   celltype.volcano <- EnhancedVolcano(celltype.markers_tibble,
                                       lab = celltype.markers_tibble$GeneNames,
-                                      x = 'avg_log2FC', y = 'p_val_adj',
+                                      x = 'avg_logFC', y = 'p_val_adj',
                                       pCutoff = pCutoff, FCcutoff = FCcutoff,
-                                      title = paste(celltype, "DE:", ident, "vs.", ident2))
+                                      title = paste(title, "DE:", ident, "vs.", ident2))
   
   return(celltype.volcano)
   
@@ -36,7 +36,7 @@ bioc_volcano <- function(dataset, celltype, group, ident, ident2, pCutoff=0.05, 
 
 
 anova_test <- function(data.frame, gene, category, confidence = 0.95, xlab = "Comparisons", ylab = "Difference in Mean Expression") {
-
+  
   anova <- aov(gene~category, data=data.frame)
   tukey <- TukeyHSD(anova, conf.level = confidence)
   plot <- tuk_plot(tukey, xlab = xlab, ylab = ylab, title = paste0("ANOVA Test: Mean Expression of ", gene, ": ", confidence, " Confidence Level"))
@@ -192,7 +192,7 @@ fourway_diffexpression_MHCandHSP <- function(celltype, celltypename) {
   BCC.celltype.averages.score[(x+y+z+1):(x+y+z+w),3] <- BCC.celltype.nonresponder.post.averages.hsp.score
   
   colnames(BCC.celltype.averages.score) <- c("MHC1", "MHC2", "HSP")
-
+  
   
   BCC.celltype.averages.score$Response[1:(x+y+z+w)] <- c("placeholder")
   
@@ -200,7 +200,7 @@ fourway_diffexpression_MHCandHSP <- function(celltype, celltypename) {
   BCC.celltype.averages.score$Response[(x+1):(x+y)] <- c("Responsive.Post")
   BCC.celltype.averages.score$Response[(x+y+1):(x+y+z)] <- c("Nonresponsive.Pre")
   BCC.celltype.averages.score$Response[(x+y+z+1):(x+y+z+w)] <- c("Nonresponsive.Post")
-
+  
   
   BCC.celltype.averages.score$Patient <- rownames(BCC.celltype.averages.score)
   
@@ -228,8 +228,57 @@ fourway_diffexpression_MHCandHSP <- function(celltype, celltypename) {
                         BCC.celltype.averages.score.graph.HSP,
                         nrow = 1,
                         top = textGrob(paste0("Differential Expression of MHC and HSP Genes in the ", celltypename, " of BCC Patients"), gp=gpar(fontsize=30)))
-                        
+  
   return(graph)
   
 }
+
+BCC_diffexp_dumbbell <- function(df1, df2, filterx=0.5, filtery=0.05, title) {
+  
+  df1.data <- df1$data %>% select(GeneNames, xvals, yvals)
+  df2.data <- df2$data %>% select(GeneNames, xvals, yvals)
+  
+  filterxneg <- -1 * filterx
+  
+  df1.data <- filter(df1.data, xvals < filterxneg | xvals > filterx, yvals < filtery)
+  df2.data <- filter(df2.data, xvals < filterxneg | xvals > filterx, yvals < filtery)
+  
+  df1.data$xvals[df1.data$xvals < -2] <- -2
+  df1.data$xvals[df1.data$xvals > 2] <- 2
+  
+  df2.data$xvals[df2.data$xvals < -2] <- -2
+  df2.data$xvals[df2.data$xvals > 2] <- 2
+  
+  df1.data$Treatment <- "Pre-treatment"
+  df2.data$Treatment <- "Post-treatment"
+  
+  data <- rbind(df1.data, df2.data)
+  data <- data %>% group_by(GeneNames) %>% filter(n()>1)
+  
+  data <- data[order(data$GeneNames),]
+  data$paired <- 0
+  for (i in 1:nrow(data)) {
+    data$paired[i] <- ceiling(i/2)
+  }
+  
+  data$yvals <- -log10(data$yvals)
+  
+  graph <- data %>%
+    ggplot(aes(x = xvals, y = GeneNames)) +
+    labs(title = title,
+         x = expression("Log"[2]*" Fold Change"),
+         y = "Gene") +
+    geom_line(aes(group = paired), color="black", size=1) + 
+    geom_point(aes(color = Treatment, size = yvals)) +
+    guides(size = FALSE) +
+    theme_light() +
+    theme(legend.position="top", 
+          plot.title = element_text(color="black", size=24, face="bold", hjust = 0.5)) +
+    xlim(-2,2)
+  
+  return(graph)
+ 
+}
+
+
 
