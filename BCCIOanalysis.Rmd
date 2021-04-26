@@ -29,10 +29,11 @@ library(CellChat)
 library(grid)
 
 ## Load functions
-source("ClusteringAnalysisFunctions.R", echo=TRUE)
-source("SeuratClusteringFunctions.R", echo=TRUE)
+source("ClusteringAnalysisFunctions.R", echo=FALSE)
+source("SeuratClusteringFunctions.R", echo=FALSE)
+source("DifferentialExpressionFunctions.R", echo=FALSE)
 
-## Load subsetteed data
+## Load subsetted data
 load("C:\\Users\\Ryan\\Documents\\Nie Research Project\\GSE 123813\\BCCresponderpre")
 load("C:\\Users\\Ryan\\Documents\\Nie Research Project\\GSE 123813\\BCCresponderpost")
 
@@ -693,5 +694,143 @@ Macrophage_graph <- fourway_diffexpression_MHCandHSP("Macrophages", "Macrophages
 Malignant_graph <- fourway_diffexpression_MHCandHSP(c("Tumor 1", "Tumor 2"), "Malignant cells")
 Bcell_graph <- fourway_diffexpression_MHCandHSP("B cells", "B cells")
 NK_graph <- fourway_diffexpression_MHCandHSP("NK", "NK cells")
+
+```
+
+
+
+#####################################################################################################################
+
+Comparison of intra-patient trends between responders and nonresponders
+
+Redo volcano plots for responders vs. nonresponders, pretreatment and posttreatment
+
+```{r}
+
+Idents(BCCIO) <- BCCIO$treatment
+
+BCC.pre <- subset(BCCIO, idents="pre")
+BCC.post <- subset(BCCIO, idents="post")
+
+Idents(BCC.pre) <- BCC.pre$seurat_clusters
+Idents(BCC.post) <- BCC.post$seurat_clusters
+
+celltypes <- c("CD8_activation", "CD8_exhausted", "CD8_memory", "CD4", "Tregs", "T_proliferation", "Macrophages", "B cells", "NK")
+
+celltypesnames <- c("Activated CD8+ T Cells", "Exhausted CD8+ T Cells", "Memory T Cells", "CD4+ T Cells", "Regulatory T cells", "Proliferating T Cells", "Macrophages", "B Cells", "Natural Killer Cells")
+
+## Create Enhanced Volcano plots
+
+for (i in 1:length(celltypes)) {
+  assign(paste0("BCC.pre.", celltypes[i]), bioc_volcano(dataset=BCC.pre,
+                                                        celltype=celltypes[i],
+                                                        group="response",
+                                                        ident="Responsive", ident2="Nonresponsive",
+                                                        pCutoff=0.05, FCcutoff=0.5, title=celltypesnames[i]))
+}
+
+BCC.pre.malignant <- bioc_volcano(dataset=BCC.pre, celltype=c("Tumor 1", "Tumor 2"), group="response", ident="Responsive", ident2="Nonresponsive", pCutoff=0.05, FCcutoff=0.5, title = "Malignant Cells")
+
+for (i in 1:length(celltypes)) {
+  assign(paste0("BCC.post.", celltypes[i]), bioc_volcano(dataset=BCC.post,
+                                                        celltype=celltypes[i],
+                                                        group="response",
+                                                        ident="Responsive", ident2="Nonresponsive",
+                                                        pCutoff=0.05, FCcutoff=0.5, title=celltypesnames[i]))
+}
+
+BCC.post.malignant <- bioc_volcano(dataset=BCC.post, celltype=c("Tumor 1", "Tumor 2"), group="response", ident="Responsive", ident2="Nonresponsive", pCutoff=0.05, FCcutoff=0.5, title = "Malignant Cells")
+
+BCC.pre.CD8_activation + BCC.post.CD8_activation
+BCC.pre.CD8_exhausted + BCC.post.CD8_exhausted
+BCC.pre.CD8_memory + BCC.post.CD8_memory
+BCC.pre.CD4 + BCC.post.CD4
+BCC.pre.Tregs + BCC.post.Tregs
+BCC.pre.T_proliferation + BCC.post.T_proliferation
+BCC.pre.Macrophages + BCC.post.Macrophages
+`BCC.pre.B cells` + `BCC.post.B cells`
+BCC.pre.NK + BCC.post.NK
+BCC.pre.malignant + BCC.post.malignant
+
+```
+
+
+
+Create a dumbbell plot comparing the differential expression of genes between responders and nonresponders, pretreatment vs. posttreatment (Regulatory T cells)
+
+```{r}
+
+
+BCC.pre.Tregs.data <- BCC.pre.Tregs$data %>% select(GeneNames, xvals, yvals)
+BCC.post.Tregs.data <- BCC.post.Tregs$data %>% select(GeneNames, xvals, yvals)
+
+BCC.pre.Tregs.data <- filter(BCC.pre.Tregs.data, xvals < -0.5 | xvals > 0.5, yvals < 0.05)
+BCC.post.Tregs.data <- filter(BCC.post.Tregs.data, xvals < -0.5 | xvals > 0.5, yvals < 0.05)
+
+BCC.pre.Tregs.data$xvals[BCC.pre.Tregs.data$xvals < -2] <- -2
+BCC.pre.Tregs.data$xvals[BCC.pre.Tregs.data$xvals > 2] <- 2
+
+BCC.post.Tregs.data$xvals[BCC.post.Tregs.data$xvals < -2] <- -2
+BCC.post.Tregs.data$xvals[BCC.post.Tregs.data$xvals > 2] <- 2
+
+BCC.pre.Tregs.data$Treatment <- "Pre-treatment"
+BCC.post.Tregs.data$Treatment <- "Post-treatment"
+
+BCC.Tregs.data <- rbind(BCC.pre.Tregs.data, BCC.post.Tregs.data)
+BCC.Tregs.data <- BCC.Tregs.data %>% group_by(GeneNames) %>% filter(n()>1)
+
+BCC.Tregs.data <- BCC.Tregs.data[order(BCC.Tregs.data$GeneNames),]
+BCC.Tregs.data$paired <- 0
+for (i in 1:nrow(BCC.Tregs.data)) {
+  BCC.Tregs.data$paired[i] <- ceiling(i/2)
+}
+
+BCC.Tregs.data$yvals <- -log10(BCC.Tregs.data$yvals)
+
+BCC.Tregs.data %>%
+  ggplot(aes(x = xvals, y = GeneNames)) +
+  labs(title = "Regulatory T cells",
+       x = expression("Log"[2]*" Fold Change"),
+       y = "Gene") +
+  geom_line(aes(group = paired), color="black", size=1) + 
+  geom_point(aes(color = Treatment, size = yvals)) +
+  guides(size = FALSE) +
+  theme_light() +
+  theme(legend.position="top", 
+        plot.title = element_text(color="black", size=24, face="bold", hjust = 0.5)) +
+  xlim(-2,2)
+
+```
+
+
+
+Dumbbell charts for every cell type
+
+```{r}
+
+celltypes <- c("CD8_activation", "CD8_exhausted", "CD8_memory", "CD4", "Tregs", "T_proliferation", "Macrophages", "B cells", "NK")
+
+celltypesnames <- c("Activated CD8+ T Cells", "Exhausted CD8+ T Cells", "Memory T Cells", "CD4+ T Cells", "Regulatory T cells", "Proliferating T Cells", "Macrophages", "B Cells", "Natural Killer Cells")
+
+df_pre <- list(BCC.pre.CD8_activation, BCC.pre.CD8_exhausted, BCC.pre.CD8_memory, BCC.pre.CD4, BCC.pre.Tregs, BCC.pre.T_proliferation, BCC.pre.Macrophages, `BCC.pre.B cells`, BCC.pre.NK)
+
+df_post <- list(BCC.post.CD8_activation, BCC.post.CD8_exhausted, BCC.post.CD8_memory, BCC.post.CD4, BCC.post.Tregs, BCC.post.T_proliferation, BCC.post.Macrophages, `BCC.post.B cells`, BCC.post.NK)
+
+for (i in 1:length(celltypes)) {
+  assign(paste0("dumbbell.", celltypes[i]), BCC_diffexp_dumbbell(df_pre[[i]], df_post[[i]], 0, 0.05, celltypesnames[i]))
+}
+
+dumbbell.malignant <- BCC_diffexp_dumbbell(BCC.pre.malignant, BCC.post.malignant, 0, 0.05, "Malignant Cells")
+
+dumbbell.CD8_activation
+dumbbell.CD8_exhausted
+dumbbell.CD8_memory
+dumbbell.CD4
+dumbbell.Tregs
+dumbbell.T_proliferation
+dumbbell.Macrophages
+`dumbbell.B cells`
+dumbbell.NK
+dumbbell.malignant
 
 ```
