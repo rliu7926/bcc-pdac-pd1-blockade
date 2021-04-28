@@ -280,5 +280,32 @@ BCC_diffexp_dumbbell <- function(df1, df2, filterx=0.5, filtery=0.05, title) {
  
 }
 
-
-
+BCC_score_dumbbell <- function(df, patient, xlim=50) {
+  
+  patient.id.char <- BCC.patients.char[patient]
+  
+  if (df == BCC.MHC1.scores.na) {
+    title <- c("MHC-1")
+  } else if (df == BCC.MHC2.scores.na) {
+    title <- c("MHC-2")
+  } else {
+    title <- c("HSP")
+  }
+  
+  colnames(df)[patient] <- "xvals"
+  
+  graph <- df %>%
+    ggplot(aes(x = xvals, y = Cluster)) +
+    labs(title = paste0(title, " Gene Score: ", patients[patient]), x = "Score", y = "Cluster") +
+    geom_line(aes(group = paired), color="black", size=1) + 
+    geom_point(aes(color = Treatment, size = 3)) +
+    guides(size = FALSE) +
+    theme_light() +
+    theme(legend.position="top", 
+          plot.title = element_text(color="black", size=18, face="bold", hjust = 0.5))
+  
+  colnames(df)[patient] <- BCC.patients.char[patient]
+  
+  return(graph)
+  
+}
