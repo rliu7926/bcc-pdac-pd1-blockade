@@ -581,7 +581,7 @@ MHC1.genes <- c('HLA-A', 'HLA-B', 'HLA-C', 'HLA-E', 'HLA-F', 'HLA-G')
 MHC2.genes <- c('HLA-DMA', 'HLA-DMB', 'HLA-DOA', 'HLA-DOB', 'HLA-DPA1', 'HLA-DPB1', 'HLA-DQA1', 'HLA-DQA2', 'HLA-DQB1', 'HLA-DQB1-AS1', 'HLA-DQB2', 'HLA-DRA', 'HLA-DRB1', 'HLA-DRB5')
 HSP.genes <- c('HSP90AA1', 'HSP90AB1', 'HSP90B1', 'HPSA12A', 'HSPA12B', 'HSPA13', 'HSPA14', 'HPSA1A', 'HSPA1B', 'HSPA1L', 'HSPA2', 'HSPA4', 'HSPA4L', 'HSPA5', 'HSPA6', 'HSPA8', 'HSPA9', 'HSPB1', 'HSPB11', 'HSPB2', 'HSPB3', 'HSPB6', 'HSPB7', 'HSPB8', 'HSPB9', 'HSPBAP1', 'HSPBP1', 'HSPD1', 'HSPE1', 'HSPE1-MOB4', 'HSPG2', 'HSPH1')
 
-BCC.responder.pre.averages.mhc1 <- BCC.responder.pre.averages[MHC1.genes,]
+BCC.responder.pre.averages.HSP <- BCC.responder.pre.averages[MHC1.genes,]
 BCC.responder.pre.averages.mhc2 <- BCC.responder.pre.averages[MHC2.genes,]
 BCC.responder.pre.averages.hsp <- BCC.responder.pre.averages[HSP.genes,]
 
@@ -834,3 +834,204 @@ dumbbell.NK
 dumbbell.malignant
 
 ```
+
+
+
+Dumbbell chart analysis comparing differences in responders and nonresponders in their differential expression pretreatment vs. posttreatment
+
+```{r}
+
+## Create objects for each patient
+
+Idents(BCCIO) <- BCCIO$patient
+patients <- levels(Idents(BCCIO))
+
+for (i in 1:length(patients)) {
+  assign(paste0("BCC.", patients[i]), subset(BCCIO, idents=patients[i]))
+}
+
+BCC.patients <- list(BCC.su001, BCC.su002, BCC.su003, BCC.su004, BCC.su005, BCC.su006, BCC.su007, BCC.su008, BCC.su009, BCC.su010, BCC.su012)
+
+BCC.patients.char <- c("BCC.su001", "BCC.su002", "BCC.su003", "BCC.su004", "BCC.su005", "BCC.su006", "BCC.su007", "BCC.su008", "BCC.su009", "BCC.su010", "BCC.su012")
+
+for (i in 1:length(BCC.patients)) {
+  Idents(BCC.patients[[i]]) <- BCC.patients[[i]]$seurat_clusters
+  assign(paste0(BCC.patients.char[i], ".avg"), AverageExpression(BCC.patients[[i]], add.ident = "treatment"))
+}
+
+BCC.patients.avg <- list(BCC.su001.avg, BCC.su002.avg, BCC.su003.avg, BCC.su004.avg, BCC.su005.avg, BCC.su006.avg, BCC.su007.avg, BCC.su008.avg, BCC.su009.avg, BCC.su010.avg, BCC.su012.avg)
+
+MHC1.genes <- c('HLA-A', 'HLA-B', 'HLA-C', 'HLA-E', 'HLA-F', 'HLA-G')
+MHC2.genes <- c('HLA-DMA', 'HLA-DMB', 'HLA-DOA', 'HLA-DOB', 'HLA-DPA1', 'HLA-DPB1', 'HLA-DQA1', 'HLA-DQA2', 'HLA-DQB1', 'HLA-DQB1-AS1', 'HLA-DQB2', 'HLA-DRA', 'HLA-DRB1', 'HLA-DRB5')
+HSP.genes <- c('HSP90AA1', 'HSP90AB1', 'HSP90B1', 'HPSA12A', 'HSPA12B', 'HSPA13', 'HSPA14', 'HPSA1A', 'HSPA1B', 'HSPA1L', 'HSPA2', 'HSPA4', 'HSPA4L', 'HSPA5', 'HSPA6', 'HSPA8', 'HSPA9', 'HSPB1', 'HSPB11', 'HSPB2', 'HSPB3', 'HSPB6', 'HSPB7', 'HSPB8', 'HSPB9', 'HSPBAP1', 'HSPBP1', 'HSPD1', 'HSPE1', 'HSPE1-MOB4', 'HSPG2', 'HSPH1')
+
+## Gather average expression data
+
+BCC.patients.avg.MHC1 <- list()
+BCC.patients.avg.MHC2 <- list()
+BCC.patients.avg.HSP <- list()
+
+for (i in 1:length(BCC.patients.avg)) {
+  x <- BCC.patients.avg[[i]]$RNA[MHC1.genes,]
+  y <- BCC.patients.avg[[i]]$RNA[MHC2.genes,]
+  z <- BCC.patients.avg[[i]]$RNA[HSP.genes,]
+  
+  assign(paste0(BCC.patients.char[i], ".avg.MHC1"), x)
+  assign(paste0(BCC.patients.char[i], ".avg.MHC2"), y)
+  assign(paste0(BCC.patients.char[i], ".avg.HSP"), z)
+  
+  BCC.patients.avg.MHC1[[i]] <- x
+  BCC.patients.avg.MHC2[[i]] <- y
+  BCC.patients.avg.HSP[[i]] <- z
+}
+
+BCC.patients.avg.MHC1.score <- list()
+BCC.patients.avg.MHC2.score <- list()
+BCC.patients.avg.HSP.score <- list()
+
+for (i in 1:length(BCC.patients.avg.filtered)) {
+  x <- as.data.frame(colMeans(BCC.patients.avg.MHC1[[i]], na.rm=TRUE))
+  x$group <- rownames(x)
+  y <- as.data.frame(colMeans(BCC.patients.avg.MHC2[[i]], na.rm=TRUE))
+  y$group <- rownames(y)
+  z <- as.data.frame(colMeans(BCC.patients.avg.HSP[[i]], na.rm=TRUE))
+  z$group <- rownames(z)
+  
+  assign(paste0(BCC.patients.char[i], ".avg.MHC1.score"), x)
+  assign(paste0(BCC.patients.char[i], ".avg.MHC2.score"), y)
+  assign(paste0(BCC.patients.char[i], ".avg.HSP.score"), z)
+  
+  BCC.patients.avg.MHC1.score[[i]] <- x
+  BCC.patients.avg.MHC2.score[[i]] <- y
+  BCC.patients.avg.HSP.score[[i]] <- z
+}
+
+BCC.MHC1.scores <- Reduce(function(d1, d2) merge(d1, d2, by = "group", all=TRUE), BCC.patients.avg.MHC1.score)
+BCC.MHC2.scores <- Reduce(function(d1, d2) merge(d1, d2, by = "group", all=TRUE), BCC.patients.avg.MHC2.score)
+BCC.HSP.scores <- Reduce(function(d1, d2) merge(d1, d2, by = "group", all=TRUE), BCC.patients.avg.HSP.score)
+
+rownames(BCC.MHC1.scores) <- BCC.MHC1.scores$group
+BCC.MHC1.scores <- BCC.MHC1.scores[,-1]
+colnames(BCC.MHC1.scores) <- BCC.patients.char
+
+rownames(BCC.MHC2.scores) <- BCC.MHC2.scores$group
+BCC.MHC2.scores <- BCC.MHC2.scores[,-1]
+colnames(BCC.MHC2.scores) <- BCC.patients.char
+
+rownames(BCC.HSP.scores) <- BCC.HSP.scores$group
+BCC.HSP.scores <- BCC.HSP.scores[,-1]
+colnames(BCC.HSP.scores) <- BCC.patients.char 
+
+## Create dumbbell plots
+
+BCC.responders.char <- c("BCC.su001", "BCC.su002", "BCC.su003", "BCC.su004", "BCC.su009", "BCC.su012")
+BCC.nonresponders.char <- c("BCC.su005", "BCC.su006", "BCC.su007", "BCC.su008", "BCC.su010")
+
+BCC.MHC1.scores$Responders <- rowMeans(BCC.MHC1.scores[,BCC.responders.char], na.rm=TRUE)
+BCC.MHC1.scores$Nonresponders <- rowMeans(BCC.MHC1.scores[,BCC.nonresponders.char], na.rm=TRUE)
+
+BCC.MHC1.scores.data <- data.frame(matrix(nrow=38))
+BCC.MHC1.scores.data$xvals.responder <- BCC.MHC1.scores$Responders
+BCC.MHC1.scores.data$xvals.nonresponder <- BCC.MHC1.scores$Nonresponders
+BCC.MHC1.scores.data$Cluster <- rep(levels(Idents(BCCIO)), each=2)
+BCC.MHC1.scores.data$paired <- rep(1:length(levels(Idents(BCCIO))), each=2)
+BCC.MHC1.scores.data$Treatment <- c("Pre-treatment", "Post-treatment")
+BCC.MHC1.scores.data <- BCC.MHC1.scores.data[,-1]
+
+BCC.MHC1.scores.dumbbell.responders <- BCC.MHC1.scores.data %>%
+    ggplot(aes(x = xvals.responder, y = Cluster)) +
+    labs(title = "MHC-1 Gene Score: Responders", x = "Score", y = "Cluster") +
+    geom_line(aes(group = paired), color="black", size=1) + 
+    geom_point(aes(color = Treatment, size = 3)) +
+    guides(size = FALSE) +
+    theme_light() +
+    theme(legend.position="top", 
+          plot.title = element_text(color="black", size=18, face="bold", hjust = 0.5)) +
+    xlim(0,50)
+
+BCC.MHC1.scores.dumbbell.nonresponders <- BCC.MHC1.scores.data %>%
+    ggplot(aes(x = xvals.nonresponder, y = Cluster)) +
+    labs(title = "MHC-1 Gene Score: Nonresponders", x = "Score", y = "Cluster") +
+    geom_line(aes(group = paired), color="black", size=1) + 
+    geom_point(aes(color = Treatment, size = 3)) +
+    guides(size = FALSE) +
+    theme_light() +
+    theme(legend.position="top", 
+          plot.title = element_text(color="black", size=18, face="bold", hjust = 0.5)) +
+    xlim(0,50)
+
+BCC.MHC1.scores.dumbbell.responders + BCC.MHC1.scores.dumbbell.nonresponders
+
+
+BCC.MHC2.scores$Responders <- rowMeans(BCC.MHC2.scores[,BCC.responders.char], na.rm=TRUE)
+BCC.MHC2.scores$Nonresponders <- rowMeans(BCC.MHC2.scores[,BCC.nonresponders.char], na.rm=TRUE)
+
+BCC.MHC2.scores.data <- data.frame(matrix(nrow=38))
+BCC.MHC2.scores.data$xvals.responder <- BCC.MHC2.scores$Responders
+BCC.MHC2.scores.data$xvals.nonresponder <- BCC.MHC2.scores$Nonresponders
+BCC.MHC2.scores.data$Cluster <- rep(levels(Idents(BCCIO)), each=2)
+BCC.MHC2.scores.data$paired <- rep(1:length(levels(Idents(BCCIO))), each=2)
+BCC.MHC2.scores.data$Treatment <- c("Pre-treatment", "Post-treatment")
+BCC.MHC2.scores.data <- BCC.MHC2.scores.data[,-1]
+
+BCC.MHC2.scores.dumbbell.responders <- BCC.MHC2.scores.data %>%
+    ggplot(aes(x = xvals.responder, y = Cluster)) +
+    labs(title = "MHC-2 Gene Score: Responders", x = "Score", y = "Cluster") +
+    geom_line(aes(group = paired), color="black", size=1) + 
+    geom_point(aes(color = Treatment, size = 3)) +
+    guides(size = FALSE) +
+    theme_light() +
+    theme(legend.position="top", 
+          plot.title = element_text(color="black", size=18, face="bold", hjust = 0.5)) +
+    xlim(0,50)
+
+BCC.MHC2.scores.dumbbell.nonresponders <- BCC.MHC2.scores.data %>%
+    ggplot(aes(x = xvals.nonresponder, y = Cluster)) +
+    labs(title = "MHC-2 Gene Score: Nonresponders", x = "Score", y = "Cluster") +
+    geom_line(aes(group = paired), color="black", size=1) + 
+    geom_point(aes(color = Treatment, size = 3)) +
+    guides(size = FALSE) +
+    theme_light() +
+    theme(legend.position="top", 
+          plot.title = element_text(color="black", size=18, face="bold", hjust = 0.5)) +
+    xlim(0,50)
+
+BCC.MHC2.scores.dumbbell.responders + BCC.MHC2.scores.dumbbell.nonresponders
+
+
+BCC.HSP.scores$Responders <- rowMeans(BCC.HSP.scores[,BCC.responders.char], na.rm=TRUE)
+BCC.HSP.scores$Nonresponders <- rowMeans(BCC.HSP.scores[,BCC.nonresponders.char], na.rm=TRUE)
+
+BCC.HSP.scores.data <- data.frame(matrix(nrow=38))
+BCC.HSP.scores.data$xvals.responder <- BCC.HSP.scores$Responders
+BCC.HSP.scores.data$xvals.nonresponder <- BCC.HSP.scores$Nonresponders
+BCC.HSP.scores.data$Cluster <- rep(levels(Idents(BCCIO)), each=2)
+BCC.HSP.scores.data$paired <- rep(1:length(levels(Idents(BCCIO))), each=2)
+BCC.HSP.scores.data$Treatment <- c("Pre-treatment", "Post-treatment")
+BCC.HSP.scores.data <- BCC.HSP.scores.data[,-1]
+
+BCC.HSP.scores.dumbbell.responders <- BCC.HSP.scores.data %>%
+    ggplot(aes(x = xvals.responder, y = Cluster)) +
+    labs(title = "HSP Gene Score: Responders", x = "Score", y = "Cluster") +
+    geom_line(aes(group = paired), color="black", size=1) + 
+    geom_point(aes(color = Treatment, size = 3)) +
+    guides(size = FALSE) +
+    theme_light() +
+    theme(legend.position="top", 
+          plot.title = element_text(color="black", size=18, face="bold", hjust = 0.5)) +
+    xlim(0,15)
+
+BCC.HSP.scores.dumbbell.nonresponders <- BCC.HSP.scores.data %>%
+    ggplot(aes(x = xvals.nonresponder, y = Cluster)) +
+    labs(title = "HSP Gene Score: Nonresponders", x = "Score", y = "Cluster") +
+    geom_line(aes(group = paired), color="black", size=1) + 
+    geom_point(aes(color = Treatment, size = 3)) +
+    guides(size = FALSE) +
+    theme_light() +
+    theme(legend.position="top", 
+          plot.title = element_text(color="black", size=18, face="bold", hjust = 0.5)) +
+    xlim(0,15)
+
+BCC.HSP.scores.dumbbell.responders + BCC.HSP.scores.dumbbell.nonresponders
+```
+
