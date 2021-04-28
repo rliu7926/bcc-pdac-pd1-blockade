@@ -846,6 +846,7 @@ Dumbbell chart analysis comparing differences in responders and nonresponders in
 Idents(BCCIO) <- BCCIO$patient
 patients <- levels(Idents(BCCIO))
 
+memory.limit(1600000000)
 for (i in 1:length(patients)) {
   assign(paste0("BCC.", patients[i]), subset(BCCIO, idents=patients[i]))
 }
@@ -889,7 +890,7 @@ BCC.patients.avg.MHC1.score <- list()
 BCC.patients.avg.MHC2.score <- list()
 BCC.patients.avg.HSP.score <- list()
 
-for (i in 1:length(BCC.patients.avg.filtered)) {
+for (i in 1:length(BCC.patients.avg.MHC1)) {
   x <- as.data.frame(colMeans(BCC.patients.avg.MHC1[[i]], na.rm=TRUE))
   x$group <- rownames(x)
   y <- as.data.frame(colMeans(BCC.patients.avg.MHC2[[i]], na.rm=TRUE))
@@ -922,7 +923,13 @@ rownames(BCC.HSP.scores) <- BCC.HSP.scores$group
 BCC.HSP.scores <- BCC.HSP.scores[,-1]
 colnames(BCC.HSP.scores) <- BCC.patients.char 
 
-## Create dumbbell plots
+```
+
+
+
+Create dumbbell plots comparing responders and nonresponders
+
+```{r}
 
 BCC.responders.char <- c("BCC.su001", "BCC.su002", "BCC.su003", "BCC.su004", "BCC.su009", "BCC.su012")
 BCC.nonresponders.char <- c("BCC.su005", "BCC.su006", "BCC.su007", "BCC.su008", "BCC.su010")
@@ -933,7 +940,7 @@ BCC.MHC1.scores$Nonresponders <- rowMeans(BCC.MHC1.scores[,BCC.nonresponders.cha
 BCC.MHC1.scores.data <- data.frame(matrix(nrow=38))
 BCC.MHC1.scores.data$xvals.responder <- BCC.MHC1.scores$Responders
 BCC.MHC1.scores.data$xvals.nonresponder <- BCC.MHC1.scores$Nonresponders
-BCC.MHC1.scores.data$Cluster <- rep(levels(Idents(BCCIO)), each=2)
+BCC.MHC1.scores.data$Cluster <- rep(sort(levels(Idents(BCCIO))), each=2)
 BCC.MHC1.scores.data$paired <- rep(1:length(levels(Idents(BCCIO))), each=2)
 BCC.MHC1.scores.data$Treatment <- c("Pre-treatment", "Post-treatment")
 BCC.MHC1.scores.data <- BCC.MHC1.scores.data[,-1]
@@ -969,7 +976,7 @@ BCC.MHC2.scores$Nonresponders <- rowMeans(BCC.MHC2.scores[,BCC.nonresponders.cha
 BCC.MHC2.scores.data <- data.frame(matrix(nrow=38))
 BCC.MHC2.scores.data$xvals.responder <- BCC.MHC2.scores$Responders
 BCC.MHC2.scores.data$xvals.nonresponder <- BCC.MHC2.scores$Nonresponders
-BCC.MHC2.scores.data$Cluster <- rep(levels(Idents(BCCIO)), each=2)
+BCC.MHC2.scores.data$Cluster <- rep(sort(levels(Idents(BCCIO))), each=2)
 BCC.MHC2.scores.data$paired <- rep(1:length(levels(Idents(BCCIO))), each=2)
 BCC.MHC2.scores.data$Treatment <- c("Pre-treatment", "Post-treatment")
 BCC.MHC2.scores.data <- BCC.MHC2.scores.data[,-1]
@@ -1005,7 +1012,7 @@ BCC.HSP.scores$Nonresponders <- rowMeans(BCC.HSP.scores[,BCC.nonresponders.char]
 BCC.HSP.scores.data <- data.frame(matrix(nrow=38))
 BCC.HSP.scores.data$xvals.responder <- BCC.HSP.scores$Responders
 BCC.HSP.scores.data$xvals.nonresponder <- BCC.HSP.scores$Nonresponders
-BCC.HSP.scores.data$Cluster <- rep(levels(Idents(BCCIO)), each=2)
+BCC.HSP.scores.data$Cluster <- rep(sort(levels(Idents(BCCIO))), each=2)
 BCC.HSP.scores.data$paired <- rep(1:length(levels(Idents(BCCIO))), each=2)
 BCC.HSP.scores.data$Treatment <- c("Pre-treatment", "Post-treatment")
 BCC.HSP.scores.data <- BCC.HSP.scores.data[,-1]
@@ -1035,3 +1042,57 @@ BCC.HSP.scores.dumbbell.nonresponders <- BCC.HSP.scores.data %>%
 BCC.HSP.scores.dumbbell.responders + BCC.HSP.scores.dumbbell.nonresponders
 ```
 
+
+
+Create dumbbell plots comparing only responders or nonresponders
+
+```{r}
+
+Idents(BCCIO) <- BCCIO$seurat_clusters
+
+BCC.MHC1.scores.na <- BCC.MHC1.scores
+BCC.MHC1.scores.na[is.na(BCC.MHC1.scores)] <- 0
+BCC.MHC1.scores.na$Cluster <- rep(sort(levels(Idents(BCCIO))), each=2)
+BCC.MHC1.scores.na$paired <- rep(1:length(levels(Idents(BCCIO))), each=2)
+BCC.MHC1.scores.na$Treatment <- c("Pre-treatment", "Post-treatment")
+
+BCC.MHC2.scores.na <- BCC.MHC2.scores
+BCC.MHC2.scores.na[is.na(BCC.MHC2.scores)] <- 0
+BCC.MHC2.scores.na$Cluster <- rep(sort(levels(Idents(BCCIO))), each=2)
+BCC.MHC2.scores.na$paired <- rep(1:length(levels(Idents(BCCIO))), each=2)
+BCC.MHC2.scores.na$Treatment <- c("Pre-treatment", "Post-treatment")
+
+BCC.HSP.scores.na <- BCC.HSP.scores
+BCC.HSP.scores.na[is.na(BCC.HSP.scores)] <- 0
+BCC.HSP.scores.na$Cluster <- rep(sort(levels(Idents(BCCIO))), each=2)
+BCC.HSP.scores.na$paired <- rep(1:length(levels(Idents(BCCIO))), each=2)
+BCC.HSP.scores.na$Treatment <- c("Pre-treatment", "Post-treatment")
+
+for (i in 1:length(BCC.patients)) {
+  BCC_score-Dumbbell(df=MHC1.scores.na)
+}
+
+
+for (i in 1:11) {
+  assign(paste0(BCC.patients.char[i], ".MHC1.dumbbell"), 
+         BCC_score_dumbbell(df = BCC.MHC1.scores.na, patient = i))
+  assign(paste0(BCC.patients.char[i], ".MHC2.dumbbell"),
+         BCC_score_dumbbell(df = BCC.MHC2.scores.na, patient = i))
+  assign(paste0(BCC.patients.char[i], ".HSP.dumbbell"), 
+         BCC_score_dumbbell(df= BCC.HSP.scores.na, patient = i))
+}
+
+grid.arrange(BCC.su001.MHC1.dumbbell, BCC.su001.MHC2.dumbbell, BCC.su001.HSP.dumbbell, ncol=3)
+grid.arrange(BCC.su002.MHC1.dumbbell, BCC.su002.MHC2.dumbbell, BCC.su002.HSP.dumbbell, ncol=3)
+grid.arrange(BCC.su003.MHC1.dumbbell, BCC.su003.MHC2.dumbbell, BCC.su003.HSP.dumbbell, ncol=3)
+grid.arrange(BCC.su004.MHC1.dumbbell, BCC.su004.MHC2.dumbbell, BCC.su004.HSP.dumbbell, ncol=3)
+grid.arrange(BCC.su005.MHC1.dumbbell, BCC.su005.MHC2.dumbbell, BCC.su005.HSP.dumbbell, ncol=3)
+grid.arrange(BCC.su006.MHC1.dumbbell, BCC.su006.MHC2.dumbbell, BCC.su006.HSP.dumbbell, ncol=3)
+grid.arrange(BCC.su007.MHC1.dumbbell, BCC.su007.MHC2.dumbbell, BCC.su007.HSP.dumbbell, ncol=3)
+grid.arrange(BCC.su008.MHC1.dumbbell, BCC.su008.MHC2.dumbbell, BCC.su008.HSP.dumbbell, ncol=3)
+grid.arrange(BCC.su009.MHC1.dumbbell, BCC.su009.MHC2.dumbbell, BCC.su009.HSP.dumbbell, ncol=3)
+grid.arrange(BCC.su010.MHC1.dumbbell, BCC.su010.MHC2.dumbbell, BCC.su010.HSP.dumbbell, ncol=3)
+grid.arrange(BCC.su012.MHC1.dumbbell, BCC.su012.MHC2.dumbbell, BCC.su012.HSP.dumbbell, ncol=3)
+
+
+```
