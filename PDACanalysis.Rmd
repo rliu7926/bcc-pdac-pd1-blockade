@@ -15,8 +15,13 @@ library(RColorBrewer)
 library(EnhancedVolcano)
 
 ## Load functions
-source("ClusteringAnalysisFunctions.R", echo=TRUE)
-source("SeuratClusteringFunctions.R", echo=TRUE)
+source("ClusteringAnalysisFunctions.R", echo=FALSE)
+source("SeuratClusteringFunctions.R", echo=FALSE)
+source("DifferentialExpressionFunctions.R", echo=FALSE)
+
+## Load PDAC integrated object
+load("C:\\Users\\Ryan\\Documents\\Nie Research Project\\GSE 155698\\PDAC155698.integrated")
+
 ```
 
 
@@ -296,15 +301,6 @@ DoHeatmap(subset(pdac.combined, downsample=100), features=features)
 
 
 
-
-
-
-
-
-
-
-
-
 ##############################################################################################
 
 Analyze GSE 155698 Dataset
@@ -351,7 +347,7 @@ PDAC155698.16 <- CreateSeuratObject(PDAC155698.16.read, project="PDAC155698.16",
 
 ## Merge datasets together
 
-PDAC155698 <- merge(PDAC155698.1, y=c(PDAC155698.2, PDAC155698.3, PDAC155698.4, PDAC155698.5, PDAC155698.6, PDAC155698.7, PDAC155698.8, PDAC155698.9, PDAC155698.10, PDAC155698.11A, PDAC155698.11B, PDAC155698.12, PDAC155698.13, PDAC155698.15, PDAC155698.16), add.cell.ids = c("tissue1", "tissue2", "tissue3", "tissue4", "tissue5", "tissue6", "tissue7", "tissue8", "tissue9", "tissue10", "tissue11A", "tissue11B", "tissue12", "tissue13", "tissue15", "tissue16"), project="PDAC155698")
+PDAC.merged <- merge(PDAC155698.1, y=c(PDAC155698.2, PDAC155698.3, PDAC155698.4, PDAC155698.5, PDAC155698.6, PDAC155698.7, PDAC155698.8, PDAC155698.9, PDAC155698.10, PDAC155698.11A, PDAC155698.11B, PDAC155698.12, PDAC155698.13, PDAC155698.15, PDAC155698.16), add.cell.ids = c("tissue1", "tissue2", "tissue3", "tissue4", "tissue5", "tissue6", "tissue7", "tissue8", "tissue9", "tissue10", "tissue11A", "tissue11B", "tissue12", "tissue13", "tissue15", "tissue16"), project="PDAC155698")
 
 
 ## Integrate datasets together
@@ -381,6 +377,7 @@ PDAC155698.integrated <- clustering(PDAC155698.integrated, resolution=0.5, genes
 
 save(PDAC155698.integrated, file="C:\\Users\\Ryan\\Documents\\Nie Research Project\\GSE 155698\\PDAC155698.integrated")
 memory.limit(size=160000000)
+
 load("C:\\Users\\Ryan\\Documents\\Nie Research Project\\GSE 155698\\PDAC155698.integrated")
 
 PDAC155698.integrated.umap <- DimPlot(PDAC155698.integrated, reduction="umap", label=TRUE)
@@ -538,3 +535,238 @@ PDAC155698.all <- preprocessing(PDAC155698.all)
 PDAC155698.all <- clustering(PDAC155698.all)
 
 ```
+
+
+
+####################################################################################################################
+
+Redo PDAC clustering
+
+```{r}
+
+## Load PDAC155698.integrated dataset
+
+PDAC.integrated <- PDAC155698.integrated
+remove(PDAC155698.integrated)
+
+PDAC.integrated@meta.data$seurat_clusters <- PDAC.integrated@meta.data$RNA_snn_res.0.5
+
+Idents(PDAC.integrated) <- PDAC.integrated$seurat_clusters
+PDAC.integrated.umap <- DimPlot(PDAC.integrated, reduction="umap", label=TRUE)
+PDAC.integrated.umap
+
+```
+
+
+
+Re-determine cluster labels for PDAC
+
+```{r}
+
+## Use features from the old PDAC paper
+
+features <- c('CD79A', 'MS4A1', 'KRT18', 'KRT8', 'TFF1', 'LYZ', 'APOE', 'HLA-DRA', 'C1QA', 'CD14', 'CD3D', 'CD2', 'NKG7', 'IGFBP7', 'ACTA2', 'RGS5', 'PRSS1', 'CTRB2', 'REG1A', 'COL1A1', 'COL3A1', 'LUM', 'DCN', 'MMP7', 'CLU', 'SPP1', 'IGJ', 'IGLL5', 'IRF7', 'GZMB', 'CCL22', 'LAMP3', 'PLVAP', 'VWF', 'TPSAB1', 'CPA3', 'HBB', 'HBA2', 'KRT19', 'SPINK1')
+
+DotPlot(PDAC.integrated, features = features, assay = 'RNA', cols = c('White', 'Blue')) + RotatedAxis() + xlab('Marker Genes')+ ylab('Clusters')
+
+annotations <- c('T', 'NK', 'DC1', 'MYE', 'UNK', 'DC3', 'UNK', 'MYE', 'DC3', 'DC3', 'PERI+FIB', 'MAST', 'MYE', 'PLASMA', 'DC1', 'B', 'UNK', 'PERI', 'DC2', 'DC1', 'MYE+TNK', 'ACINAR', 'DC1', 'ENDO', 'PDC', 'DC1', 'PLAS+MAST')
+
+Idents(PDAC.integrated) <- PDAC.integrated$seurat_clusters
+names(annotations) <- levels(PDAC.integrated)
+PDAC.integrated <- RenameIdents(PDAC.integrated, annotations)
+PDAC.integrated@meta.data$seurat_clusters <- PDAC.integrated@active.ident
+
+PDAC.integrated.umap <- DimPlot(PDAC.integrated, reduction="umap", label=TRUE, pt.size=0.1)
+PDAC.integrated.umap 
+
+## Rename patients 
+
+PDAC.integrated$orig.ident <- as.factor(PDAC.integrated$orig.ident)
+
+levels(PDAC.integrated@meta.data$orig.ident) <- list(P1 = 'PDAC155698.1', P2 = 'PDAC155698.2', P3 = 'PDAC155698.3', P4 = 'PDAC155698.4', P5 = 'PDAC155698.5', P6 = 'PDAC155698.6', P7 = 'PDAC155698.7', P8 = 'PDAC155698.8', P9 = 'PDAC155698.9', P10='PDAC155698.10', P11A = 'PDAC155698.11A', P11B = 'PDAC155698.11B', P12 = 'PDAC155698.12', P13 = 'PDAC155698.13', P15 = 'PDAC155698.15', P16 = 'PDAC155698.16')
+
+PDAC.integrated$patient <- PDAC.integrated$orig.ident
+PDAC.integrated$orig.ident <- NULL
+
+```
+
+
+
+Subcluster immune cells 
+
+```{r}
+
+Idents(PDAC.integrated) <- PDAC.integrated$seurat_clusters
+
+PDAC.integrated.metadata <- PDAC.integrated@meta.data
+
+PDAC.integrated.metadata$seurat_clusters <- as.character(PDAC.integrated.metadata$seurat_clusters)
+
+## Update clusters 0 and 1 (T and NK cells)
+
+for (i in 1:nrow(PDAC.integrated.metadata)) {
+  if (PDAC.integrated.metadata$RNA_snn_res.0.5[i] == 0 || PDAC.integrated.metadata$RNA_snn_res.0.5[i] == 1) {
+    PDAC.integrated.metadata$seurat_clusters[i] <- PDAC.integrated.metadata$sub_cluster[i]
+  }
+}
+
+PDAC.integrated@meta.data <- PDAC.integrated.metadata
+
+PDAC.integrated.umap <- DimPlot(PDAC.integrated, reduction="umap", label=TRUE, pt.size=0.1)
+PDAC.integrated.umap 
+
+
+## Update cluster 20 (Myeloid and T cells)
+
+for (i in 1:nrow(PDAC.integrated.metadata)) {
+  if (PDAC.integrated.metadata$RNA_snn_res.0.5[i] == 20) {
+    PDAC.integrated.metadata$seurat_clusters[i] <- PDAC.integrated.metadata$sub_cluster[i]
+  }
+  if (PDAC.integrated.metadata$seurat_clusters[i] == 'Other') {
+    PDAC.integrated.metadata$seurat_clusters[i] <- "MYE"
+  }
+}
+
+PDAC.integrated@meta.data <- PDAC.integrated.metadata
+
+PDAC.integrated.umap <- DimPlot(PDAC.integrated, reduction="umap", label=TRUE, pt.size=0.1)
+PDAC.integrated.umap 
+
+
+## Subcluster ductal cells 
+
+PDAC.DC <- subset(PDAC.integrated, idents=c("DC1", "DC2", "DC3"))
+PDAC.DC@meta.data$orig.cluster <- PDAC.DC@meta.data$seurat_clusters
+
+PDAC.DC <- clustering(PDAC.DC, resolution=0.3)
+
+features <- c('TFF1', 'TFF2', 'LYZ', 'VSIG2', 'CEACAM6', 'APOA1', 'FABP1', 'ANPEP', 'ADIRF', 'DNASE1', 'CTRB2', 'CFTR', 'SOD3', 'COL18A1', 'VCAM1', 'CRISP3', 'TCN1', 'MMP1', 'SPINK1', 'LGALS2')
+
+DotPlot(PDAC.DC, features = features, assay = 'RNA', cols = c('White', 'Blue')) + RotatedAxis() + xlab('Marker Genes')+ ylab('Clusters')
+
+annotations <- c("Ductal cells 1", "Ductal cells 1", "Ductal cells 1", "Ductal cells 4", "Ductal cells 4", "Ductal cells 1", "Ductal cells 1", "Ductal cells 1", "Ductal cells 1", "Ductal cells 1", "Ductal cells 2", "Ductal cells 1", "Ductal cells 3", "Ductal cells 1")
+
+Idents(PDAC.DC) <- PDAC.DC$seurat_clusters
+names(annotations) <- levels(PDAC.DC)
+PDAC.DC <- RenameIdents(PDAC.DC, annotations)
+PDAC.DC@meta.data$seurat_clusters <- PDAC.DC@active.ident
+
+PDAC.DC.umap <- DimPlot(PDAC.DC, reduction="umap", label=TRUE, pt.size=0.1)
+PDAC.DC.umap
+
+PDAC.integrated$sub_cluster1 <- as.character(Idents(PDAC.integrated))
+PDAC.integrated$sub_cluster1[Cells(PDAC.DC)] <- paste(Idents(PDAC.DC))
+DimPlot(PDAC.integrated, group.by="sub_cluster1", label = TRUE)
+
+
+## Subcluster perivascular cells and fibroblasts
+
+PDAC.peri.fib <- subset(PDAC.integrated, idents=c("PERI", "PERI+FIB"))
+PDAC.peri.fib@meta.data$orig.cluster <- PDAC.peri.fib@meta.data$seurat_clusters
+
+PDAC.peri.fib <- clustering(PDAC.peri.fib, resolution=0.5)
+
+features <- c('IGFBP7', 'ACTA2', 'RGS5', 'COL1A1', 'COL3A1', 'LUM', 'DCN', 'IL6', 'PDGFRA', 'CXCL12', 'MMP11', 'MYL9')
+
+DotPlot(PDAC.peri.fib, features = features, assay = 'RNA', cols = c('White', 'Blue')) + RotatedAxis() + xlab('Marker Genes')+ ylab('Clusters')
+
+annotations <- c("Fibroblasts", "Fibroblasts", "Fibroblasts", "Perivascular cells", "Fibroblasts", "Fibroblasts", "Perivascular cells")
+
+Idents(PDAC.peri.fib) <- PDAC.peri.fib$seurat_clusters
+names(annotations) <- levels(PDAC.peri.fib)
+PDAC.peri.fib <- RenameIdents(PDAC.peri.fib, annotations)
+PDAC.peri.fib@meta.data$seurat_clusters <- PDAC.peri.fib@active.ident
+
+PDAC.peri.fib.umap <- DimPlot(PDAC.peri.fib, reduction="umap", label=TRUE, pt.size=0.1)
+PDAC.peri.fib.umap
+
+Idents(PDAC.integrated) <- PDAC.integrated$sub_cluster1
+PDAC.integrated$sub_cluster2 <- as.character(Idents(PDAC.integrated))
+PDAC.integrated$sub_cluster2[Cells(PDAC.peri.fib)] <- paste(Idents(PDAC.peri.fib))
+DimPlot(PDAC.integrated, group.by="sub_cluster2", label = TRUE)
+
+
+## Subcluser plasma and mast cells
+
+PDAC.plas.mast <- subset(PDAC.integrated, idents=c("PLASMA", "PLAS+MAST", "MAST"))
+PDAC.plas.mast@meta.data$orig.cluster <- PDAC.plas.mast@meta.data$seurat_clusters
+
+PDAC.plas.mast <- clustering(PDAC.plas.mast, resolution=1.0)
+
+features <- c('IGJ', 'IGLL5', 'CLU', 'TPSAB1', 'CPA3')
+
+DotPlot(PDAC.plas.mast, features = features, assay = 'RNA', cols = c('White', 'Blue')) + RotatedAxis() + xlab('Marker Genes')+ ylab('Clusters')
+
+annotations <- c("Mast cells", "Plasma cells", "Mast cells", "Mast cells", "Plasma cells", "Plasma cells", "Plasma cells", "Mast cells", "Plasma cells", "Mast cells", "Plasma cells")
+
+Idents(PDAC.plas.mast) <- PDAC.plas.mast$seurat_clusters
+names(annotations) <- levels(PDAC.plas.mast)
+PDAC.plas.mast <- RenameIdents(PDAC.plas.mast, annotations)
+PDAC.plas.mast@meta.data$seurat_clusters <- PDAC.plas.mast@active.ident
+
+PDAC.plas.mast.umap <- DimPlot(PDAC.plas.mast, reduction="umap", label=TRUE, pt.size=0.1)
+PDAC.plas.mast.umap
+
+Idents(PDAC.integrated) <- PDAC.integrated$sub_cluster2
+PDAC.integrated$sub_cluster3 <- as.character(Idents(PDAC.integrated))
+PDAC.integrated$sub_cluster3[Cells(PDAC.plas.mast)] <- paste(Idents(PDAC.plas.mast))
+DimPlot(PDAC.integrated, group.by="sub_cluster3", label = TRUE)
+
+
+## Subcluster myeloid and unknown cells 
+
+PDAC.unk <- subset(PDAC.integrated, idents=c("UNK", "MYE"))
+PDAC.unk@meta.data$orig.cluster <- PDAC.unk@meta.data$seurat_clusters
+
+PDAC.unk <- clustering(PDAC.unk, resolution=0.5)
+
+features <- c('LAMP3', 'CCL22', 'TFF1', 'KRT18', 'KRT19', 'KRT8', 'CLU', 'MMP7', 'SPP1', 'REG1A', 'CTRB2', 'PRSS1', 'DCN', 'LUM', 'CPA3', 'TPSAB1', 'CDH5', 'VWF', 'PLVAP', 'IRF7', 'RGS5', 'PDGFRB', 'CD3E', 'NCAM1', 'NKG7', 'CD3D', 'CD14', 'HLA-DRA', 'GZMB', 'ITGAX', 'ITGAM', 'APOE', 'LYZ', 'IGJ', 'CD79A', 'MS4A1')
+
+DotPlot(PDAC.unk, features = features, assay = 'RNA', cols = c('White', 'Blue')) + RotatedAxis() + xlab('Marker Genes')+ ylab('Clusters')
+
+annotations <- c("Granulocytes", "Macrophages", "Epithelial cells", "Macrophages", "Macrophages", "Macrophages", "Granulocytes", "Macrophages", "Granulocytes", "Macrophages", "Granulocytes", "Macrophages", "Epithelial cells", "Macrophages")
+
+Idents(PDAC.unk) <- PDAC.unk$seurat_clusters
+names(annotations) <- levels(PDAC.unk)
+PDAC.unk <- RenameIdents(PDAC.unk, annotations)
+PDAC.unk@meta.data$seurat_clusters <- PDAC.unk@active.ident
+
+PDAC.unk.umap <- DimPlot(PDAC.unk, reduction="umap", label=TRUE, pt.size=0.1)
+PDAC.unk.umap
+
+Idents(PDAC.integrated) <- PDAC.integrated$sub_cluster3
+PDAC.integrated$sub_cluster4 <- as.character(Idents(PDAC.integrated))
+PDAC.integrated$sub_cluster4[Cells(PDAC.unk)] <- paste(Idents(PDAC.unk))
+DimPlot(PDAC.integrated, group.by="sub_cluster4", label = TRUE)
+
+
+## Rename all idents
+
+Idents(PDAC.integrated) <- PDAC.integrated$sub_cluster4
+
+PDAC.integrated <- RenameIdents(object = PDAC.integrated,
+                                'ACINAR' = 'Acinar cells',
+                                'B' = 'B cells', 
+                                'PDC' = 'pDCs',
+                                'ENDO' = 'Endothelial cells')
+
+PDAC.integrated@meta.data$seurat_clusters <- PDAC.integrated@active.ident
+
+PDAC.integrated@meta.data$sub_cluster <- NULL
+PDAC.integrated@meta.data$sub_cluster1 <- NULL
+PDAC.integrated@meta.data$sub_cluster2 <- NULL
+PDAC.integrated@meta.data$sub_cluster3 <- NULL
+PDAC.integrated@meta.data$sub_cluster4 <- NULL
+
+Idents(PDAC.integrated) <- PDAC.integrated$seurat_clusters
+PDAC.integrated.umap <- DimPlot(PDAC.integrated, group.by="seurat_clusters", label=TRUE)
+PDAC.integrated.umap
+
+save(PDAC.integrated, file="C:\\Users\\Ryan\\Documents\\Nie Research Project\\GSE 155698\\PDAC.integrated")
+
+```
+
+
+
+
+
