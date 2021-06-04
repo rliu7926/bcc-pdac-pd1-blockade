@@ -524,15 +524,22 @@ PDAC155698.H4 <- CreateSeuratObject(PDAC155698.H4.read, project="PDAC155698.H4",
 
 ## Integrate datasets
 
+PDAC155698.all.list <- list(PDAC.integrated, PDAC155698.H1, PDAC155698.H2, PDAC155698.H3, PDAC155698.H4)
+
+
+
 PDAC155698.all.list <- list(PDAC155698.1, PDAC155698.2, PDAC155698.3, PDAC155698.4, PDAC155698.5, PDAC155698.6, PDAC155698.7, PDAC155698.8, PDAC155698.9, PDAC155698.10, PDAC155698.11A, PDAC155698.11B, PDAC155698.12, PDAC155698.13, PDAC155698.15, PDAC155698.16, PDAC155698.H1, PDAC155698.H2, PDAC155698.H3, PDAC155698.H4)
+
 PDAC155698.all.anchors <- FindIntegrationAnchors(object.list=PDAC155698.all.list, dims=1:50)
-PDAC155698.all <- IntegrateData(anchorset=PDAC155698.all.anchors, dims=1:50)
-DefaultAssay(PDAC155698.all) <- "RNA"
+
+PDAC.all <- IntegrateData(anchorset=PDAC155698.all.anchors, dims=1:50)
+DefaultAssay(PDAC.all) <- "RNA"
 
 ## Preprocessing
 
-PDAC155698.all <- preprocessing(PDAC155698.all)
-PDAC155698.all <- clustering(PDAC155698.all)
+PDAC.all <- preprocessing(PDAC.all)
+PDAC.all <- clustering(PDAC.all, resolution=0.5)
+
 
 ```
 
@@ -768,5 +775,217 @@ save(PDAC.integrated, file="C:\\Users\\Ryan\\Documents\\Nie Research Project\\GS
 
 
 
+Identify cell clusters for the infected + healthy dataset
+
+```{r}
+
+PDAC155698.all <- PDAC.all ## backup
+
+## Make sure dataset integration succeeded
+
+Idents(PDAC.all) <- PDAC.all$seurat_clusters
+DimPlot(PDAC.all, group.by="orig.ident", label=TRUE)
+
+Idents(PDAC.all) <- PDAC.all$orig.ident
+table(Idents(PDAC.all))
+table(Idents(PDAC.all), PDAC.all$seurat_clusters)
+
+## Identify initial clusters without subclustering
+
+Idents(PDAC.all) <- PDAC.all$seurat_clusters
+
+features <- c('CD79A', 'MS4A1', 'KRT18', 'KRT8', 'TFF1', 'LYZ', 'APOE', 'HLA-DRA', 'C1QA', 'CD14', 'CD3D', 'CD2', 'NKG7', 'IGFBP7', 'ACTA2', 'RGS5', 'PRSS1', 'CTRB2', 'REG1A', 'COL1A1', 'COL3A1', 'LUM', 'DCN', 'MMP7', 'CLU', 'SPP1', 'IGJ', 'IGLL5', 'IRF7', 'GZMB', 'CCL22', 'LAMP3', 'PLVAP', 'VWF', 'TPSAB1', 'CPA3', 'HBB', 'HBA2', 'KRT19', 'SPINK1')
+DotPlot(PDAC.all, features = features, assay = 'RNA', cols = c('White', 'Blue')) + RotatedAxis() + xlab('Marker Genes')+ ylab('Clusters')
+
+pdacfeatures <- c('COL1A1', 'CXCL5', 'S100P', 'CEACAM6', 'GABRP', 'SLC6A14', 'CLDN18', 'GPRC5A', 'ANO1', 'RUNX2', 'BTG2', 'SEC11C', 'SLC17A4', 'CYB5A', 'ABAT')
+DotPlot(PDAC.all, features = pdacfeatures, assay = 'RNA', cols = c('White', 'Blue')) + RotatedAxis() + xlab('Marker Genes')+ ylab('Clusters')
+
+clusters <- c('TNK', 'TNK', 'DC1', 'UNK', 'MYE1', 'UNK', 'MYE1', 'DC3', 'DC3', 'TNK', 'MYE2', 'DC3', 'MYE2', 'MAST', 'PLASMA', 'B', 'DC2', 'FIB', 'DC2', 'FIB', 'DC3', 'UNK', 'ACINAR', 'PERI', 'DC4', 'TNK', 'ENDO', 'ADC', 'PDC', 'RBC', 'PLAS', 'PLAS')
+  
+names(clusters) <- levels(PDAC.all)
+PDAC.all <- RenameIdents(PDAC.all, clusters)
+PDAC.all@meta.data$seurat_clusters <- PDAC.all@active.ident
+
+DimPlot(PDAC.all, group.by="seurat_clusters", label=TRUE)
+
+## Look at distribution of cluster between healthy and infected individuals
+
+PDAC.all$status <- PDAC.all$orig.ident
+Idents(PDAC.all) <- PDAC.all$status
+PDAC.all <- RenameIdents(object = PDAC.all, 'pdac1' = 'I', 'pdac2' = 'I', 'pdac3' = 'I', 'pdac4'= 'I', 'pdac5' = 'I', 'pdac6' = 'I', 'pdac7' = 'I', 'pdac8' = 'I', 'pdac9' = 'I', 'pdac10' = 'I', 'pdac11A' = 'I', 'pdac11B' = 'I', 'pdac12' = 'I', 'pdac13' = 'I', 'pdac15' = 'I', 'pdac16' = 'I', 'PDAC155698.H1' = 'H', 'PDAC155698.H2' = 'H', 'PDAC155698.H3' = 'H', 'PDAC155698.H4' = 'H' )
+PDAC.all@meta.data$status <- PDAC.all@active.ident
+
+Idents(PDAC.all) <- PDAC.all$seurat_clusters
+dist <- ggplot_barcharts(PDAC.all@meta.data$status, PDAC.all@meta.data$seurat_clusters)
+
+DimPlot(PDAC.all, group.by="status", label=TRUE)
+
+```
 
 
+
+Determine malignant cell clusters
+
+```{r}
+
+Idents(PDAC.all) <- PDAC.all$seurat_clusters
+
+PDAC.all.ductal <- subset(PDAC.all, idents=c("DC1", "DC2", "DC3", "DC4"))
+
+PDAC155698.all.ductal <- PDAC155698.all.ductal ## safety
+
+PDAC.all.ductal <- clustering(PDAC.all.ductal, resolution=0.5)
+
+Idents(PDAC.all.ductal) <- PDAC.all.ductal$orig.ident
+PDAC.all.ductal <- RenameIdents(object = PDAC.all.ductal, 
+                                'pdac1' = 'I1', 'pdac2' = 'I2', 'pdac3' = 'I3', 'pdac4' = 'I4', 'pdac5' = 'I5', 'pdac6' = 'I6', 'pdac7' = 'I7', 'pdac8' = 'I8', 'pdac9' = 'I9', 'pdac10' = 'I10', 'pdac11A' = 'I11', 'pdac11B' = 'I12', 'pdac12' = 'I13', 'pdac13' = 'I14', 'pdac15' = 'I15', 'pdac16' = 'I16', 'PDAC155698.H1' = 'H1', 'PDAC155698.H2' = 'H2', 'PDAC155698.H3' = 'H3', 'PDAC155698.H4' = 'H4')
+PDAC.all.ductal@meta.data$orig.ident <- PDAC.all.ductal@active.ident
+
+
+Idents(PDAC.all.ductal) <- PDAC.all.ductal$seurat_clusters
+
+DimPlot(PDAC.all.ductal, group.by="seurat_clusters", split.by="status")
+DimPlot(PDAC.all.ductal, group.by="orig.ident")
+ggplot_barcharts(PDAC.all.ductal@meta.data$status, PDAC.all.ductal@meta.data$seurat_clusters)
+ggplot_barcharts(PDAC.all.ductal@meta.data$orig.ident, PDAC.all.ductal@meta.data$seurat_clusters)
+
+
+
+## Look at upregulated and downregulated genes 
+
+pdacupregulated <- c('COL1A1', 'CXCL5', 'S100P', 'CEACAM6', 'GABRP', 'SLC6A14', 'CLDN18', 'GPRC5A', 'ANO1', 'RUNX2', 'ANTXR1', 'KIF26B', 'PHLDA2', 'PCDH7', 'CEACAM5', 'LAMC2', 'KYNU', 'LEF1', 'SFN', 'SLC6A6', 'AHNAK2', 'SHISA2', 'SULF2', 'TFF1', 'CD109', 'PLAU', 'SERPINB5', 'SDR16C5', 'DKK1', 'LAMA3', 'IFI27', 'TGM2', 'OSBPL10', 'NQO1', 'ECT2', 'HOXB3', 'MMP11', 'TPM2', 'IL1RN', 'TMEM158', 'S100A11', 'S100A4', 'NHS', 'TRIM29', 'NPR3', 'CD55', 'TMPRSS4', 'FOXQ1', 'CAPN8', 'DKK3', 'PLAUR', 'CXCL3', 'SYTL2', 'CEACAM7', 'RSAD2', 'ADAM28', 'XAF1', 'BICD1', 'FXYD3', 'SCD', 'VSIG1', 'TSPAN1', 'FXYD5', 'IGF2BP3', 'KCNK1', 'TWIST1')
+
+DotPlot(PDAC.all.ductal, features = pdacupregulated, assay = 'RNA', cols = c('White', 'Blue')) + RotatedAxis() + xlab('Marker Genes')+ ylab('Clusters')
+
+pdacdownregulated <- c('BTG2', 'SEC11C', 'SLC17A4', 'CYB5A', 'ABAT', 'LMO3', 'NUCB2', 'SLC4A4', 'FAM129A', 'AOX1', 'ACAT1', 'GMNN', 'CRAT', 'ARSE', 'AKR7A3', 'CTH', 'FAM46C', 'ECHDC3', 'SLC39A14', 'DMD', 'SLC39A8', 'GAMT', 'SERPINI1', 'FKBP11', 'SLC30A2', 'DDC', 'SLC25A15', 'SEL1L', 'SMPDL3B', 'GATM', 'TCEA3', 'SPAG4', 'EPB41L4B', 'NR5A2', 'GAS2', 'CCDC69', 'BNIP3', 'SYBU', 'DPEP1', 'MT1G', 'PDK4', 'GLS2', 'SLC25A45', 'MYRIP', 'KCNJ5', 'EPHX2', 'SLC39A5', 'CBS', 'TPST2', 'C5', 'PAIP2B', 'CCDC110', 'COCH', 'PSAT1', 'TEX11', 'RNF186', 'BHLHA15', 'ZG16', 'DPP10', 'TMEM52', 'ANPEP', 'DNASE1', 'TMED6')
+
+DotPlot(PDAC.all.ductal, features = pdacdownregulated, assay = 'RNA', cols = c('White', 'Blue')) + RotatedAxis() + xlab('Marker Genes')+ ylab('Clusters')
+
+pdacupregulated.filter <- c('S100P', 'CEACAM6', 'CLDN18', 'GPRC5A', 'PHLDA2', 'CEACAM5', 'LAMC2', 'SFN', 'AHNAK2', 'TFF1', 'SDR16C5', 'LAMA3', 'IFI27', 'TGM2', 'NQO1', 'TPM2', 'S100A4', 'TRIM29', 'CD55', 'TMPRSS4', 'FOXQ1', 'CAPN8', 'PLAUR', 'ADAM28', 'FXYD3', 'TSPAN1', 'FXYD5', 'KCNK1')
+
+DotPlot(PDAC.all.ductal, features = pdacupregulated.filter, assay = 'RNA', cols = c('White', 'Blue')) + RotatedAxis() + xlab('Marker Genes')+ ylab('Clusters')
+
+## Sort into clusters 
+
+PDAC.all.ductal$malignant <- "filler"
+
+x <- c('M', 'M', 'N', 'N', 'S', 'S', 'M', 'S', 'S', 'S', 'S', 'S', 'S', 'N', 'N', 'S', 'N', 'M', 'N', 'M')
+for (i in 1:20) {
+  PDAC.all.ductal$malignant[PDAC.all.ductal$seurat_clusters == (i-1)] <- x[i]
+}
+PDAC.all.ductal$malignant[PDAC.all.ductal$status == "H"] <- "H"
+
+Idents(PDAC.all.ductal) <- PDAC.all.ductal$malignant
+
+DotPlot(PDAC.all.ductal, features = pdacupregulated.filter, assay = 'RNA', cols = c('White', 'Blue')) + RotatedAxis() + xlab('Marker Genes')+ ylab('Clusters')
+DimPlot(PDAC.all.ductal, group.by="malignant", label="TRUE")
+ggplot_barcharts(PDAC.all.ductal@meta.data$orig.ident, PDAC.all.ductal@meta.data$malignant)
+
+## Put back into PDAC object
+
+Idents(PDAC.all) <- PDAC.all$seurat_clusters
+PDAC.all$cluster <- as.character(Idents(PDAC.all))
+Idents(PDAC.all.ductal) <- PDAC.all.ductal$malignant
+PDAC.all$cluster[Cells(PDAC.all.ductal)] <- paste(Idents(PDAC.all.ductal))
+
+Idents(PDAC.all) <- PDAC.all$cluster
+DimPlot(PDAC.all, group.by="cluster")
+```
+
+
+
+Complete subclustering for other cell groups
+
+```{r}
+
+Idents(PDAC.all) <- PDAC.all$orig.ident
+PDAC.all <- RenameIdents(object = PDAC.all, 
+                                'pdac1' = 'I1', 'pdac2' = 'I2', 'pdac3' = 'I3', 'pdac4' = 'I4', 'pdac5' = 'I5', 'pdac6' = 'I6', 'pdac7' = 'I7', 'pdac8' = 'I8', 'pdac9' = 'I9', 'pdac10' = 'I10', 'pdac11A' = 'I11', 'pdac11B' = 'I12', 'pdac12' = 'I13', 'pdac13' = 'I14', 'pdac15' = 'I15', 'pdac16' = 'I16', 'PDAC155698.H1' = 'H1', 'PDAC155698.H2' = 'H2', 'PDAC155698.H3' = 'H3', 'PDAC155698.H4' = 'H4')
+PDAC.all@meta.data$orig.ident <- PDAC.all@active.ident
+
+Idents(PDAC.all) <- PDAC.all$cluster
+
+ggplot_barcharts(PDAC.all@meta.data$status, PDAC.all@meta.data$cluster)
+ggplot_barcharts(PDAC.all@meta.data$orig.ident, PDAC.all@meta.data$cluster)
+
+## Compare labels with infected dataset clustering
+
+Idents(PDAC.all) <- PDAC.all$cluster
+PDAC.all$imported_clusters <- "Healthy"
+
+Idents(PDAC.integrated) <- PDAC.integrated$seurat_clusters
+PDAC.integrated@meta.data$rowname <- rownames(PDAC.integrated@meta.data)
+for (i in 1:nrow(PDAC.integrated@meta.data)) {
+  PDAC.integrated@meta.data$rowname[i] <- paste0(rownames(PDAC.integrated@meta.data)[i], "_1")
+}
+rownames(PDAC.integrated@meta.data) <- PDAC.integrated@meta.data$rowname
+PDAC.integrated@meta.data$rowname <- NULL
+PDAC.all$imported_clusters[rownames(PDAC.integrated@meta.data)] <- paste(Idents(PDAC.integrated))
+
+ggplot_barcharts(PDAC.all@meta.data$imported_clusters, PDAC.all@meta.data$cluster, colors="Accent")
+DimPlot(PDAC.all, group.by="imported_clusters")
+
+## T and NK cells
+
+Idents(PDAC.all) <- PDAC.all$cluster
+PDAC.all.tnk <- subset(PDAC.all, idents="TNK")
+
+PDAC.all.tnk <- clustering(PDAC.all.tnk, resolution=0.5)
+DimPlot(PDAC.all.tnk, group.by="seurat_clusters", label="TRUE", repel="TRUE")
+
+tnkgenes <- c('CD3D', 'CD2', 'CD8A', 'CD69', 'NKG7', 'GZMB', 'PRF1', 'IFNG', 'IL2RA', 'FOXP3', 'CTLA4', 'TIGIT', 'TOP2A')
+DotPlot(PDAC.all.tnk, features = tnkgenes, assay = 'RNA') + RotatedAxis() + xlab('Marker Genes')+ ylab('Clusters')
+
+clusters <- c('CD4+ T cells', 'CD8+ T cells', 'Tregs', 'NK cells', 'NK cells', 'NK cells', 'Proliferating Tregs', 'CD4+ T cells', 'Proliferating Tregs', 'NK cells')
+names(clusters) <- levels(PDAC.all.tnk)
+PDAC.all.tnk <- RenameIdents(PDAC.all.tnk, clusters)
+PDAC.all.tnk@meta.data$cluster <- PDAC.all.tnk@active.ident
+
+PDAC.all$cluster[rownames(PDAC.all.tnk@meta.data)] <- paste(Idents(PDAC.all.tnk))
+
+
+## Unknown cells
+
+Idents(PDAC.all) <- PDAC.all$cluster
+PDAC.all.unk <- subset(PDAC.all, idents="UNK")
+
+PDAC.all.unk <- clustering(PDAC.all.unk, resolution=0.5)
+DimPlot(PDAC.all.unk, group.by="seurat_clusters", label="TRUE", repel="TRUE")
+
+unkgenes <- c('LAMP3', 'CCL22', 'TFF1', 'KRT18', 'KRT19', 'KRT8', 'CLU', 'MMP7', 'SPP1', 'REG1A', 'CTRB2', 'PRSS1', 'DCN', 'LUM', 'CPA3', 'TPSAB1', 'CDH5', 'VWF', 'PLVAP', 'IRF7', 'RGS5', 'PDGFRB', 'CD3E', 'NCAM1', 'NKG7', 'CD3D', 'CD14', 'HLA-DRA', 'GZMB', 'ITGAX', 'ITGAM', 'APOE', 'LYZ', 'IGJ', 'CD79A', 'MS4A1')
+DotPlot(PDAC.all.unk, features=unkgenes, assay='RNA') + RotatedAxis() + xlab('Marker Genes')+ ylab('Clusters')
+
+clusters <- c('Granulocytes', 'Granulocytes', 'Granulocytes', 'Dendritic cells', 'Macrophages', 'Endocrine cells', 'Granulocytes')
+names(clusters) <- levels(PDAC.all.unk)
+PDAC.all.unk <- RenameIdents(PDAC.all.unk, clusters)
+PDAC.all.unk@meta.data$cluster <- PDAC.all.unk@active.ident
+
+PDAC.all$cluster <- as.character(PDAC.all$cluster)
+PDAC.all$cluster[rownames(PDAC.all.unk@meta.data)] <- paste(Idents(PDAC.all.unk))
+PDAC.all$cluster <- as.factor(PDAC.all$cluster)
+
+## Rename all clusters
+
+PDAC.all <- RenameIdents(object=PDAC.all, 
+                         'ACINAR' = 'Acinar cells',
+                         'ADC' = 'Activated dendritic cells', 
+                         'B' = 'B cells',
+                         'ENDO' = 'Endothelial cells',
+                         'FIB'= 'Fibroblasts',
+                         'H' = 'Ductal cells: Healthy',
+                         'M' = 'Ductal cells: Malignant 1',
+                         'MAST' = 'Mast cells',
+                         'MYE1' = 'Myeloid cells 1',
+                         'MYE2' = 'Myeloid cells 2',
+                         'N' = 'Ductal cells: Normal',
+                         'PDC'= 'pDCs',
+                         'PERI' = 'Perivascular cells',
+                         'PLAS' = 'Plasma cells',
+                         'PLASMA' = 'Plasma cells',
+                         'RBC' = 'Red blood cells',
+                         'S'= 'Ductal cells: Malignant 2')
+PDAC.all$cluster <- Idents(PDAC.all)
+DimPlot(PDAC.all, group.by="cluster", label="TRUE", repel="TRUE")
+
+levels(Idents(PDAC.all)) <- c('Acinar cells', 'Activated dendritic cells', 'B cells', 'Ductal cells: Healthy', 'Ductal cells: Normal', 'Ductal cells: Malignant 1', 'Ductal cells: Malignant 2', 'Endothelial cells', 'Fibroblasts', 'Mast cells', 'Myeloid cells 1', 'Myeloid cells 2', 'pDCs', 'Perivascular cells', 'Plasma cells', 'Red blood cells', )
+```
