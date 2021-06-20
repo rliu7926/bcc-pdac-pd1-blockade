@@ -309,3 +309,215 @@ BCC_score_dumbbell <- function(df, patient, xlim=50) {
   return(graph)
   
 }
+
+fiveway_diffexpression_MHCandHSP <- function(BCCcelltype, PDACcelltype, celltypename) {
+  
+  Idents(BCC.responder.pre) <- BCC.responder.pre$seurat_clusters
+  Idents(BCC.responder.post) <- BCC.responder.post$seurat_clusters
+  
+  Idents(BCC.nonresponder.pre) <- BCC.nonresponder.pre$seurat_clusters
+  Idents(BCC.nonresponder.post) <- BCC.nonresponder.post$seurat_clusters
+  
+  Idents(PDAC155698.integrated) <- PDAC155698.integrated$seurat_clusters
+  
+  BCC.celltype.responder.pre <- subset(BCC.responder.pre, idents=BCCcelltype)
+  BCC.celltype.responder.post <- subset(BCC.responder.post, idents=BCCcelltype)
+  
+  BCC.celltype.nonresponder.pre <- subset(BCC.nonresponder.pre, idents=BCCcelltype)
+  BCC.celltype.nonresponder.post <- subset(BCC.nonresponder.post, idents=BCCcelltype)
+  
+  PDAC.celltype <- subset(PDAC155698.integrated, idents=PDACcelltype)
+  
+  ## Set idents to analyze by patient
+  
+  Idents(BCC.celltype.responder.pre) <- BCC.celltype.responder.pre$patient
+  Idents(BCC.celltype.responder.post) <- BCC.celltype.responder.post$patient
+  
+  Idents(BCC.celltype.nonresponder.pre) <- BCC.celltype.nonresponder.pre$patient
+  Idents(BCC.celltype.nonresponder.post) <- BCC.celltype.nonresponder.post$patient
+  
+  Idents(PDAC.celltype) <- PDAC.celltype$patient
+  
+  ## Determine average expression of genes
+  
+  BCC.celltype.responder.pre.averages <- AverageExpression(BCC.celltype.responder.pre)
+  BCC.celltype.responder.post.averages <- AverageExpression(BCC.celltype.responder.post)
+  BCC.celltype.nonresponder.pre.averages <- AverageExpression(BCC.celltype.nonresponder.pre)
+  BCC.celltype.nonresponder.post.averages <- AverageExpression(BCC.celltype.nonresponder.post)
+  PDAC.celltype.averages <- AverageExpression(PDAC.celltype)
+  
+  BCC.celltype.responder.pre.averages <- BCC.celltype.responder.pre.averages$RNA
+  BCC.celltype.responder.post.averages <- BCC.celltype.responder.post.averages$RNA
+  BCC.celltype.nonresponder.pre.averages <- BCC.celltype.nonresponder.pre.averages$RNA
+  BCC.celltype.nonresponder.post.averages <- BCC.celltype.nonresponder.post.averages$RNA
+  PDAC.celltype.averages <- PDAC.celltype.averages$RNA
+  
+  ## Filter out important genes
+  
+  MHC1.genes <- c('HLA-A', 'HLA-B', 'HLA-C', 'HLA-E', 'HLA-F', 'HLA-G')
+  MHC2.genes <- c('HLA-DMA', 'HLA-DMB', 'HLA-DOA', 'HLA-DOB', 'HLA-DPA1', 'HLA-DPB1', 'HLA-DQA1', 'HLA-DQA2', 'HLA-DQB1', 'HLA-DQB1-AS1', 'HLA-DQB2', 'HLA-DRA', 'HLA-DRB1', 'HLA-DRB5')
+  HSP.genes <- c('HSP90AA1', 'HSP90AB1', 'HSP90B1', 'HPSA12A', 'HSPA12B', 'HSPA13', 'HSPA14', 'HPSA1A', 'HSPA1B', 'HSPA1L', 'HSPA2', 'HSPA4', 'HSPA4L', 'HSPA5', 'HSPA6', 'HSPA8', 'HSPA9', 'HSPB1', 'HSPB11', 'HSPB2', 'HSPB3', 'HSPB6', 'HSPB7', 'HSPB8', 'HSPB9', 'HSPBAP1', 'HSPBP1', 'HSPD1', 'HSPE1', 'HSPE1-MOB4', 'HSPG2', 'HSPH1')
+  
+  BCC.celltype.responder.pre.averages.mhc1 <- BCC.celltype.responder.pre.averages[MHC1.genes,]
+  BCC.celltype.responder.pre.averages.mhc2 <- BCC.celltype.responder.pre.averages[MHC2.genes,]
+  BCC.celltype.responder.pre.averages.hsp <- BCC.celltype.responder.pre.averages[HSP.genes,]
+  
+  BCC.celltype.responder.post.averages.mhc1 <- BCC.celltype.responder.post.averages[MHC1.genes,]
+  BCC.celltype.responder.post.averages.mhc2 <- BCC.celltype.responder.post.averages[MHC2.genes,]
+  BCC.celltype.responder.post.averages.hsp <- BCC.celltype.responder.post.averages[HSP.genes,]
+  
+  BCC.celltype.nonresponder.pre.averages.mhc1 <- BCC.celltype.nonresponder.pre.averages[MHC1.genes,]
+  BCC.celltype.nonresponder.pre.averages.mhc2 <- BCC.celltype.nonresponder.pre.averages[MHC2.genes,]
+  BCC.celltype.nonresponder.pre.averages.hsp <- BCC.celltype.nonresponder.pre.averages[HSP.genes,]
+  
+  BCC.celltype.nonresponder.post.averages.mhc1 <- BCC.celltype.nonresponder.post.averages[MHC1.genes,]
+  BCC.celltype.nonresponder.post.averages.mhc2 <- BCC.celltype.nonresponder.post.averages[MHC2.genes,]
+  BCC.celltype.nonresponder.post.averages.hsp <- BCC.celltype.nonresponder.post.averages[HSP.genes,]
+  
+  PDAC.celltype.averages.mhc1 <- PDAC.celltype.averages[MHC1.genes,]
+  PDAC.celltype.averages.mhc2 <- PDAC.celltype.averages[MHC2.genes,]
+  PDAC.celltype.averages.hsp <- PDAC.celltype.averages[HSP.genes,]
+  
+  ## Calculate scores (arithmetic mean)
+  
+  BCC.celltype.responder.pre.averages.mhc1.score <- as.data.frame(colMeans(BCC.celltype.responder.pre.averages.mhc1, na.rm=TRUE))
+  BCC.celltype.responder.pre.averages.mhc2.score <- as.data.frame(colMeans(BCC.celltype.responder.pre.averages.mhc2, na.rm=TRUE))
+  BCC.celltype.responder.pre.averages.hsp.score <- as.data.frame(colMeans(BCC.celltype.responder.pre.averages.hsp, na.rm=TRUE))
+  
+  BCC.celltype.responder.post.averages.mhc1.score <- as.data.frame(colMeans(BCC.celltype.responder.post.averages.mhc1, na.rm=TRUE))
+  BCC.celltype.responder.post.averages.mhc2.score <- as.data.frame(colMeans(BCC.celltype.responder.post.averages.mhc2, na.rm=TRUE))
+  BCC.celltype.responder.post.averages.hsp.score <- as.data.frame(colMeans(BCC.celltype.responder.post.averages.hsp, na.rm=TRUE))
+  
+  BCC.celltype.nonresponder.pre.averages.mhc1.score <- as.data.frame(colMeans(BCC.celltype.nonresponder.pre.averages.mhc1, na.rm=TRUE))
+  BCC.celltype.nonresponder.pre.averages.mhc2.score <- as.data.frame(colMeans(BCC.celltype.nonresponder.pre.averages.mhc2, na.rm=TRUE))
+  BCC.celltype.nonresponder.pre.averages.hsp.score <- as.data.frame(colMeans(BCC.celltype.nonresponder.pre.averages.hsp, na.rm=TRUE))
+  
+  BCC.celltype.nonresponder.post.averages.mhc1.score <- as.data.frame(colMeans(BCC.celltype.nonresponder.post.averages.mhc1, na.rm=TRUE))
+  BCC.celltype.nonresponder.post.averages.mhc2.score <- as.data.frame(colMeans(BCC.celltype.nonresponder.post.averages.mhc2, na.rm=TRUE))
+  BCC.celltype.nonresponder.post.averages.hsp.score <- as.data.frame(colMeans(BCC.celltype.nonresponder.post.averages.hsp, na.rm=TRUE))
+  
+  PDAC.celltype.averages.mhc1.score <- as.data.frame(colMeans(PDAC.celltype.averages.mhc1, na.rm=TRUE))
+  PDAC.celltype.averages.mhc2.score <- as.data.frame(colMeans(PDAC.celltype.averages.mhc2, na.rm=TRUE))
+  PDAC.celltype.averages.hsp.score <- as.data.frame(colMeans(PDAC.celltype.averages.hsp, na.rm=TRUE))
+  
+  ## Create dataframe to store all scores
+  
+  x <- nrow(BCC.celltype.responder.pre.averages.mhc1.score)
+  y <- nrow(BCC.celltype.responder.post.averages.mhc1.score)
+  z <- nrow(BCC.celltype.nonresponder.pre.averages.mhc1.score)
+  w <- nrow(BCC.celltype.nonresponder.post.averages.mhc1.score)
+  p <- nrow(PDAC.celltype.averages.mhc1.score)
+  
+  celltype.averages.score <- data.frame()
+  
+  celltype.averages.score[1:x,1] <- BCC.celltype.responder.pre.averages.mhc1.score
+  celltype.averages.score[1:x,2] <- BCC.celltype.responder.pre.averages.mhc2.score
+  celltype.averages.score[1:x,3] <- BCC.celltype.responder.pre.averages.hsp.score
+  celltype.averages.score[(x+1):(x+y),1] <- BCC.celltype.responder.post.averages.mhc1.score
+  celltype.averages.score[(x+1):(x+y),2] <- BCC.celltype.responder.post.averages.mhc2.score
+  celltype.averages.score[(x+1):(x+y),3] <- BCC.celltype.responder.post.averages.hsp.score
+  
+  celltype.averages.score[(x+y+1):(x+y+z),1] <- BCC.celltype.nonresponder.pre.averages.mhc1.score
+  celltype.averages.score[(x+y+1):(x+y+z),2] <- BCC.celltype.nonresponder.pre.averages.mhc2.score
+  celltype.averages.score[(x+y+1):(x+y+z),3] <- BCC.celltype.nonresponder.pre.averages.hsp.score
+  celltype.averages.score[(x+y+z+1):(x+y+z+w),1] <- BCC.celltype.nonresponder.post.averages.mhc1.score
+  celltype.averages.score[(x+y+z+1):(x+y+z+w),2] <- BCC.celltype.nonresponder.post.averages.mhc2.score
+  celltype.averages.score[(x+y+z+1):(x+y+z+w),3] <- BCC.celltype.nonresponder.post.averages.hsp.score
+  
+  celltype.averages.score[(x+y+z+w+1):(x+y+z+w+p),1] <- PDAC.celltype.averages.mhc1.score
+  celltype.averages.score[(x+y+z+w+1):(x+y+z+w+p),2] <- PDAC.celltype.averages.mhc2.score
+  celltype.averages.score[(x+y+z+w+1):(x+y+z+w+p),3] <- PDAC.celltype.averages.hsp.score
+  
+  colnames(celltype.averages.score) <- c("MHC1", "MHC2", "HSP")
+  
+  celltype.averages.score$Response[1:(x+y+z+w+p)] <- c("placeholder")
+  
+  celltype.averages.score$Response[1:x] <- c("Responsive.Pre")
+  celltype.averages.score$Response[(x+1):(x+y)] <- c("Responsive.Post")
+  celltype.averages.score$Response[(x+y+1):(x+y+z)] <- c("Nonresponsive.Pre")
+  celltype.averages.score$Response[(x+y+z+1):(x+y+z+w)] <- c("Nonresponsive.Post")
+  celltype.averages.score$Response[(x+y+z++w+1):(x+y+z+w+p)] <- c("PDAC.Pre")
+  
+  celltype.averages.score$Patient <- rownames(celltype.averages.score)
+  
+  celltype.averages.score.melt <- melt(celltype.averages.score, id=c("Response", "Patient"))
+  
+  celltype.averages.score.melt.MHC1 <- celltype.averages.score.melt[c(1:(x+y+z+w+p)),]
+  celltype.averages.score.melt.MHC2 <- celltype.averages.score.melt[c((x+y+z+w+p+1):(2*(x+y+z+w+p))),]
+  celltype.averages.score.melt.HSP <- celltype.averages.score.melt[c((2*(x+y+z+w+p)+1):(3*(x+y+z+w+p))),]
+  
+  ## Plot scores
+  
+  comparisons <- list(c("Responsive.Pre", "Responsive.Post"), c("Nonresponsive.Pre", "Nonresponsive.Post"), c("Responsive.Pre", "Nonresponsive.Pre"), c("Responsive.Post", "Nonresponsive.Post"), c("Responsive.Pre", "PDAC.Pre"), c("Nonresponsive.Pre", "PDAC.Pre"))
+  
+  celltype.averages.score.graph.MHC1 <- ggboxplot(celltype.averages.score.melt.MHC1, x="Response", y="value", color="Response", title = "MHC Class I", add = "jitter") + stat_compare_means(comparisons = comparisons)
+  celltype.averages.score.graph.MHC1 <- ggpar(p=celltype.averages.score.graph.MHC1, font.main=c(16, "bold", "black")) + theme(plot.title = element_text(hjust = 0.5))
+  
+  celltype.averages.score.graph.MHC2 <- ggboxplot(celltype.averages.score.melt.MHC2, x="Response", y="value", color="Response", title = "MHC Class II", add = "jitter") + stat_compare_means(comparisons = comparisons) 
+  celltype.averages.score.graph.MHC2 <- ggpar(p=celltype.averages.score.graph.MHC2, font.main=c(16, "bold", "black")) + theme(plot.title = element_text(hjust = 0.5))
+  
+  celltype.averages.score.graph.HSP <- ggboxplot(celltype.averages.score.melt.HSP, x="Response", y="value", color="Response", title = "HSP Genes", add = "jitter") + stat_compare_means(comparisons = comparisons)
+  celltype.averages.score.graph.HSP <- ggpar(p=celltype.averages.score.graph.HSP, font.main=c(16, "bold", "black")) + theme(plot.title = element_text(hjust = 0.5))
+  
+  graph <- grid.arrange(celltype.averages.score.graph.MHC1,
+                        celltype.averages.score.graph.MHC2,
+                        celltype.averages.score.graph.HSP,
+                        nrow = 1,
+                        top = textGrob(paste0("Differential Expression of MHC and HSP Genes in the ", celltypename, " of BCC Patients"), gp=gpar(fontsize=30)))
+  
+  return(graph)
+  
+}
+
+genes_cdf <- function(datasets, clusters, genes, title) {
+  
+  gene <- c(0)
+  cluster <- c(0)
+  gene.cdf.data <- data.frame(gene, cluster)
+  
+  for (i in 1:length(datasets)) {
+    counts <- datasets[[i]]@assays$RNA@data
+    gene.counts <- data.frame(counts[genes,])
+    gene.counts["gene",] <- colSums(gene.counts)
+    gene.counts["cluster",] <- clusters[i]
+    gene.counts <- data.frame(t(gene.counts))
+    gene.cdf.data <- rbind(gene.cdf.data, gene.counts[,c("gene", "cluster")])
+  }
+  
+  gene.cdf.data <- gene.cdf.data[-1,]
+  gene.cdf.data$gene <- as.numeric(gene.cdf.data$gene)
+  gene.cdf.data$cluster <- as.factor(gene.cdf.data$cluster)
+  
+  gene.cdf <- ggplot(gene.cdf.data, aes(x=gene, col=cluster)) + stat_ecdf(geom = "step", size=1) +
+    labs(title=title, x="Score", y="Cumulative Proportion") +
+    theme_light() +
+    theme(legend.position="top", plot.title = element_text(color="black", size=18, face="bold", hjust = 0.5))
+  
+  return(gene.cdf)
+}
+
+gene_cdf <- function(datasets, clusternames, genename, title) {
+  
+  gene <- c(0)
+  cluster <- c(0)
+  gene.cdf.data <- data.frame(gene, cluster)
+  
+  for (i in 1:length(datasets)) {
+    counts <- datasets[[i]]@assays$RNA@data
+    counts <- data.frame(counts[genename,])
+    colnames(counts) <- "gene"
+    counts$cluster <- clusternames[i]
+    gene.cdf.data <- rbind(gene.cdf.data, counts[,c("gene", "cluster")])
+  }
+  
+  gene.cdf.data <- gene.cdf.data[-1,]
+  gene.cdf.data$gene <- as.numeric(gene.cdf.data$gene)
+  gene.cdf.data$cluster <- as.factor(gene.cdf.data$cluster)
+  
+  gene.cdf <- ggplot(gene.cdf.data, aes(x=gene, col=cluster)) + stat_ecdf(geom = "step", size=1) +
+    labs(title=title, x="Gene Expression", y="Cumulative Proportion") +
+    theme_light() +
+    theme(legend.position="top", plot.title = element_text(color="black", size=18, face="bold", hjust = 0.5))
+  
+  return(gene.cdf)
+}
