@@ -1010,5 +1010,152 @@ grid.arrange(bcc.tcells.pd1.graphic, bcc.bcells.pd1.graphic, bcc.macrophages.pd1
 
 
 
+################################################################################
+
+Spring 2021 update presentation graphics
+
+Reclustered PDAC UMAP 
+
+```{r}
+
+colors <- c("#d071db", "#ad4d4b", "#d78eca", "#715b9e", "#aebe6d", "#d77c34", "#9447b5", "#5c6bd7", "#db3a5b", "#d1aa34", "#5bc15b", "#d8a36a", "#91652b", "#9395de", "#468e4b", "#d44392", "#e5818b", "#9fc43f", "#a14b76", "#64d2af", "#4fa5d7", "#35927d", "#6c7a2d", "#d14d2f")
+
+Idents(PDAC.all) <- PDAC.all$cluster
+PDAC.all.UMAP <- DimPlot(PDAC.all, group.by="cluster", label="TRUE", repel="TRUE", cols=colors, pt.size=0.1, label.size=4)
+
+ggarrange(PDAC.all.UMAP, ncol=1, legend="bottom")
+
+PDAC.all.UMAP.cancerous <- DimPlot(PDAC.all, group.by="cluster", label="FALSE", cols=colors, pt.size=0.1, label.size=4, split.by="status") + NoLegend()
+
+```
 
 
+
+Boxplots comparing MHC Class I and Class II Scores
+
+```{r}
+
+`malignant.PDAC M` <- merge(`malignant.PDAC M1`, `malignant.PDAC M2`)
+
+clusters <- list(`malignant.PDAC M`, `malignant.PDAC N`, `malignant.PDAC H`, `malignant.BCC RPre`, `malignant.BCC RPost`, `malignant.BCC NRPre`, `malignant.BCC NRPost`)
+
+clusternames <- c('PDAC.M', 'PDAC.N', 'PDAC.H', 'BCC.RPre', 'BCC.RPost', 'BCC.NRPre', 'BCC.NRPost')
+
+pdacclusters <- list(`malignant.PDAC M`, `malignant.PDAC N`, `malignant.PDAC H`)
+
+for (i in 1:length(pdacclusters)) {
+  clusters[[i]]$patient <- clusters[[i]]$orig.ident
+}
+
+for (i in 1:length(clusters)) {
+  Idents(clusters[[i]]) <- clusters[[i]]$patient
+  assign(paste0(clusternames[i], ".exp"), AverageExpression(clusters[[i]]))
+}
+
+cluster.averages <- list(PDAC.M.exp, PDAC.N.exp, PDAC.H.exp, BCC.RPre.exp, BCC.RPost.exp, BCC.NRPre.exp, BCC.NRPost.exp)
+
+for (i in 1:length(cluster.averages)) {
+  assign(paste0(clusternames[i], ".exp.mhc1"), cluster.averages[[i]]$RNA[mhc1.genes, ])
+  assign(paste0(clusternames[i], ".exp.mhc2"), cluster.averages[[i]]$RNA[mhc2.genes, ])
+}
+
+cluster.averages.mhc1 <- list(PDAC.M.exp.mhc1, PDAC.N.exp.mhc1, PDAC.H.exp.mhc1, BCC.RPre.exp.mhc1, BCC.RPost.exp.mhc1, BCC.NRPre.exp.mhc1, BCC.NRPost.exp.mhc1)
+
+cluster.averages.mhc2 <- list(PDAC.M.exp.mhc2, PDAC.N.exp.mhc2, PDAC.H.exp.mhc2, BCC.RPre.exp.mhc2, BCC.RPost.exp.mhc2, BCC.NRPre.exp.mhc2, BCC.NRPost.exp.mhc2)
+
+for (i in 1:length(cluster.averages.mhc1)) {
+  cluster.averages.mhc1[[i]] <- as.data.frame(colMeans(cluster.averages.mhc1[[i]]))
+  cluster.averages.mhc1[[i]]$patient <- rownames(cluster.averages.mhc1[[i]])
+  cluster.averages.mhc1[[i]]$cluster <- clusternames[i]
+  colnames(cluster.averages.mhc1[[i]]) <- c("score", "patient", "cluster")
+}
+
+for (i in 1:length(cluster.averages.mhc2)) {
+  cluster.averages.mhc2[[i]] <- as.data.frame(colMeans(cluster.averages.mhc2[[i]]))
+  cluster.averages.mhc2[[i]]$patient <- rownames(cluster.averages.mhc2[[i]])
+  cluster.averages.mhc2[[i]]$cluster <- clusternames[i]
+  colnames(cluster.averages.mhc2[[i]]) <- c("score", "patient", "cluster")
+}
+
+cluster.averages.mhc1 <- rbind(cluster.averages.mhc1[[1]], cluster.averages.mhc1[[2]], cluster.averages.mhc1[[3]], cluster.averages.mhc1[[4]], cluster.averages.mhc1[[5]], cluster.averages.mhc1[[6]], cluster.averages.mhc1[[7]])
+
+cluster.averages.mhc2 <- rbind(cluster.averages.mhc2[[1]], cluster.averages.mhc2[[2]], cluster.averages.mhc2[[3]], cluster.averages.mhc2[[4]], cluster.averages.mhc2[[5]], cluster.averages.mhc2[[6]], cluster.averages.mhc2[[7]])
+
+comparisons <- list(c("BCC.RPre", "BCC.RPost"), c("BCC.NRPre", "BCC.NRPost"), c("BCC.RPre", "BCC.NRPre"), c("BCC.RPost", "BCC.NRPost"), c("PDAC.M", "PDAC.N"), c("PDAC.M", "PDAC.H"), c("PDAC.N", "PDAC.H"))
+
+mhc1.score.comparison <- ggboxplot(cluster.averages.mhc1, x="cluster", y="score", color="cluster", title="MHC Class I Score", add="jitter") +
+  stat_compare_means(comparisons = comparisons) +
+  theme(legend.position="none", plot.title = element_text(color="black", size=18, face="bold", hjust = 0.5)) +
+  labs(x="Cell Population", y="Score")
+
+mhc2.score.comparison <- ggboxplot(cluster.averages.mhc2, x="cluster", y="score", color="cluster", title="MHC Class II Score", add="jitter") +
+  stat_compare_means(comparisons = comparisons) +
+  theme(legend.position="none", plot.title = element_text(color="black", size=18, face="bold", hjust = 0.5)) +
+  labs(x="Cell Population", y="Score")
+
+ggarrange(mhc1.score.comparison, mhc2.score.comparison, ncol=2)
+
+```
+
+
+
+PDF of MHC Class I and Class II Score
+
+```{r}
+
+mhc1.cdf.data.filtered <- mhc1.cdf.data
+mhc1.cdf.data.filtered$id <- as.character(mhc1.cdf.data.filtered$id)
+mhc1.cdf.data.filtered$id[mhc1.cdf.data.filtered$id == "PDAC M1" | mhc1.cdf.data.filtered$id == "PDAC M2"] <- "PDAC M"
+mhc1.cdf.data.filtered$id <- as.factor(mhc1.cdf.data.filtered$id)
+delete <- which(mhc1.cdf.data$id == "BCC RPost" | mhc1.cdf.data$id == "BCC NRPost")
+mhc1.cdf.data.filtered <- mhc1.cdf.data.filtered[-c(delete),]
+
+mhc2.cdf.data.filtered <- mhc2.cdf.data
+mhc2.cdf.data.filtered$id <- as.character(mhc2.cdf.data.filtered$id)
+mhc2.cdf.data.filtered$id[mhc2.cdf.data.filtered$id == "PDAC M1" | mhc2.cdf.data.filtered$id == "PDAC M2"] <- "PDAC M"
+mhc2.cdf.data.filtered$id <- as.factor(mhc2.cdf.data.filtered$id)
+delete <- which(mhc2.cdf.data$id == "BCC RPost" | mhc2.cdf.data$id == "BCC NRPost")
+mhc2.cdf.data.filtered <- mhc2.cdf.data.filtered[!delete,]
+
+
+mhc1.pdf <- ggplot(mhc1.cdf.data.filtered, aes(x=MHC.Class.I, fill=id)) + geom_density(alpha=0.3) +
+  labs(title="MHC Class I", x="Score",y = "Probability Density") +
+  theme_light() +
+  theme(legend.position="top", plot.title = element_text(color="black", size=18, face="bold", hjust=0.5))
+  
+mhc2.pdf <- ggplot(mhc2.cdf.data.filtered, aes(x=MHC.Class.II, fill=id)) + geom_density(alpha=0.3) +
+  labs(title="MHC Class II", x="Score",y = "Probability Density") +
+  theme_light() + xlim(0, 10) + ylim(0, 1) +
+  theme(legend.position="top", plot.title = element_text(color="black", size=18, face="bold", hjust=0.5))
+
+ggarrange(mhc1.pdf, mhc2.pdf, ncol=2, common.legend=TRUE, legend="bottom")
+
+
+mhc1.vln <- ggplot(mhc1.cdf.data.filtered, aes(x=MHC.Class.I/6, factor(id))) + geom_violin(draw_quantiles = c(0.25, 0.5, 0.75)) +
+  labs(title="MHC Class I Score", x = "Sum of Normalized Count Matrix", y = "Cluster") +
+  aes(fill=factor(id)) + theme_bw() + xlab("Score") +
+  theme(legend.position="none", plot.title = element_text(color="black", size=18, face="bold", hjust=0.5))
+
+mhc2.vln <- ggplot(mhc2.cdf.data.filtered, aes(x=MHC.Class.II/12, factor(id))) + geom_violin(draw_quantiles = c(0.25, 0.5, 0.75)) +
+  labs(title="MHC Class II Score", x = "Sum of Normalized Count Matrix", y = "Cluster") +
+  aes(fill=factor(id)) + theme_bw() + xlim(0, 1.2) + xlab("Score") +
+  theme(legend.position="none", plot.title = element_text(color="black", size=18, face="bold", hjust=0.5))
+
+ggarrange(mhc1.vln, mhc2.vln, ncol=2)
+
+```
+
+
+
+PD-1 Pathway Expression Graphics 
+
+```{r}
+
+
+
+
+
+
+
+
+```

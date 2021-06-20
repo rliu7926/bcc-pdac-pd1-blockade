@@ -874,7 +874,8 @@ Idents(PDAC.all.ductal) <- PDAC.all.ductal$malignant
 
 DotPlot(PDAC.all.ductal, features = pdacupregulated.filter, assay = 'RNA', cols = c('White', 'Blue')) + RotatedAxis() + xlab('Marker Genes')+ ylab('Clusters')
 DimPlot(PDAC.all.ductal, group.by="malignant", label="TRUE")
-ggplot_barcharts(PDAC.all.ductal@meta.data$orig.ident, PDAC.all.ductal@meta.data$malignant)
+ggplot_barcharts(PDAC.all.ductal@meta.data$orig.ident, PDAC.all.ductal@meta.data$cluster) + 
+  theme_cowplot() + theme(axis.text.x = element_text(angle=45, hjust=0.5, vjust=0.5))
 
 ## Put back into PDAC object
 

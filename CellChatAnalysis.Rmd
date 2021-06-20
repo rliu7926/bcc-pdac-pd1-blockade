@@ -19,6 +19,7 @@ library(EnhancedVolcano)
 library(gridExtra)
 library(reshape2)
 library(CellChat)
+library(NMF)
 
 memory.limit(size = 16000000)
 
@@ -28,10 +29,23 @@ load("C:\\Users\\Ryan\\Documents\\Nie Research Project\\BCC.cellchat")
 ## PDAC Integrated Cellchat Object
 load("C:\\Users\\Ryan\\Documents\\Nie Research Project\\PDAC.cellchat")
 
+## BCC Responders Object 
+load("C:\\Users\\Ryan\\Documents\\Nie Research Project\\BCC.responders.cellchat")
+
+## BCC Nonresponders Object
+load("C:\\Users\\Ryan\\Documents\\Nie Research Project\\BCC.nonresponders.cellchat")
+
+## CellChat Object: BCC Pre-treatment + Post-treatment Responders + Nonresponders
+load("C:\\Users\\Ryan\\Documents\\Nie Research Project\\BCC.pre.responders.cellchat")
+load("C:\\Users\\Ryan\\Documents\\Nie Research Project\\BCC.pre.nonresponders.cellchat")
+load("C:\\Users\\Ryan\\Documents\\Nie Research Project\\BCC.post.responders.cellchat")
+load("C:\\Users\\Ryan\\Documents\\Nie Research Project\\BCC.post.nonresponders.cellchat")
+
 ## Load functions
-source("ClusteringAnalysisFunctions.R", echo=TRUE)
-source("SeuratClusteringFunctions.R", echo=TRUE)
-source("DifferentialExpressionFunctions.R", echo=TRUE)
+source("ClusteringAnalysisFunctions.R", echo=FALSE)
+source("SeuratClusteringFunctions.R", echo=FALSE)
+source("DifferentialExpressionFunctions.R", echo=FALSE)
+source("CellChatFunctions.R", echo=FALSE)
 ```
 
 
@@ -136,18 +150,18 @@ Visualization of cell-cell communication network, looking specifically at MHC-I,
 
 ```{R}
 
-pathway <- c("MHC-I", "MHC-II", "PD-L1", "PDL2")
+pathways <- c("MHC-I", "MHC-II", "PD-L1", "PDL2")
 
 ## Circle plots
 
 par(mfrow = c(1,4), mar = c(1,1,1,1))
-for (i in 1:length(pathway)) {
-  netVisual_aggregate(BCC.cellchat, signaling = pathway[i], layout = "circle")
+for (i in 1:length(pathways)) {
+  netVisual_aggregate(BCC.cellchat, signaling = pathways[i], layout = "circle")
 }
 
 par(mfrow = c(1,4), mar = c(1,1,1,1))
-for (i in 1:length(pathway)) {
-  netVisual_aggregate(PDAC.cellchat, signaling = pathway[i], layout = "circle")
+for (i in 1:length(pathways)) {
+  netVisual_aggregate(PDAC.cellchat, signaling = pathways[i], layout = "circle")
 }
 
 ## Compare contribution of ligand-receptor pair to overall signaling pathway in MHC
@@ -155,15 +169,15 @@ for (i in 1:length(pathway)) {
 par(mfrow = c(2,4), mar = c(1,1,1,1))
 
 # For loop did not work
-netAnalysis_contribution(BCC.cellchat, signaling = pathway[1], title = paste0("Contribution of L-R Pairs: ", pathway[1], " (BCC)"))
-netAnalysis_contribution(BCC.cellchat, signaling = pathway[2], title = paste0("Contribution of L-R Pairs: ", pathway[2], " (BCC)"))
-netAnalysis_contribution(BCC.cellchat, signaling = pathway[3], title = paste0("Contribution of L-R Pairs: ", pathway[3], " (BCC)"))
-netAnalysis_contribution(BCC.cellchat, signaling = pathway[4], title = paste0("Contribution of L-R Pairs: ", pathway[4], " (BCC)"))
+netAnalysis_contribution(BCC.cellchat, signaling = pathways[1], title = paste0("Contribution of L-R Pairs: ", pathways[1], " (BCC)"))
+netAnalysis_contribution(BCC.cellchat, signaling = pathways[2], title = paste0("Contribution of L-R Pairs: ", pathways[2], " (BCC)"))
+netAnalysis_contribution(BCC.cellchat, signaling = pathways[3], title = paste0("Contribution of L-R Pairs: ", pathways[3], " (BCC)"))
+netAnalysis_contribution(BCC.cellchat, signaling = pathways[4], title = paste0("Contribution of L-R Pairs: ", pathways[4], " (BCC)"))
 
-netAnalysis_contribution(PDAC.cellchat, signaling = pathway[1], title = paste0("Contribution of L-R Pairs: ", pathway[1], " (PDAC)"))
-netAnalysis_contribution(PDAC.cellchat, signaling = pathway[2], title = paste0("Contribution of L-R Pairs: ", pathway[2], " (PDAC)"))
-netAnalysis_contribution(PDAC.cellchat, signaling = pathway[3], title = paste0("Contribution of L-R Pairs: ", pathway[3], " (PDAC)"))
-netAnalysis_contribution(PDAC.cellchat, signaling = pathway[4], title = paste0("Contribution of L-R Pairs: ", pathway[4], " (PDAC)"))
+netAnalysis_contribution(PDAC.cellchat, signaling = pathways[1], title = paste0("Contribution of L-R Pairs: ", pathways[1], " (PDAC)"))
+netAnalysis_contribution(PDAC.cellchat, signaling = pathways[2], title = paste0("Contribution of L-R Pairs: ", pathways[2], " (PDAC)"))
+netAnalysis_contribution(PDAC.cellchat, signaling = pathways[3], title = paste0("Contribution of L-R Pairs: ", pathways[3], " (PDAC)"))
+netAnalysis_contribution(PDAC.cellchat, signaling = pathways[4], title = paste0("Contribution of L-R Pairs: ", pathways[4], " (PDAC)"))
 
 ## Plot signaling gene expression distribution 
 
@@ -176,15 +190,661 @@ plotGeneExpression(PDAC.cellchat, signaling = "MHC-II")
 ## Bubble plot of all significant interactions
 
 # Macrophages
-netVisual_bubble(BCC.cellchat, sources.use = 7, targets.use = c(1, 2, 4, 5, 6, 11, 9, 15), remove.isolate = FALSE)
-netVisual_bubble(PDAC.cellchat, sources.use = 10, targets.use = c(1, 3, 4), remove.isolate = FALSE)
-
-
-
+netVisual_bubble(BCC.cellchat, sources.use = 7, targets.use = c(1, 2, 4, 5, 6, 11, 9, 15), signaling = pathways, remove.isolate = FALSE)
+netVisual_bubble(PDAC.cellchat, sources.use = 10, targets.use = c(1, 3, 4), signaling = pathways, remove.isolate = FALSE)
 
 
 ```
 
 
+
+###############################    Compare BCC responders vs. nonresponders   ###################################
+
+
+Create CellChat objects for responders and nonresponders
+
+```{r}
+
+Idents(BCCIO) <- BCCIO$response
+BCC.responders <- subset(BCCIO, idents = "Responsive")
+BCC.nonresponders <- subset(BCCIO, idents = "Nonresponsive")
+remove(BCCIO)
+
+BCC.responders.cellchat <- createCellChat(object = BCC.responders, meta = BCC.responders@meta.data, group.by = "seurat_clusters")
+BCC.nonresponders.cellchat <- createCellChat(object = BCC.nonresponders, meta = BCC.nonresponders@meta.data, group.by = "seurat_clusters")
+remove(BCC.responders)
+remove(BCC.nonresponders)
+
+CellChatDB <- CellChatDB.human
+CellChatDB.use <- subsetDB(CellChatDB, search = "Cell-Cell Adhesion")
+CellChatDB.use <- CellChatDB
+
+BCC.responders.cellchat@DB <- CellChatDB.use
+BCC.nonresponders.cellchat@DB <- CellChatDB.use
+
+BCC.responders.cellchat <- subsetData(BCC.responders.cellchat)
+BCC.nonresponders.cellchat <- subsetData(BCC.nonresponders.cellchat)
+
+BCC.responders.cellchat <- identifyOverExpressedGenes(BCC.responders.cellchat)
+BCC.responders.cellchat <- identifyOverExpressedInteractions(BCC.responders.cellchat)
+BCC.responders.cellchat <- projectData(BCC.responders.cellchat, PPI.human)
+
+BCC.nonresponders.cellchat <- identifyOverExpressedGenes(BCC.nonresponders.cellchat)
+BCC.nonresponders.cellchat <- identifyOverExpressedInteractions(BCC.nonresponders.cellchat)
+BCC.nonresponders.cellchat <- projectData(BCC.nonresponders.cellchat, PPI.human)
+
+BCC.responders.cellchat <- computeCommunProb(BCC.responders.cellchat, raw.use = TRUE)
+BCC.responders.cellchat <- filterCommunication(BCC.responders.cellchat, min.cells = 10)
+
+BCC.nonresponders.cellchat <- computeCommunProb(BCC.nonresponders.cellchat, raw.use = TRUE)
+BCC.nonresponders.cellchat <- filterCommunication(BCC.nonresponders.cellchat, min.cells = 10)
+
+BCC.responders.cellchat <- computeCommunProbPathway(BCC.responders.cellchat)
+BCC.nonresponders.cellchat <- computeCommunProbPathway(BCC.nonresponders.cellchat)
+
+BCC.responders.cellchat <- aggregateNet(BCC.responders.cellchat)
+BCC.nonresponders.cellchat <- aggregateNet(BCC.nonresponders.cellchat)
+
+object.list <- list(responder = BCC.responders.cellchat, nonresponder = BCC.nonresponders.cellchat)
+response.cellchat <- mergeCellChat(object.list, add.names = names(object.list))
+
+save(BCC.responders.cellchat, file="C:\\Users\\Ryan\\Documents\\Nie Research Project\\BCC.responders.cellchat")
+save(BCC.nonresponders.cellchat, file="C:\\Users\\Ryan\\Documents\\Nie Research Project\\BCC.nonresponders.cellchat")
+
 ```
 
+
+
+Comparison Analysis for BCC Responders vs. Nonresponders (All)
+
+```{r}
+
+## Compare total number of interactions and interaction strength
+
+interaction1 <- compareInteractions(response.cellchat, show.legend = F, group = c(1,2))
+interaction2 <- compareInteractions(response.cellchat, show.legend = F, group = c(1,2), measure = "weight")
+interaction1 + interaction2
+
+## Differential interaction strength among different cell populations
+
+netVisual_diffInteraction(response.cellchat, weight.scale = T)
+netVisual_diffInteraction(response.cellchat, weight.scale = T, measure= "weight")
+
+netVisual_diffInteraction(response.cellchat, sources.use = celltypes, targets.use = celltypes, weight.scale = T, measure = "weight", remove.isolate = T)
+
+par(mfrow = c(2,2))
+netVisual_heatmap(response.cellchat, measure = "weight", signaling = "MHC-I", slot.name = "netP", title.name = "Differential interaction strength: MHC Class I")
+netVisual_heatmap(response.cellchat, measure = "weight", signaling = "MHC-II", title.name = "Differential interaction strength: MHC Class II")
+netVisual_heatmap(response.cellchat, measure = "weight", signaling = "PD-L1", title.name = "Differential interaction strength: PD-L1")
+netVisual_heatmap(response.cellchat, measure = "weight", signaling = "PDL2", title.name = "Differential interaction strength: PD-L2")
+
+## Compare outgoing and incoming interaction strengths
+
+weight.max <- list()
+weight.max <- getMaxWeight(object.list, attribute = c("idents", "count"))
+for (i in 1:length(object.list)) {
+  netVisual_circle(object.list[[i]]@net$count, weight.scale = T, label.edge = F, edge.weight.max = weight.max[2], edge.width.max = 12, title.name = paste0("Number of interactions: ", names(object.list)[i]))
+}
+
+num.link <- sapply(object.list, function(x) {rowSums(x@net$count) + colSums(x@net$count) - diag(x@net$count)})
+weight.minmax <- c(min(num.link), max(num.link))
+
+
+for (i in 1:length(object.list)) {
+  object.list[[i]] <- netAnalysis_computeCentrality(object = object.list[[i]])
+}
+
+gg <- list()
+for (i in 1:length(object.list)) {
+    gg[[i]] <- netAnalysis_signalingRole_scatter(object.list[[i]], title= names(object.list)[i], weight.MinMax = weight.minmax)
+}
+patchwork::wrap_plots(plots = gg)
+
+## Identify signaling networks/groups with larger or less difference based on their functional and structural similarity
+
+response.cellchat <- computeNetSimilarityPairwise(response.cellchat, type = "functional")
+response.cellchat <- netEmbedding(response.cellchat, type = "functional")
+response.cellchat <- netClustering(response.cellchat, type = "functional")
+netVisual_embeddingPairwise(response.cellchat, type = "functional")
+
+response.cellchat <- computeNetSimilarityPairwise(response.cellchat, type = "structural")
+response.cellchat <- netEmbedding(response.cellchat, type = "structural")
+response.cellchat <- netClustering(response.cellchat, type = "structural")
+netVisual_embeddingPairwise(response.cellchat, type = "structural")
+
+```
+
+
+
+Identify upregulated and downregulated signaling LR pairs
+
+```{r}
+
+celltypes <- c("CD8_activation", "CD8_exhausted", "CD8_memory", "CD4", "Tregs", "T_proliferation", "Macrophages", "Tumor 1", "Tumor 2", "B cells")
+
+## Compare communication probabilities for macrophages
+netVisual_bubble(response.cellchat, sources.use = "Macrophages", targets.use = celltypes, comparison = c(1,2), angle.x = 45)
+
+gg1 <- netVisual_bubble(response.cellchat, sources.use = "Macrophages", targets.use = celltypes, comparison = c(1,2), max.dataset = 2, title.name = "Increased Signaling in Nonresponders")
+gg2 <- netVisual_bubble(response.cellchat, sources.use = "Macrophages", targets.use = celltypes, comparison = c(1,2), max.dataset = 1, title.name = "Increased Signaling in Responders")
+gg1 + gg2
+
+## Plot signaling gene expression distribution 
+response.cellchat@meta$datasets = factor(response.cellchat@meta$datasets, levels = c("Responsive", "Nonresponsive"))
+plotGeneExpression(response.cellchat, idents = celltypes, signaling = pathways, type = "violin", split.by = "response")
+
+
+```
+
+
+
+############  Compare BCC Responders vs. Nonresponders Pre-treatment and Post-treatment  ############
+
+Create CellChat objects 
+
+```{r}
+
+## Load BCC Seurat object
+load("C:\\Users\\Ryan\\Documents\\Nie Research Project\\GSE 123813\\BCCIOwithUMAP")
+
+## Subset Seurat objects 
+Idents(BCCIO) <- BCCIO$treatment
+BCC.pre <- subset(BCCIO, idents="pre")
+BCC.post <- subset(BCCIO, idents="post")
+remove(BCCIO)
+
+Idents(BCC.pre) <- BCC.pre$response
+Idents(BCC.post) <- BCC.post$response
+
+BCC.pre.responders <- subset(BCC.pre, idents="Responsive")
+BCC.pre.nonresponders <- subset(BCC.pre, idents="Nonresponsive")
+remove(BCC.pre)
+
+BCC.post.responders <- subset(BCC.post, idents="Responsive")
+BCC.post.nonresponders <- subset(BCC.post, idents="Nonresponsive")
+remove(BCC.post)
+
+## Create CellChat objects 
+BCC.pre.responders.cellchat <- createCellChat(object = BCC.pre.responders, meta = BCC.pre.responders@meta.data, group.by = "seurat_clusters")
+BCC.pre.nonresponders.cellchat <- createCellChat(object = BCC.pre.nonresponders, meta = BCC.pre.nonresponders@meta.data, group.by = "seurat_clusters")
+BCC.post.responders.cellchat <- createCellChat(object = BCC.post.responders, meta = BCC.post.responders@meta.data, group.by = "seurat_clusters")
+BCC.post.nonresponders.cellchat <- createCellChat(object = BCC.post.nonresponders, meta = BCC.post.nonresponders@meta.data, group.by = "seurat_clusters")
+
+remove(BCC.pre.responders)
+remove(BCC.pre.nonresponders)
+remove(BCC.post.responders)
+remove(BCC.post.nonresponders)
+
+## Preprocessing steps
+CellChatDB <- CellChatDB.human
+CellChatDB.use <- subsetDB(CellChatDB, search = "Cell-Cell Adhesion")
+CellChatDB.use <- CellChatDB
+
+BCC.pre.responders.cellchat <- preprocessingCellChat(BCC.pre.responders.cellchat)
+BCC.pre.nonresponders.cellchat <- preprocessingCellChat(BCC.pre.nonresponders.cellchat)
+BCC.post.responders.cellchat <- preprocessingCellChat(BCC.post.responders.cellchat)
+BCC.post.nonresponders.cellchat <- preprocessingCellChat(BCC.post.nonresponders.cellchat)
+
+## Save CellChat objects
+save(BCC.pre.responders.cellchat, file="C:\\Users\\Ryan\\Documents\\Nie Research Project\\BCC.pre.responders.cellchat")
+save(BCC.pre.nonresponders.cellchat, file="C:\\Users\\Ryan\\Documents\\Nie Research Project\\BCC.pre.nonresponders.cellchat")
+save(BCC.post.responders.cellchat, file="C:\\Users\\Ryan\\Documents\\Nie Research Project\\BCC.post.responders.cellchat")
+save(BCC.post.nonresponders.cellchat, file="C:\\Users\\Ryan\\Documents\\Nie Research Project\\BCC.post.nonresponders.cellchat")
+
+```
+
+
+
+Comparison of pretreatment responders vs. nonresponders
+
+```{r}
+
+## Define clusters and pathways of interest
+
+celltypes <- c("CD8_activation", "CD8_exhausted", "CD8_memory", "CD4", "Tregs", "T_proliferation", "Tumor 1", "Tumor 2")
+pathways <- c("MHC-I", "MHC-II", "PD-L1", "PDL2")
+
+pre.object.list <- list(Responsive = BCC.pre.responders.cellchat, Nonresponsive = BCC.pre.nonresponders.cellchat)
+pre.response.cellchat <- mergeCellChat(pre.object.list, add.names = names(pre.object.list))
+
+
+## Compare total number of interactions and interaction strength
+
+interaction1 <- compareInteractions(pre.response.cellchat, show.legend = F, group = c(1,2))
+interaction2 <- compareInteractions(pre.response.cellchat, show.legend = F, group = c(1,2), measure = "weight")
+interaction1 + interaction2
+
+## Differential interaction strength among different cell populations (not working still)
+
+netVisual_diffInteraction(pre.response.cellchat, sources.use = celltypes, targets.use = celltypes, weight.scale = T, measure = "weight", remove.isolate = T, title="Differential Interaction Strength")
+
+## Heatmaps of pathway communication probabilities 
+
+netVisual_heatmap(BCC.pre.responders.cellchat, signaling = "MHC-I", title.name = "MHC-I Signaling Network: BCC Pretreatment Responders")
+netVisual_heatmap(BCC.pre.nonresponders.cellchat, signaling = "MHC-I", title.name = "MHC-I Signaling Network: BCC Pretreatment Nonresponders")
+
+netVisual_heatmap(BCC.pre.responders.cellchat, signaling = "MHC-II", title.name = "MHC-II Signaling Network: BCC Pretreatment Responders")
+netVisual_heatmap(BCC.pre.nonresponders.cellchat, signaling = "MHC-II", title.name = "MHC-I Signaling Network: BCC Pretreatment Nonresponders")
+
+netVisual_heatmap(BCC.pre.responders.cellchat, signaling = "PD-L1", title.name = "PD-L1 Signaling Network: BCC Pretreatment Responders")
+netVisual_heatmap(BCC.pre.nonresponders.cellchat, signaling = "PD-L1", title.name = "PD-L1 Signaling Network: BCC Pretreatment Nonresponders")
+
+netVisual_heatmap(BCC.pre.responders.cellchat, signaling = "PDL2", title.name = "PD-L2 Signaling Network: BCC Pretreatment Responders")
+netVisual_heatmap(BCC.pre.nonresponders.cellchat, signaling = "PDL2", title.name = "PD-L2 Signaling Network: BCC Pretreatment Nonresponders")
+
+
+## Compare outgoing and incoming interaction strengths
+
+weight.max <- list()
+weight.max <- getMaxWeight(pre.object.list, attribute = c("idents", "count"))
+for (i in 1:length(pre.object.list)) {
+  netVisual_circle(pre.object.list[[i]]@net$count, weight.scale = T, label.edge = F, edge.weight.max = weight.max[2], edge.width.max = 12, title.name = paste0("Number of interactions: ", names(pre.object.list)[i]))
+}
+
+num.link <- sapply(pre.object.list, function(x) {rowSums(x@net$count) + colSums(x@net$count) - diag(x@net$count)})
+weight.minmax <- c(min(num.link), max(num.link))
+
+for (i in 1:length(pre.object.list)) {
+  pre.object.list[[i]] <- netAnalysis_computeCentrality(object = pre.object.list[[i]])
+}
+
+names <- c("Responders", "Nonresponders")
+
+for (i in 1:length(pre.object.list)) {
+    netAnalysis_signalingRole_scatter(pre.object.list[[i]], title= names[i], weight.MinMax = weight.minmax)
+}
+
+## Compare signaling pathways of MHC and PD-1 pathways
+
+genes <- c('MHC-I', 'MHC-I1', 'MHC-II', 'MHC-II1', 'PD-L1', 'PD-L11', 'PDL2', 'PDL21')
+
+gg1 <- rankNet(pre.response.cellchat, mode="comparison", stacked=T, do.stat=TRUE)
+gg1.data.filter <- gg1$data[genes, ]
+
+for (i in 1:nrow(gg1.data.filter)) {
+  gg1.data.filter$relative[i] <- gg1.data.filter$contribution[i] / (gg1.data.filter$contribution[ceil(i/2)*2-1] + gg1.data.filter$contribution[ceil(i/2)*2])
+}
+
+pre.signaling.ranknet <- ggplot(gg1.data.filter, aes(x=relative, y=name, fill=group)) + geom_bar(stat="identity") +
+  geom_vline(xintercept=0.50, linetype="solid", color="black", size=1) + theme_bw() +
+  labs(x="Relative Information Flow", y="Signaling Pathway", fill="Response", title="Pre-Treatment") +
+  theme(legend.position="bottom", plot.title = element_text(color="black", size=18, face="bold", hjust=0.5))
+
+## Simplified comparison of outgoing and incoming interaction strengths
+
+group.cellType <- c("T cells", "T cells", "Other", "T cells", "T cells", "T cells", "Other", "Malignant", "T cells", "T cells", "Other", "Other", "Other", "Malignant", "Other", "Other", "Other", "Other")
+group.cellType <- factor(group.cellType)
+pre.object.list <- lapply(pre.object.list, function(x) {mergeInteractions(x, group.cellType)})
+pre.response.cellchat <- mergeCellChat(pre.object.list, add.names = names(pre.object.list))
+
+names <- c("Responders", "Nonresponders")
+weight.max <- getMaxWeight(pre.object.list, slot.name=c("idents", "net", "net"), attribute=c("idents", "count", "count.merged"))
+for (i in 1:length(pre.object.list)) {
+  netVisual_circle(pre.object.list[[i]]@net$count.merged, weight.scale = T, label.edge = T, edge.weight.max = weight.max[3], edge.width.max = 12, title.name = paste0("Number of Interactions - ", names[i]))
+}
+
+gg1 <- netVisual_diffInteraction(pre.response.cellchat, weight.scale = T, measure = "count.merged", label.edge = T)
+gg2 <- netVisual_diffInteraction(pre.response.cellchat, weight.scale = T, measure = "weight.merged", label.edge = T)
+
+## Identify signaling networks/groups with larger or less difference based on their functional and structural similarity
+
+pre.response.cellchat <- computeNetSimilarityPairwise(pre.response.cellchat, type = "functional")
+pre.response.cellchat <- netEmbedding(pre.response.cellchat, type = "functional")
+pre.response.cellchat <- netClustering(pre.response.cellchat, type = "functional")
+netVisual_embeddingPairwise(pre.response.cellchat, type = "functional")
+
+pre.response.cellchat <- computeNetSimilarityPairwise(pre.response.cellchat, type = "structural")
+pre.response.cellchat <- netEmbedding(pre.response.cellchat, type = "structural")
+pre.response.cellchat <- netClustering(pre.response.cellchat, type = "structural")
+netVisual_embeddingPairwise(pre.response.cellchat, type = "structural")
+
+
+```
+
+
+
+Comparison of posttreatment responders vs. nonresponders 
+
+```{r}
+
+## Define clusters and pathways of interest
+
+celltypes <- c("CD8_activation", "CD8_exhausted", "CD8_memory", "CD4", "Tregs", "T_proliferation", "Macrophages", "Tumor 1", "Tumor 2", "B cells")
+pathways <- c("MHC-I", "MHC-II", "PD-L1", "PDL2")
+
+post.object.list <- list(Responsive = BCC.post.responders.cellchat, Nonresponsive = BCC.post.nonresponders.cellchat)
+post.response.cellchat <- mergeCellChat(post.object.list, add.names = names(post.object.list))
+
+
+## Compare total number of interactions and interaction strength
+
+interaction1 <- compareInteractions(post.response.cellchat, show.legend = F, group = c(1,2))
+interaction2 <- compareInteractions(post.response.cellchat, show.legend = F, group = c(1,2), measure = "weight")
+interaction1 + interaction2
+
+## Differential interaction strength among different cell populations (not working still)
+
+netVisual_diffInteraction(post.response.cellchat, sources.use = celltypes, targets.use = celltypes, weight.scale = T, measure = "weight", remove.isolate = T, title="Differential Interaction Strength: \nBCC Posttreatment Responders vs. Nonresponders")
+
+## Heatmaps of pathway communication probabilities 
+
+netVisual_heatmap(BCC.post.responders.cellchat, signaling = "MHC-I", title.name = "MHC-I Signaling Network: BCC Posttreatment Responders")
+netVisual_heatmap(BCC.post.nonresponders.cellchat, signaling = "MHC-I", title.name = "MHC-I Signaling Network: BCC Posttreatment Nonresponders")
+
+netVisual_heatmap(BCC.post.responders.cellchat, signaling = "MHC-II", title = "MHC-II Signaling Network: BCC Posttreatment Responders")
+netVisual_heatmap(BCC.post.nonresponders.cellchat, signaling = "MHC-II", title = "MHC-II Signaling Network: BCC Posttreatment Nonresponders")
+
+netVisual_heatmap(BCC.post.responders.cellchat, signaling = "PD-L1", title = "PD-L1 Signaling Network: BCC Posttreatment Responders")
+netVisual_heatmap(BCC.post.nonresponders.cellchat, signaling = "PD-L1", title = "PD-L1 Signaling Network: BCC Posttreatment Nonresponders")
+
+netVisual_heatmap(BCC.post.responders.cellchat, signaling = "PDL2", title = "PD-L2 Signaling Network: BCC Posttreatment Responders")
+netVisual_heatmap(BCC.post.nonresponders.cellchat, signaling = "PDL2", title = "PD-L2 Signaling Network: BCC Posttreatment Nonresponders")
+
+
+## Compare outgoing and incoming interaction strengths
+
+weight.max <- list()
+weight.max <- getMaxWeight(post.object.list, attribute = c("idents", "count"))
+for (i in 1:length(post.object.list)) {
+  netVisual_circle(post.object.list[[i]]@net$count, weight.scale = T, label.edge = F, edge.weight.max = weight.max[2], edge.width.max = 12, title.name = paste0("Number of interactions: ", names(post.object.list)[i]))
+}
+
+num.link <- sapply(post.object.list, function(x) {rowSums(x@net$count) + colSums(x@net$count) - diag(x@net$count)})
+weight.minmax <- c(min(num.link), max(num.link))
+
+for (i in 1:length(post.object.list)) {
+  post.object.list[[i]] <- netAnalysis_computeCentrality(object = post.object.list[[i]])
+}
+
+gg <- list()
+for (i in 1:length(post.object.list)) {
+    gg[[i]] <- netAnalysis_signalingRole_scatter(post.object.list[[i]], title= names(post.object.list)[i], weight.MinMax = weight.minmax)
+}
+patchwork::wrap_plots(plots = gg)
+
+
+## Compare signaling pathways of MHC and PD-1 pathways
+
+genes <- c('MHC-I', 'MHC-I1', 'MHC-II', 'MHC-II1', 'PD-L1', 'PD-L11', 'PDL2', 'PDL21')
+
+gg1 <- rankNet(post.response.cellchat, mode="comparison", stacked=T, do.stat=TRUE)
+gg1.data.filter <- gg1$data[genes, ]
+
+for (i in 1:nrow(gg1.data.filter)) {
+  gg1.data.filter$relative[i] <- gg1.data.filter$contribution[i] / (gg1.data.filter$contribution[ceil(i/2)*2-1] + gg1.data.filter$contribution[ceil(i/2)*2])
+}
+
+post.signaling.ranknet <- ggplot(gg1.data.filter, aes(x=relative, y=name, fill=group)) + geom_bar(stat="identity") +
+  geom_vline(xintercept=0.50, linetype="solid", color="black", size=1) + theme_bw() +
+  labs(x="Relative Information Flow", y="Signaling Pathway", fill="Response", title="Post-Treatment") +
+  theme(legend.position="bottom", plot.title = element_text(color="black", size=18, face="bold", hjust=0.5))
+
+
+## Identify signaling networks/groups with larger or less difference based on their functional and structural similarity
+
+post.response.cellchat <- computeNetSimilarityPairwise(post.response.cellchat, type = "functional")
+post.response.cellchat <- netEmbedding(post.response.cellchat, type = "functional")
+post.response.cellchat <- netClustering(post.response.cellchat, type = "functional")
+netVisual_embeddingPairwise(post.response.cellchat, type = "functional")
+
+post.response.cellchat <- computeNetSimilarityPairwise(post.response.cellchat, type = "structural")
+post.response.cellchat <- netEmbedding(post.response.cellchat, type = "structural")
+post.response.cellchat <- netClustering(post.response.cellchat, type = "structural")
+netVisual_embeddingPairwise(post.response.cellchat, type = "structural")
+
+
+```
+
+
+
+Comparison of responders pretreatment vs. posttreatment
+
+```{r}
+
+## Define clusters and pathways of interest
+
+celltypes <- c("CD8_activation", "CD8_exhausted", "CD8_memory", "CD4", "Tregs", "T_proliferation", "Tumor 1", "Tumor 2")
+pathways <- c("MHC-I", "MHC-II", "PD-L1", "PDL2")
+
+responder.object.list <- list(Pretreatment = BCC.pre.responders.cellchat, Posttreatment = BCC.post.responders.cellchat)
+responder.treatment.cellchat <- mergeCellChat(responder.object.list, add.names = names(responder.object.list))
+
+
+## Compare total number of interactions and interaction strength
+
+interaction1 <- compareInteractions(responder.treatment.cellchat, show.legend = F, group = c(1,2))
+interaction2 <- compareInteractions(responder.treatment.cellchat, show.legend = F, group = c(1,2), measure = "weight")
+interaction1 + interaction2
+
+## Differential interaction strength among different cell populations
+
+netVisual_diffInteraction(responder.treatment.cellchat, sources.use = celltypes, targets.use = celltypes, weight.scale = T, measure = "weight", remove.isolate = T, title="Differential Interaction Strength: \nBCC Responders Pretreatment vs. Posttreatment")
+
+gg1 <- netVisual_heatmap(responder.treatment.cellchat)
+gg2 <- netVisual_heatmap(responder.treatment.cellchat, measure="weight")
+
+gg1.data.filter <- gg1@matrix[celltypes, celltypes]
+gg1.data.filter <- melt(gg1.data.filter)
+gg1.data.filter[is.na(gg1.data.filter)] <- 0
+gg2.data.filter <- gg2@matrix[celltypes, celltypes]
+gg2.data.filter <- melt(gg2.data.filter)
+gg2.data.filter[is.na(gg2.data.filter)] <- 0
+
+counts.heatmap.filter <- ggplot(data=gg1.data.filter, aes(x=Var2, y=Var1, fill=value)) + geom_tile() +
+  scale_fill_distiller(palette="RdBu", limits = c(-95, 95)) + theme_bw() +
+  labs(y="Sources (Outgoing)", x="Receptors (Incoming)", fill="", title="Differential Number of Interactions") + 
+  theme(legend.position="right", plot.title = element_text(color="black", size=18, face="bold", hjust=0.5), axis.text.x = element_text(angle=90, vjust=0.5, hjust=1))
+
+weight.heatmap.filter <- ggplot(data=gg2.data.filter, aes(x=Var2, y=Var1, fill=value)) + geom_tile() +
+  scale_fill_distiller(palette="RdBu", limits = c(-1.6, 1.6)) + theme_bw() +
+  labs(y="Sources (Outgoing)", x="Receptors (Incoming)", fill="", title="Differential Interaction Strength") +
+  theme(legend.position="right", plot.title = element_text(color="black", size=18, face="bold", hjust=0.5), axis.text.x = element_text(angle=90, vjust=0.5, hjust=1))
+
+## Heatmaps of pathway communication probabilities 
+
+netVisual_heatmap(BCC.pre.responders.cellchat, signaling = "MHC-I", title.name = "MHC-I Signaling Network: BCC Pretreatment Responders")
+netVisual_heatmap(BCC.post.responders.cellchat, signaling = "MHC-I", title.name = "MHC-I Signaling Network: BCC Posttreatment Responders")
+
+netVisual_heatmap(BCC.pre.responders.cellchat, signaling = "MHC-II", title = "MHC-II Signaling Network: BCC Pretreatment Responders")
+netVisual_heatmap(BCC.post.responders.cellchat, signaling = "MHC-II", title = "MHC-II Signaling Network: BCC Posttreatment Responders")
+
+netVisual_heatmap(BCC.pre.responders.cellchat, signaling = "PD-L1", title = "PD-L1 Signaling Network: BCC Pretreatment Responders")
+netVisual_heatmap(BCC.post.responders.cellchat, signaling = "PD-L1", title = "PD-L1 Signaling Network: BCC Posttreatment Responders")
+
+netVisual_heatmap(BCC.pre.responders.cellchat, signaling = "PDL2", title = "PD-L2 Signaling Network: BCC Pretreatment Responders")
+netVisual_heatmap(BCC.post.responders.cellchat, signaling = "PDL2", title = "PD-L2 Signaling Network: BCC Posttreatment Responders")
+
+
+## Identify signals contributing most to outgoing/incoming signaling of cell groups
+
+BCC.pre.responders.cellchat <- netAnalysis_computeCentrality(BCC.pre.responders.cellchat)
+BCC.post.responders.cellchat <- netAnalysis_computeCentrality(BCC.post.responders.cellchat)
+
+netAnalysis_signalingRole_heatmap(BCC.pre.responders.cellchat, pattern="outgoing", signaling=c("MHC-I", "MHC-II", "PD-L1", "PD-L2"), height=3) ##PD-L1 and PD-L2 don't show anything
+
+netAnalysis_signalingRole_heatmap(BCC.pre.responders.cellchat, pattern="incoming", signaling=c("MHC-I", "MHC-II", "PD-L1", "PD-L2"), height=3)
+
+
+## Identify signaling networks/groups with larger or less difference based on their functional and structural similarity
+
+responder.treatment.cellchat <- computeNetSimilarityPairwise(responder.treatment.cellchat, type = "functional")
+responder.treatment.cellchat <- netEmbedding(responder.treatment.cellchat, type = "functional")
+responder.treatment.cellchat <- netClustering(responder.treatment.cellchat, type = "functional")
+netVisual_embeddingPairwise(responder.treatment.cellchat, type = "functional")
+
+responder.treatment.cellchat <- computeNetSimilarityPairwise(responder.treatment.cellchat, type = "structural")
+responder.treatment.cellchat <- netEmbedding(responder.treatment.cellchat, type = "structural")
+responder.treatment.cellchat <- netClustering(responder.treatment.cellchat, type = "structural")
+netVisual_embeddingPairwise(responder.treatment.cellchat, type = "structural")
+
+```
+
+
+
+Comparison of nonresponders pretreatment vs. posttreatment
+
+```{r}
+
+## Define clusters and pathways of interest
+
+celltypes <- c("CD8_activation", "CD8_exhausted", "CD8_memory", "CD4", "Tregs", "T_proliferation", "Macrophages", "Tumor 1", "Tumor 2", "B cells")
+pathways <- c("MHC-I", "MHC-II", "PD-L1", "PDL2")
+
+nonresponder.object.list <- list(Pretreatment = BCC.pre.nonresponders.cellchat, Posttreatment = BCC.post.nonresponders.cellchat)
+nonresponder.treatment.cellchat <- mergeCellChat(nonresponder.object.list, add.names = names(nonresponder.object.list))
+
+
+## Compare total number of interactions and interaction strength
+
+interaction1 <- compareInteractions(nonresponder.treatment.cellchat, show.legend = F, group = c(1,2))
+interaction2 <- compareInteractions(nonresponder.treatment.cellchat, show.legend = F, group = c(1,2), measure = "weight")
+interaction1 + interaction2
+
+## Differential interaction strength among different cell populations
+
+netVisual_diffInteraction(nonresponder.treatment.cellchat, sources.use = celltypes, targets.use = celltypes, weight.scale = T, measure = "weight", remove.isolate = T, title="Differential Interaction Strength: \nBCC Nonresponders Pretreatment vs. Posttreatment")
+
+gg1 <- netVisual_heatmap(nonresponder.treatment.cellchat)
+gg2 <- netVisual_heatmap(nonresponder.treatment.cellchat, measure="weight")
+
+gg1.data.filter <- gg1@matrix[celltypes, celltypes]
+gg1.data.filter <- melt(gg1.data.filter)
+gg1.data.filter[is.na(gg1.data.filter)] <- 0
+gg2.data.filter <- gg2@matrix[celltypes, celltypes]
+gg2.data.filter <- melt(gg2.data.filter)
+gg2.data.filter[is.na(gg2.data.filter)] <- 0
+
+counts.heatmap.filter <- ggplot(data=gg1.data.filter, aes(x=Var2, y=Var1, fill=value)) + geom_tile() +
+  scale_fill_distiller(palette="RdBu", limits = c(-95, 95)) + theme_bw() +
+  labs(y="Sources (Outgoing)", x="Receptors (Incoming)", fill="", title="Differential Number of Interactions") + 
+  theme(legend.position="right", plot.title = element_text(color="black", size=18, face="bold", hjust=0.5), axis.text.x = element_text(angle=90, vjust=0.5, hjust=1))
+
+weight.heatmap.filter <- ggplot(data=gg2.data.filter, aes(x=Var2, y=Var1, fill=value)) + geom_tile() +
+  scale_fill_distiller(palette="RdBu", limits = c(-1.6, 1.6)) + theme_bw() +
+  labs(y="Sources (Outgoing)", x="Receptors (Incoming)", fill="", title="Differential Interaction Strength") +
+  theme(legend.position="right", plot.title = element_text(color="black", size=18, face="bold", hjust=0.5), axis.text.x = element_text(angle=90, vjust=0.5, hjust=1))
+
+## Heatmaps of pathway communication probabilities 
+
+netVisual_heatmap(BCC.pre.nonresponders.cellchat, signaling = "MHC-I", title.name = "MHC-I Signaling Network: BCC Pretreatment nonresponders")
+netVisual_heatmap(BCC.post.nonresponders.cellchat, signaling = "MHC-I", title.name = "MHC-I Signaling Network: BCC Posttreatment nonresponders")
+
+netVisual_heatmap(BCC.pre.nonresponders.cellchat, signaling = "MHC-II", title = "MHC-II Signaling Network: BCC Pretreatment nonresponders")
+netVisual_heatmap(BCC.post.nonresponders.cellchat, signaling = "MHC-II", title = "MHC-II Signaling Network: BCC Posttreatment nonresponders")
+
+netVisual_heatmap(BCC.pre.nonresponders.cellchat, signaling = "PD-L1", title = "PD-L1 Signaling Network: BCC Pretreatment nonresponders")
+netVisual_heatmap(BCC.post.nonresponders.cellchat, signaling = "PD-L1", title = "PD-L1 Signaling Network: BCC Posttreatment nonresponders")
+
+netVisual_heatmap(BCC.pre.nonresponders.cellchat, signaling = "PDL2", title = "PD-L2 Signaling Network: BCC Pretreatment nonresponders")
+netVisual_heatmap(BCC.post.nonresponders.cellchat, signaling = "PDL2", title = "PD-L2 Signaling Network: BCC Posttreatment nonresponders")
+
+
+## Compare outgoing and incoming interaction strengths
+
+weight.max <- list()
+weight.max <- getMaxWeight(nonresponder.object.list, attribute = c("idents", "count"))
+for (i in 1:length(nonresponder.object.list)) {
+  netVisual_circle(nonresponder.object.list[[i]]@net$count, weight.scale = T, label.edge = F, edge.weight.max = weight.max[2], edge.width.max = 12, title.name = paste0("Number of interactions: ", names(nonresponder.object.list)[i]))
+}
+
+num.link <- sapply(nonresponder.object.list, function(x) {rowSums(x@net$count) + colSums(x@net$count) - diag(x@net$count)})
+weight.minmax <- c(min(num.link), max(num.link))
+
+for (i in 1:length(nonresponder.object.list)) {
+  nonresponder.object.list[[i]] <- netAnalysis_computeCentrality(object = nonresponder.object.list[[i]])
+}
+
+gg <- list()
+for (i in 1:length(nonresponder.object.list)) {
+    gg[[i]] <- netAnalysis_signalingRole_scatter(nonresponder.object.list[[i]], title= names(nonresponder.object.list)[i], weight.MinMax = weight.minmax)
+}
+patchwork::wrap_plots(plots = gg)
+
+## Identify signaling networks/groups with larger or less difference based on their functional and structural similarity (not working)
+
+nonresponder.treatment.cellchat <- computeNetSimilarityPairwise(nonresponder.treatment.cellchat, type = "functional")
+nonresponder.treatment.cellchat <- netEmbedding(nonresponder.treatment.cellchat, type = "functional")
+nonresponder.treatment.cellchat <- netClustering(nonresponder.treatment.cellchat, type = "functional")
+netVisual_embeddingPairwise(nonresponder.treatment.cellchat, type = "functional")
+
+nonresponder.treatment.cellchat <- computeNetSimilarityPairwise(nonresponder.treatment.cellchat, type = "structural")
+nonresponder.treatment.cellchat <- netEmbedding(nonresponder.treatment.cellchat, type = "structural")
+nonresponder.treatment.cellchat <- netClustering(nonresponder.treatment.cellchat, type = "structural")
+netVisual_embeddingPairwise(nonresponder.treatment.cellchat, type = "structural")
+
+```
+
+
+
+Compare composition of T cells in BCC patients
+
+```{r}
+
+r.pre.levels <- BCC.pre.responders.cellchat@meta
+r.post.levels <- BCC.post.responders.cellchat@meta
+nr.pre.levels <- BCC.pre.nonresponders.cellchat@meta
+nr.post.levels <- BCC.post.nonresponders.cellchat@meta
+
+r.pre.levels <- r.pre.levels %>% group_by(seurat_clusters) %>% summarise(cells = length(seurat_clusters)) 
+r.post.levels <- r.post.levels %>% group_by(seurat_clusters) %>% summarise(cells = length(seurat_clusters)) 
+nr.pre.levels <- nr.pre.levels %>% group_by(seurat_clusters) %>% summarise(cells = length(seurat_clusters)) 
+nr.post.levels <- nr.post.levels %>% group_by(seurat_clusters) %>% summarise(cells = length(seurat_clusters)) 
+
+levels <- cbind(r.pre.levels, r.post.levels, nr.pre.levels, nr.post.levels)
+levels <- levels[c(1, 2, 4, 5, 6, 11), c(1, 2, 4, 6, 8)]
+colnames(levels) <- c("Cluster", "R Pre", "R Post", "NR Pre", "NR Post")
+
+for (i in 2:5) {
+  levels[, i] <- levels[, i] / sum(levels[, i])
+}
+
+levels(levels$Cluster) <- c("CD8+ Memory", "CD4+", "NA", "Tregs", "CD8+ Activated", "CD8+ Exhausted", "NA", "NA", "NA", "NA", "Proliferating", "NA", "NA", "NA", "NA", "NA", "NA", "NA", "NA")
+levels <- melt(levels, id.vars="Cluster")
+
+ggplot(levels, aes(fill=Cluster, y=value, x=variable)) +
+  geom_bar(position="stack", stat="identity") +
+  scale_fill_brewer(palette="Spectral") + theme_bw() +
+  labs(y="Proportion", x="Population") +
+  theme(legend.position="bottom")
+
+```
+
+#####################################################################################################################
+
+Differential Analysis of BCC Pretreatment vs. PDAC
+
+```{r}
+
+Idents(BCCIO) <- BCCIO$seurat_clusters
+Idents(PDAC155698.integrated) <- PDAC155698.integrated$seurat_clusters
+
+BCC.overlap <- subset(BCCIO, idents=c("CD8_activation", "CD8_exhausted", "CD8_memory", "CD4", "Tregs", "Macrophages", "B cells", "NK"))
+PDAC.overlap <- subset(PDAC155698.integrated, idents=c("Macrophages", "NK cells", "CD8+ T cells", "B cells", "CD4+ T cells", "Tregs"))
+
+## Rename Idents
+
+rename.ident(BCC.overlap, old.ident.name="CD8_activation", new.ident.name="CD8+ T cells")
+rename.ident(BCC.overlap, "CD8_memory", "CD8+ T cells")
+rename.ident(BCC.overlap, "CD8_exhausted", "CD8+ T cells")
+rename.ident(BCC.overlap, "CD4", "CD4+ T cells")
+rename.ident(BCC.overlap, "NK", "NK cells")
+
+####
+
+## Define clusters and pathways of interest
+
+celltypes <- c("CD8_activation", "CD8_exhausted", "CD8_memory", "CD4", "Tregs", "T_proliferation", "Macrophages", "Tumor 1", "Tumor 2", "B cells")
+pathways <- c("MHC-I", "MHC-II", "PD-L1", "PDL2")
+
+pre.object.list <- list(Pretreatment_Responders = BCC.pre.responders.cellchat, Pretreatment_Nonresponders = BCC.pre.nonresponders.cellchat)
+pre.response.cellchat <- mergeCellChat(pre.object.list, add.names = names(pre.object.list))
+
+
+## Compare total number of interactions and interaction strength
+
+interaction1 <- compareInteractions(pre.response.cellchat, show.legend = F, group = c(1,2))
+interaction2 <- compareInteractions(pre.response.cellchat, show.legend = F, group = c(1,2), measure = "weight")
+interaction1 + interaction2
+
+
+```

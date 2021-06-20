@@ -1,6 +1,8 @@
 ---
 title: "BCCIO / PDAC Comparison"
 output: html_notebook
+editor_options: 
+  chunk_output_type: inline
 ---
 
 Load Packages and Data
@@ -17,11 +19,15 @@ library(RColorBrewer)
 library(EnhancedVolcano)
 library(gridExtra)
 library(reshape2)
+library(ggpubr)
 
 memory.limit(size = 16000000)
 
-## Integrated PDAC datasets 
-load("C:\\Users\\Ryan\\Documents\\Nie Research Project\\GSE 155698\\PDAC155698.integrated")
+## PDAC infected patients dataset 
+load("C:\\Users\\Ryan\\Documents\\Nie Research Project\\GSE 155698\\PDAC.integrated")
+
+## PDAC infected + healthy patients dataset
+load("C:\\Users\\Ryan\\Documents\\Nie Research Project\\GSE 155698\\PDAC.all")
 
 ## BCCIO dataset
 load("C:\\Users\\Ryan\\Documents\\Nie Research Project\\GSE 123813\\BCCIOwithUMAP")
@@ -33,9 +39,9 @@ load("C:\\Users\\Ryan\\Documents\\Nie Research Project\\BCC.PDAC.merge")
 load("C:\\Users\\Ryan\\Documents\\Nie Research Project\\BCC.pre.PDAC.merge")
 
 ## Load functions
-source("ClusteringAnalysisFunctions.R", echo=TRUE)
-source("SeuratClusteringFunctions.R", echo=TRUE)
-source("DifferentialExpressionFunctions.R", echo=TRUE)
+source("ClusteringAnalysisFunctions.R", echo=FALSE)
+source("SeuratClusteringFunctions.R", echo=FALSE)
+source("DifferentialExpressionFunctions.R", echo=FALSE)
 
 ```
 
@@ -890,7 +896,6 @@ hsp.markers.by.patient <- do.call("rbind", hsp.markers)
 ## Plot results
 
 hsp.markers.by.patient$log_pvaladj <- -log(hsp.markers.by.patient$p_val_adj)
-#hsp.markers.by.patient$loglog_pvaladj <- log(hsp.markers.by.patient$log_pvaladj + 1)
 
 hsp.markers.plot <- ggplot(hsp.markers.by.patient, aes(x=log_pvaladj, y=avg_log2FC, color=GeneNames, size=1)) + theme_minimal() + ggtitle("Differential Expression of HSP genes by patient: \n BCC Responders vs. PDAC") + xlab("-log10(P)") + ylab("Log2 fold change") + geom_point() + theme(plot.title = element_text(size=20), legend.text = element_text(size = 10), legend.title = element_text(size = 14))
 hsp.markers.plot
@@ -1028,39 +1033,1140 @@ tuk_plot(hsp.malignant.tukey, title = "HSP")
 
 ```
 
+##################################################################################################################
 
-
-##################################################################################################################################
-
+Compare pretreatment PDAC to BCC responders and nonresponders, pretreatment vs. posttreatment
 
 ```{r}
 
-Idents(BCCIO) <- BCCIO$seurat_clusters
-bcc.averages.celltype <- AverageExpression(BCCIO)
-bcc.hla.averages.celltype <- bcc.averages.celltype[["RNA"]][hla.genes,]
-colnames(bcc.hla.averages.celltype) <- paste0("bcc ", colnames(bcc.hla.averages.celltype))
-bcc.hla.averages.celltype$gene <- rownames(bcc.hla.averages.celltype)
+## Possible comparisons: CD8+ T cells, CD4+ T cells, Tregs, B cells, Macrophages, NK cells
+
+BCC.PDAC.comparison.CD8 <- fiveway_diffexpression_MHCandHSP(c("CD8_activation", "CD8_exhausted", "CD8_memory"), "CD8+ T cells", "CD8+ T Cells")
+BCC.PDAC.comparison.CD4 <- fiveway_diffexpression_MHCandHSP("CD4", "CD4+ T cells", "CD4+ T Cells")
+BCC.PDAC.comparison.Tregs <- fiveway_diffexpression_MHCandHSP("Tregs", "Tregs", "Regulatory T Cells")
+BCC.PDAC.comparison.Macrophages <- fiveway_diffexpression_MHCandHSP("Macrophages", "Macrophages", "Macrophages")
+BCC.PDAC.comparison.B <- fiveway_diffexpression_MHCandHSP("B cells", "B cells","B Cells")
+BCC.PDAC.comparison.NK <- fiveway_diffexpression_MHCandHSP("NK", "NK cells", "Natural Killer Cells")
+
+## Use grid.draw() to see the final product 
+
+```
+
+
+Look at expression of PD-1 pathway again
+
+```{r}
 
 Idents(PDAC155698.integrated) <- PDAC155698.integrated$seurat_clusters
-pdac.averages.celltype <- AverageExpression(PDAC155698.integrated)
-pdac.hla.averages.celltype <- pdac.averages.celltype[["RNA"]][hla.genes,]
-colnames(pdac.hla.averages.celltype) <- paste0("pdac ", colnames(pdac.hla.averages.celltype))
-pdac.hla.averages.celltype$gene <- rownames(pdac.hla.averages.celltype)
 
-hla.averages.celltype <- merge(bcc.hla.averages.celltype, pdac.hla.averages.celltype, by="gene")
-hla.averages.celltype <- t(hla.averages.celltype)
-colnames(hla.averages.celltype) <- hla.averages.celltype[1,]
-hla.averages.celltype <- hla.averages.celltype[-1,]
+PDAC.averages <- AverageExpression(PDAC155698.integrated)[["RNA"]]
+PDAC.genes <- rownames(PDAC.averages)
 
+PDAC.averages.PD1 <- PDAC.averages[c("PDCD1", "CD274", "PDCD1LG2"),]
+
+Idents(BCC.responder.pre) <- BCC.responder.pre$seurat_clusters
+Idents(BCC.responder.post) <- BCC.responder.post$seurat_clusters
+Idents(BCC.nonresponder.pre) <- BCC.nonresponder.pre$seurat_clusters
+Idents(BCC.nonresponder.post) <- BCC.nonresponder.post$seurat_clusters
+
+BCC.responder.pre.averages <- AverageExpression(BCC.responder.pre)[["RNA"]]
+BCC.responder.post.averages <- AverageExpression(BCC.responder.post)[["RNA"]]
+BCC.nonresponder.pre.averages <- AverageExpression(BCC.nonresponder.pre)[["RNA"]]
+BCC.nonresponder.post.averages <- AverageExpression(BCC.nonresponder.post)[["RNA"]]
+
+BCC.responder.pre.averages.PD1 <- BCC.responder.pre.averages[c("PDCD1", "CD274", "PDCD1LG2"),]
+BCC.responder.post.averages.PD1 <- BCC.responder.post.averages[c("PDCD1", "CD274", "PDCD1LG2"),]
+BCC.nonresponder.pre.averages.PD1 <- BCC.nonresponder.pre.averages[c("PDCD1", "CD274", "PDCD1LG2"),]
+BCC.nonresponder.post.averages.PD1 <- BCC.nonresponder.post.averages[c("PDCD1", "CD274", "PDCD1LG2"),]
 
 
 
 ```
 
-####################################################################################################################################
+
+
+####################################################################################################################
+
+Complete analysis using reclustered PDAC dataset
+
+Compare malignant cells between PDAC and BCC 
+
+```{r}
+
+## Create merged BCC and PDAC object
+
+Idents(BCCIO) <- BCCIO$seurat_clusters
+Idents(PDAC.integrated) <- PDAC.integrated$seurat_clusters
+
+PDAC.malignant <- subset(PDAC.integrated, idents=c("Ductal cells 1", "Ductal cells 2", "Ductal cells 3", "Ductal cells 4"))
+
+BCC.malignant <- subset(BCCIO, idents=c("Tumor 1", "Tumor 2"))
+
+BCC.PDAC.malignant <- merge(PDAC.malignant, BCC.malignant, add.cell.ids = c("PDAC", "BCC"))
+
+BCC.PDAC.malignant@meta.data$sort <- NULL
+BCC.PDAC.malignant@meta.data$RNA_snn_res.0.5 <- NULL
+BCC.PDAC.malignant@meta.data$RNA_snn_res.0.4 <- NULL
+
+BCC.PDAC.malignant@meta.data$response[is.na(BCC.PDAC.malignant@meta.data$response)] <- "PDAC"
+BCC.PDAC.malignant@meta.data$treatment[is.na(BCC.PDAC.malignant@meta.data$treatment)] <- "PDAC"
+BCC.PDAC.malignant@meta.data$celltype <- "Malignant cells"
+
+## Enhanced volcano plot comparing PDAC to all BCC 
+
+Idents(BCC.PDAC.malignant) <- BCC.PDAC.malignant$celltype
+
+BCC.PDAC.malignant.volcano <- bioc_volcano(BCC.PDAC.malignant, celltype = "Malignant cells", group = "response", ident = "PDAC", ident2 = "BCC", title = "PDAC vs. BCC (All)")
+
+## Enhanced volcano plot comparing PDAC to all BCC pretreatment
+
+Idents(BCC.PDAC.malignant) <- BCC.PDAC.malignant$treatment
+
+BCC.PDAC.malignant.pre <- subset(BCC.PDAC.malignant, idents = c("pre", "PDAC"))
+
+Idents(BCC.PDAC.malignant.pre) <- BCC.PDAC.malignant.pre$celltype 
+
+BCC.PDAC.malignant.pre.volcano <- bioc_volcano(BCC.PDAC.malignant.pre, celltype = "Malignant cells", group = "response", ident = "PDAC", ident2 = "BCC", title = "PDAC vs. BCC Pretreatment")
+
+## Enhanced volcano plot comparing PDAC to BCC responders pretreatment
+
+Idents(BCC.PDAC.malignant.pre) <- BCC.PDAC.malignant.pre$response
+
+BCC.PDAC.malignant.preresponder <- subset(BCC.PDAC.malignant.pre, idents = c("Responsive", "PDAC"))
+
+BCC.PDAC.malignant.preresponder.volcano <- bioc_volcano(BCC.PDAC.malignant.preresponder, celltype = "Malignant cells", group = "response", ident = "PDAC", ident2 = "BCC", title = "PDAC vs. BCC Responders Pretreatment")
+
+```
 
 
 
+Calculate MHC Class I scores for PDAC and BCC
 
-wilcoxon test
-ks test
+```{r}
+
+## Calculate scores by patient
+
+Idents(BCC.PDAC.malignant.pre) <- BCC.PDAC.malignant.pre$response
+Idents(BCC.PDAC.malignant) <- BCC.PDAC.malignant$response
+
+
+## Dot plots (by gene, by cluster)
+
+mhc.genes <- c('HLA-A', 'HLA-B', 'HLA-C', 'HLA-E', 'HLA-F', 'HLA-G', 'HLA-DMA', 'HLA-DMB', 'HLA-DOA', 'HLA-DPA1', 'HLA-DPB1', 'HLA-DQA1', 'HLA-DQA2', 'HLA-DQB1', 'HLA-DQB2', 'HLA-DRA', 'HLA-DRB1', 'HLA-DRB5')
+
+BCC.PDAC.malignant.expression <- AverageExpression(BCC.PDAC.malignant)
+BCC.PDAC.malignant.mhc.expression <- BCC.PDAC.malignant.expression[["RNA"]][mhc.genes,]
+
+BCC.PDAC.malignant.mhc.expression$Gene <- rownames(BCC.PDAC.malignant.mhc.expression)
+BCC.PDAC.malignant.mhc.expression <- melt(BCC.PDAC.malignant.mhc.expression, id.vars="Gene")
+
+BCC.PDAC.malignant.mhc.dotplot <- ggplot(BCC.PDAC.malignant.mhc.expression, aes(x=Gene, y=value, color=variable)) +
+  geom_dotplot(binaxis='y', stackdir='center', binwidth=0) + 
+  theme_light() +
+  coord_flip() +
+  labs(title = "Average Expression of MHC Genes", x = "Score", y = "Gene") +
+  geom_point(aes(size=3))
+
+BCC.PDAC.malignant.mhc.dotplot
+
+## Dumbbell plots (by gene, by patient)
+
+BCC.PDAC.malignant@meta.data$cancer <- BCC.PDAC.malignant@meta.data$response
+Idents(BCC.PDAC.malignant) <- BCC.PDAC.malignant$cancer
+
+BCC.PDAC.malignant <- RenameIdents(object = BCC.PDAC.malignant,
+                                   "PDAC" = "PDAC",
+                                   "Responsive" = "BCC", 
+                                   "Nonresponsive" = "BCC")
+BCC.PDAC.malignant@meta.data$cancer <- Idents(BCC.PDAC.malignant)
+
+BCC.PDAC.malignant.expression.cancer <- AverageExpression(BCC.PDAC.malignant)
+BCC.PDAC.malignant.mhc.expression.cancer <- data.frame(t(BCC.PDAC.malignant.expression.cancer[["RNA"]][mhc.genes,]))
+colnames(BCC.PDAC.malignant.mhc.expression.cancer) <- mhc.genes
+
+BCC.PDAC.malignant.mhc.expression.cancer$Cancer <- rownames(BCC.PDAC.malignant.mhc.expression.cancer)
+BCC.PDAC.malignant.mhc.expression.cancer <- melt(BCC.PDAC.malignant.mhc.expression.cancer, id.vars="Cancer")
+
+BCC.PDAC.malignant.mhc.expression.cancer <- BCC.PDAC.malignant.mhc.expression.cancer %>% 
+  mutate(paired = rep(1:(n()/2), each=2), Cancer=factor(Cancer))
+
+BCC.PDAC.malignant.mhc.expression.cancer %>% ggplot(aes(x=value, y=variable)) +
+  geom_line(aes(group=paired)) +
+  geom_point(aes(color=Cancer), size=5) +
+  theme(legend.position="top") +
+  labs(title = "Average Expression of MHC Genes", x = "Score", y = "Gene") +
+  theme_light() +
+  theme(legend.position="top", plot.title = element_text(color="black", size=18, face="bold", hjust = 0.5))
+
+## Calculate MHC Class I and II scores
+
+mhc1.genes <- c('HLA-A', 'HLA-B', 'HLA-C', 'HLA-E', 'HLA-F', 'HLA-G')
+mhc2.genes <- c('HLA-DMA', 'HLA-DMB', 'HLA-DOA', 'HLA-DPA1', 'HLA-DPB1', 'HLA-DQA1', 'HLA-DQA2', 'HLA-DQB1', 'HLA-DQB2', 'HLA-DRA', 'HLA-DRB1', 'HLA-DRB5')
+
+BCC.PDAC.malignant.mhc1.expression.cancer <- BCC.PDAC.malignant.expression.cancer[["RNA"]][mhc1.genes,]
+BCC.PDAC.malignant.mhc2.expression.cancer <- BCC.PDAC.malignant.expression.cancer[["RNA"]][mhc2.genes,]
+
+avg1 <- t(data.frame(colMeans(BCC.PDAC.malignant.mhc1.expression.cancer)))
+BCC.PDAC.malignant.mhc1.expression.cancer <- rbind(BCC.PDAC.malignant.mhc1.expression.cancer, avg1)
+
+avg2 <- t(data.frame(colMeans(BCC.PDAC.malignant.mhc2.expression.cancer)))
+BCC.PDAC.malignant.mhc2.expression.cancer <- rbind(BCC.PDAC.malignant.mhc2.expression.cancer, avg2)
+
+BCC.PDAC.malignant.mhc.expression.cancer <- rbind(BCC.PDAC.malignant.mhc1.expression.cancer, BCC.PDAC.malignant.mhc2.expression.cancer)
+
+rownames(BCC.PDAC.malignant.mhc.expression.cancer)[rownames(BCC.PDAC.malignant.mhc.expression.cancer) == "colMeans.BCC.PDAC.malignant.mhc1.expression.cancer."] <- "MHC Class I"
+rownames(BCC.PDAC.malignant.mhc.expression.cancer)[rownames(BCC.PDAC.malignant.mhc.expression.cancer) == "colMeans.BCC.PDAC.malignant.mhc2.expression.cancer."] <- "MHC Class II"
+
+BCC.PDAC.malignant.mhc.expression.cancer <- data.frame(t(BCC.PDAC.malignant.mhc.expression.cancer))
+
+# Execute 1198 - 1210
+
+## Recreate dumbbell plots with both responders and nonresponders
+
+Idents(BCC.PDAC.malignant) <- BCC.PDAC.malignant$response
+
+BCC.PDAC.malignant.averages.response <- AverageExpression(BCC.PDAC.malignant)
+BCC.PDAC.malignant.averages.response.mhc1 <- BCC.PDAC.malignant.averages.response[["RNA"]][mhc1.genes,]
+BCC.PDAC.malignant.averages.response.mhc2 <- BCC.PDAC.malignant.averages.response[["RNA"]][mhc2.genes,]
+
+avg1 <- t(data.frame(colMeans(BCC.PDAC.malignant.averages.response.mhc1)))
+BCC.PDAC.malignant.averages.response.mhc1 <- rbind(BCC.PDAC.malignant.averages.response.mhc1, avg1)
+
+avg2 <- t(data.frame(colMeans(BCC.PDAC.malignant.averages.response.mhc2)))
+BCC.PDAC.malignant.averages.response.mhc2 <- rbind(BCC.PDAC.malignant.averages.response.mhc2, avg2)
+
+BCC.PDAC.malignant.averages.response.mhc <- rbind(BCC.PDAC.malignant.averages.response.mhc1, BCC.PDAC.malignant.averages.response.mhc2)
+
+rownames(BCC.PDAC.malignant.averages.response.mhc)[rownames(BCC.PDAC.malignant.averages.response.mhc) == "colMeans.BCC.PDAC.malignant.averages.response.mhc1."] <- "MHC Class I"
+rownames(BCC.PDAC.malignant.averages.response.mhc)[rownames(BCC.PDAC.malignant.averages.response.mhc) == "colMeans.BCC.PDAC.malignant.averages.response.mhc2."] <- "MHC Class II"
+
+BCC.PDAC.malignant.averages.response.mhc <- data.frame(t(BCC.PDAC.malignant.averages.response.mhc))
+
+BCC.PDAC.malignant.averages.response.mhc$Response <- rownames(BCC.PDAC.malignant.averages.response.mhc)
+BCC.PDAC.malignant.averages.response.mhc <- melt(BCC.PDAC.malignant.averages.response.mhc, id.vars="Response")
+
+BCC.PDAC.malignant.averages.response.mhc <- BCC.PDAC.malignant.averages.response.mhc %>% 
+  mutate(paired = rep(1:(n()/3), each=3), Response=factor(Response))
+
+BCC.PDAC.malignant.averages.response.mhc %>% ggplot(aes(x=value, y=variable)) +
+  geom_line(aes(group=paired)) +
+  geom_point(aes(color=Response), size=5) +
+  theme(legend.position="top") +
+  labs(title = "Average Expression of MHC Genes", x = "Score", y = "Gene") +
+  theme_light() +
+  theme(legend.position="top", plot.title = element_text(color="black", size=18, face="bold", hjust = 0.5))
+
+## Recreate dumbbell plots, separating pretreatment and posttreatment
+
+BCC.PDAC.malignant$restreat <- "PDAC"
+BCC.PDAC.malignant$restreat[BCC.PDAC.malignant$treatment == "pre" & BCC.PDAC.malignant$response == "Responsive"] <- "Responsive Pretreatment"
+BCC.PDAC.malignant$restreat[BCC.PDAC.malignant$treatment == "post" & BCC.PDAC.malignant$response == "Responsive"] <- "Responsive Posttreatment"
+BCC.PDAC.malignant$restreat[BCC.PDAC.malignant$treatment == "pre" & BCC.PDAC.malignant$response == "Nonresponsive"] <- "Nonresponsive Pretreatment"
+BCC.PDAC.malignant$restreat[BCC.PDAC.malignant$treatment == "post" & BCC.PDAC.malignant$response == "Nonresponsive"] <- "Nonresponsive Posttreatment"
+
+Idents(BCC.PDAC.malignant) <- BCC.PDAC.malignant$restreat
+
+BCC.PDAC.malignant.averages.restreat <- AverageExpression(BCC.PDAC.malignant)
+BCC.PDAC.malignant.averages.restreat.mhc1 <- BCC.PDAC.malignant.averages.restreat[["RNA"]][mhc1.genes,]
+BCC.PDAC.malignant.averages.restreat.mhc2 <- BCC.PDAC.malignant.averages.restreat[["RNA"]][mhc2.genes,]
+
+avg1 <- t(data.frame(colMeans(BCC.PDAC.malignant.averages.restreat.mhc1)))
+BCC.PDAC.malignant.averages.restreat.mhc1 <- rbind(BCC.PDAC.malignant.averages.restreat.mhc1, avg1)
+
+avg2 <- t(data.frame(colMeans(BCC.PDAC.malignant.averages.restreat.mhc2)))
+BCC.PDAC.malignant.averages.restreat.mhc2 <- rbind(BCC.PDAC.malignant.averages.restreat.mhc2, avg2)
+
+BCC.PDAC.malignant.averages.restreat.mhc <- rbind(BCC.PDAC.malignant.averages.restreat.mhc1, BCC.PDAC.malignant.averages.restreat.mhc2)
+
+rownames(BCC.PDAC.malignant.averages.restreat.mhc)[rownames(BCC.PDAC.malignant.averages.restreat.mhc) == "colMeans.BCC.PDAC.malignant.averages.restreat.mhc1."] <- "MHC Class I"
+rownames(BCC.PDAC.malignant.averages.restreat.mhc)[rownames(BCC.PDAC.malignant.averages.restreat.mhc) == "colMeans.BCC.PDAC.malignant.averages.restreat.mhc2."] <- "MHC Class II"
+
+BCC.PDAC.malignant.averages.restreat.mhc <- data.frame(t(BCC.PDAC.malignant.averages.restreat.mhc))
+
+BCC.PDAC.malignant.averages.restreat.mhc$Response <- rownames(BCC.PDAC.malignant.averages.restreat.mhc)
+BCC.PDAC.malignant.averages.restreat.mhc <- melt(BCC.PDAC.malignant.averages.restreat.mhc, id.vars="Response")
+
+BCC.PDAC.malignant.averages.restreat.mhc <- BCC.PDAC.malignant.averages.restreat.mhc %>% 
+  mutate(paired = rep(1:(n()/5), each=5), Response=factor(Response))
+
+BCC.PDAC.malignant.averages.restreat.mhc %>% ggplot(aes(x=value, y=variable)) +
+  geom_line(aes(group=paired)) +
+  geom_point(aes(color=Response), size=5) +
+  theme(legend.position="top") +
+  labs(title = "Average Expression of MHC Genes", x = "Score", y = "Gene") +
+  theme_light() +
+  theme(legend.position="top", plot.title = element_text(color="black", size=18, face="bold", hjust = 0.5))
+
+```
+
+
+
+Investigate MHC expression in different clusters and patients 
+
+```{r}
+
+BCC.PDAC.malignant <- preprocessing(BCC.PDAC.malignant)
+BCC.PDAC.malignant <- clustering(BCC.PDAC.malignant, resolution=0.5)
+
+BCC.PDAC.malignant$clusters <- save$seurat_clusters
+Idents(BCC.PDAC.malignant) <- BCC.PDAC.malignant$clusters
+DimPlot(BCC.PDAC.malignant, reduction = "umap")
+
+Idents(BCC.PDAC.malignant) <- BCC.PDAC.malignant$seurat_clusters
+BCC.PDAC.malignant.averages <- AverageExpression(BCC.PDAC.malignant, return.seurat=TRUE, add.ident="restreat")
+
+mhc.genes <- c(mhc1.genes, mhc2.genes)
+
+BCC.PDAC.mhc.heatmap <- DoHeatmap(BCC.PDAC.malignant.averages, features=mhc.genes, size=3, draw.lines=FALSE)
+
+BCC.PDAC.heatmap <- DoHeatmap(BCC.PDAC.malignant.averages, features = unlist(TopFeatures(BCC.PDAC.malignant[['pca']], balanced=TRUE)), size=3, draw.lines=FALSE)
+BCC.PDAC.heatmap
+
+## Investigate expression per patient
+
+Idents(BCC.PDAC.malignant) <- BCC.PDAC.malignant$response
+
+BCC.PDAC.malignant.averages <- AverageExpression(BCC.PDAC.malignant, return.seurat=TRUE, add.ident="patient")
+BCC.PDAC.patient.heatmap <- DoHeatmap(BCC.PDAC.malignant.averages, features=mhc.genes, size=3, draw.lines=TRUE)
+
+Idents(BCC.PDAC.malignant) <- BCC.PDAC.malignant$treatment
+BCC.PDAC.malignant.pre <- subset(BCC.PDAC.malignant, idents=c("PDAC", "pre"))
+
+Idents(BCC.PDAC.malignant.pre) <- BCC.PDAC.malignant.pre$response
+BCC.PDAC.malignant.pre.averages <- AverageExpression(BCC.PDAC.malignant.pre, return.seurat=TRUE, add.ident="patient")
+BCC.PDAC.pre.patient.heatmap <- DoHeatmap(BCC.PDAC.malignant.pre.averages, features=mhc.genes, size=3, draw.lines=TRUE)
+
+## Throw out patient 1
+
+Idents(BCC.PDAC.malignant) <- BCC.PDAC.malignant$patient
+BCC.PDAC.malignant.p1 <- subset(BCC.PDAC.malignant, idents="pdac1", invert=TRUE)
+
+Idents(BCC.PDAC.malignant.p1) <- BCC.PDAC.malignant.p1$response
+BCC.PDAC.malignant.p1.averages <- AverageExpression(BCC.PDAC.malignant.p1, return.seurat=TRUE, add.ident="patient")
+BCC.PDAC.patient.p1.heatmap <- DoHeatmap(BCC.PDAC.malignant.p1.averages, features=mhc.genes, size=3, draw.lines=TRUE)
+
+Idents(BCC.PDAC.malignant.p1) <- BCC.PDAC.malignant.p1$treatment
+BCC.PDAC.malignant.p1.pre <- subset(BCC.PDAC.malignant.p1, idents=c("PDAC", "pre"))
+
+Idents(BCC.PDAC.malignant.p1.pre) <- BCC.PDAC.malignant.p1.pre$response
+BCC.PDAC.malignant.p1.pre.averages <- AverageExpression(BCC.PDAC.malignant.p1.pre, return.seurat=TRUE, add.ident="patient")
+BCC.PDAC.patient.p1.pre.heatmap <- DoHeatmap(BCC.PDAC.malignant.p1.pre.averages, features=mhc.genes, size=3, draw.lines=TRUE)
+
+## Separate by patient and treatment
+
+Idents(BCC.PDAC.malignant) <- BCC.PDAC.malignant$treatment
+BCC.malignant <- subset(BCC.PDAC.malignant, idents=c("pre", "post"))
+
+Idents(BCC.malignant) <- BCC.malignant$patient
+BCC.malignant.averages <- AverageExpression(BCC.malignant, return.seurat=TRUE, add.ident="treatment")
+
+BCC.malignant.averages.mhc1 <- data.frame(BCC.malignant.averages[["RNA"]][mhc1.genes,])
+BCC.malignant.averages.mhc2 <- data.frame(BCC.malignant.averages[["RNA"]][mhc2.genes,])
+
+BCC.malignant.averages.mhc1$su001_post <- 0
+BCC.malignant.averages.mhc1$su002_post <- 0
+BCC.malignant.averages.mhc1$su010_pre <- 0
+
+BCC.malignant.averages.mhc2$su001_post <- 0
+BCC.malignant.averages.mhc2$su002_post <- 0
+BCC.malignant.averages.mhc2$su010_pre <- 0
+
+BCC.malignant.averages.mhc1 <- BCC.malignant.averages.mhc1[, c(1, 16, 2, 17, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 18, 15)]
+BCC.malignant.averages.mhc2 <- BCC.malignant.averages.mhc2[, c(1, 16, 2, 17, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 18, 15)]
+
+avg1 <- t(data.frame(colMeans(BCC.malignant.averages.mhc1)))
+avg2 <- t(data.frame(colMeans(BCC.malignant.averages.mhc2)))
+
+BCC.malignant.averages.mhc <- rbind(avg1, avg2)
+
+BCC.malignant.averages.mhc.pre <- BCC.malignant.averages.mhc[, c(1, 3, 5, 7, 9, 11, 13, 15, 17)]
+BCC.malignant.averages.mhc.post <- BCC.malignant.averages.mhc[, c(2, 4, 6, 8, 10, 12, 14, 16, 18)]
+colnames(BCC.malignant.averages.mhc.pre) <- c('su001', 'su002', 'su003', 'su004', 'su005', 'su006', 'su007', 'su008', 'su010')
+rownames(BCC.malignant.averages.mhc.pre) <- c('MHC Class 1 Pre-treatment', 'MHC Class 2 Pre-treatment')
+colnames(BCC.malignant.averages.mhc.post) <- c('su001', 'su002', 'su003', 'su004', 'su005', 'su006', 'su007', 'su008', 'su010')
+rownames(BCC.malignant.averages.mhc.post) <- c('MHC Class 1 Post-treatment', 'MHC Class 2 Post-treatment')
+BCC.malignant.averages.mhc <- data.frame(rbind(BCC.malignant.averages.mhc.pre, BCC.malignant.averages.mhc.post))
+
+save <- BCC.malignant.averages.mhc
+
+BCC.malignant.averages.mhc$Response <- rownames(BCC.malignant.averages.mhc)
+BCC.malignant.averages.mhc <- melt(BCC.malignant.averages.mhc, id.vars="Response")
+
+BCC.malignant.averages.mhc <- BCC.malignant.averages.mhc %>% 
+  mutate(paired = rep(1:(n()/4), each=4), Response=factor(Response))
+
+BCC.malignant.averages.mhc %>% ggplot(aes(x=value, y=variable)) +
+  geom_line(aes(group=paired)) +
+  geom_point(aes(color=Response), size=5) +
+  theme(legend.position="top") +
+  labs(title = "Average Expression of MHC Genes", x = "Score", y = "Patient") +
+  theme_light() +
+  theme(legend.position="top", plot.title = element_text(color="black", size=18, face="bold", hjust = 0.5))
+
+## Five-way boxplot to compare MHC scores
+
+BCCIO$restreat <- "filler"
+
+BCCIO$restreat[BCCIO$treatment == "pre" & BCCIO$response == "Responsive"] <- "Responsive Pretreatment"
+BCCIO$restreat[BCCIO$treatment == "post" & BCCIO$response == "Responsive"] <- "Responsive Posttreatment"
+BCCIO$restreat[BCCIO$treatment == "pre" & BCCIO$response == "Nonresponsive"] <- "Nonresponsive Pretreatment"
+BCCIO$restreat[BCCIO$treatment == "post" & BCCIO$response == "Nonresponsive"] <- "Nonresponsive Posttreatment"
+
+Idents(BCCIO) <- BCCIO$restreat
+
+BCC.responder.pre <- subset(BCCIO, idents="Responsive Pretreatment")
+BCC.responder.post <- subset(BCCIO, idents="Responsive Posttreatment")
+BCC.nonresponder.pre <- subset(BCCIO, idents="Nonresponsive Pretreatment")
+BCC.nonresponder.post <- subset(BCCIO, idents="Nonresponsive Posttreatment")
+
+PDAC155698.integrated <- PDAC.integrated
+
+Idents(BCCIO) <- BCCIO$seurat_clusters
+Idents(PDAC155698.integrated) <- PDAC155698.integrated$seurat_clusters
+
+BCC.PDAC.comparison.malignant <- fiveway_diffexpression_MHCandHSP(c("Tumor 1", "Tumor 2"), c("Ductal cells 1", "Ductal cells 2", "Ductal cells 3", "Ductal cells 4"), "Malignant Cells")
+grid.draw(BCC.PDAC.comparison.malignant)
+
+```
+
+
+
+################################################################################################################
+
+Compare gene expression between malignnat cells in BCC vs. PDAC
+
+```{r}
+
+## Isolate malignant/ductal cells into its own Seurat object and integrate
+
+Idents(BCCIO) <- BCCIO$seurat_clusters
+Idents(PDAC.all) <- PDAC.all$cluster
+
+BCC.malignant <- subset(BCCIO, idents=c("Tumor 1", "Tumor 2"))
+
+PDAC.malignant <- subset(PDAC.all, idents=c("Ductal cells: Healthy", "Ductal cells: Malignant 1", "Ductal cells: Malignant 2", "Ductal cells: Normal"))
+
+malignant.anchors <- FindIntegrationAnchors(object.list=list(BCC.malignant, PDAC.malignant), dims=1:50)
+malignant <- IntegrateData(anchorset=malignant.anchors, dims=1:50)
+DefaultAssay(malignant) <- "RNA"
+
+malignant@meta.data$seurat_clusters[is.na(malignant@meta.data$seurat_clusters)] <- malignant@meta.data$cluster[is.na(malignant@meta.data$seurat_clusters)]
+
+Idents(malignant) <- malignant$seurat_clusters
+
+malignant <- RenameIdents(object=malignant, 
+                          'Tumor 1' = 'BCC Malignant 1',
+                          'Tumor 2' = 'BCC Malignant 2',
+                          'Ductal cells: Malignant 1' = 'PDAC DC Malignant 1',
+                          'Ductal cells: Malignant 2' = 'PDAC DC Malignant 2',
+                          'Ductal cells: Normal'= 'PDAC DC Normal',
+                          'Ductal cells: Healthy' = 'PDAC DC Healthy')
+
+malignant$imported_clusters <- Idents(malignant)
+
+malignant <- preprocessing(malignant, heatmap=FALSE)
+malignant <- clustering(malignant, resolution=0.3)
+
+malignant$imported_clusters[rownames(BCC.malignant@meta.data)] <- paste(BCC.malignant$seurat_clusters)
+malignant$imported_clusters[rownames(PDAC.malignant@meta.data)] <- paste(PDAC.malignant$cluster)
+
+Idents(malignant) <- malignant$imported_clusters
+
+malignant <- RenameIdents(object=malignant,
+                          'Tumor 1' = 'BCC Malignant 1',
+                          'Tumor 2' = 'BCC Malignant 2',
+                          'Ductal cells: Malignant 1' = 'PDAC DC Malignant 1',
+                          'Ductal cells: Malignant 2' = 'PDAC DC Malignant 2',
+                          'Ductal cells: Normal' = 'PDAC DC Normal',
+                          'Ductal cells: Healthy' = 'PDAC DC Healthy')
+
+malignant$imported_clusters <- Idents(malignant)
+
+malignant <- RenameIdents(object=malignant,
+                          'BCC Malignant 1' = 'BCC',
+                          'BCC Malignant 2' = 'BCC',
+                          'PDAC DC Malignant 1' = 'PDAC',
+                          'PDAC DC Malignant 2' = 'PDAC',
+                          'PDAC DC Normal' = 'PDAC',
+                          'PDAC DC Healthy' = 'PDAC')
+
+malignant$cancer <- Idents(malignant)
+
+malignant$healthy <- malignant$imported_clusters
+Idents(malignant) <- malignant$healthy
+
+malignant <- RenameIdents(object=malignant,
+                          'BCC Malignant 1' = 'BCC',
+                          'BCC Malignant 2' = 'BCC',
+                          'PDAC DC Malignant 1' = 'Malignant',
+                          'PDAC DC Malignant 2' = 'Malignant',
+                          'PDAC DC Normal' = 'Normal',
+                          'PDAC DC Healthy' = 'Normal')
+
+malignant$healthy <- Idents(malignant)
+
+## Look at differential expression between the populations 
+
+DimPlot(malignant, group.by="imported_clusters", label=TRUE, shuffle=TRUE) + NoLegend()
+DimPlot(malignant, group.by="seurat_clusters", label=TRUE, shuffle=TRUE) + NoLegend()
+
+ggplot_barcharts(malignant$imported_clusters, malignant$seurat_clusters)
+ggplot_barcharts(malignant$cancer, malignant$seurat_clusters)
+
+malignant$filler <- "everything"
+Idents(malignant) <- malignant$filler
+malignant.volcano <- bioc_volcano(malignant, "everything", "cancer", "PDAC", "BCC", title="Malignant cells")
+
+Idents(malignant) <- malignant$cancer
+pdac.volcano <- bioc_volcano(malignant, "PDAC", "healthy", "Malignant", "Normal", title="PDAC Ductal Cells")
+
+Idents(malignant) <- malignant$imported_clusters
+pdacupregulated.filter <- c('S100P', 'CEACAM6', 'CLDN18', 'GPRC5A', 'PHLDA2', 'CEACAM5', 'LAMC2', 'SFN', 'AHNAK2', 'TFF1', 'SDR16C5', 'LAMA3', 'IFI27', 'TGM2', 'NQO1', 'TPM2', 'S100A4', 'TRIM29', 'CD55', 'TMPRSS4', 'FOXQ1', 'CAPN8', 'PLAUR', 'ADAM28', 'FXYD3', 'TSPAN1', 'FXYD5', 'KCNK1')
+DotPlot(malignant, features = pdacupregulated.filter, assay = 'RNA', cols = c('White', 'Blue')) + RotatedAxis() + xlab('Marker Genes')+ ylab('Clusters')
+
+mhc.genes <- c('HLA-A', 'HLA-B', 'HLA-C', 'HLA-E', 'HLA-F', 'HLA-G', 'HLA-DMA', 'HLA-DMB', 'HLA-DOA', 'HLA-DPA1', 'HLA-DPB1', 'HLA-DQA1', 'HLA-DQA2', 'HLA-DQB1', 'HLA-DQB2', 'HLA-DRA', 'HLA-DRB1', 'HLA-DRB5')
+DotPlot(malignant, features = mhc.genes, assay = 'RNA', cols = c('White', 'Blue')) + RotatedAxis() + xlab('Marker Genes')+ ylab('Clusters')
+
+```
+
+
+
+Investigate MHC expression between BCC and PDAC 
+
+```{r}
+
+## MHC score comparison using all BCC cells 
+
+mhc1.genes <- c('HLA-A', 'HLA-B', 'HLA-C', 'HLA-E', 'HLA-F', 'HLA-G')
+mhc2.genes <- c('HLA-DMA', 'HLA-DMB', 'HLA-DOA', 'HLA-DPA1', 'HLA-DPB1', 'HLA-DQA1', 'HLA-DQA2', 'HLA-DQB1', 'HLA-DQB2', 'HLA-DRA', 'HLA-DRB1', 'HLA-DRB5')
+
+exp <- AverageExpression(malignant)
+mhc1.exp <- t(exp$RNA[mhc1.genes,])
+mhc2.exp <- t(exp$RNA[mhc2.genes,])
+
+data <- as.data.frame(t(cbind(rownames(exp), mhc1.exp, mhc2.exp, rowMeans(mhc1.exp), rowMeans(mhc2.exp))))
+rownames(data) <- c(mhc1.genes, mhc2.genes, "MHC Class I", "MHC Class II")
+
+data$gene <- rownames(data)
+data <- melt(data, id.vars="gene")
+data <- data %>% mutate(paired = rep(1:(n()/length(rownames(data))), each=length(rownames(data))), gene=factor(gene))
+
+data %>% ggplot(aes(x=value, y=gene)) +
+  geom_line(aes(group=gene)) +
+  geom_point(aes(color=variable), size=5) +
+  theme(legend.position="top") +
+  labs(title = "MHC Gene Expression", x = "Expression", y = "Gene") +
+  theme_light() +
+  theme(legend.position="top", plot.title = element_text(color="black", size=18, face="bold", hjust = 0.5))
+
+## MHC score comparison separating responsive and nonresponsive BCC cells, pretreatment and posttreatment
+
+malignant$refined_clusters <- as.character(malignant$imported_clusters)
+malignant@meta.data[is.na(malignant@meta.data)] <- "NA"
+
+refined_clusters <- c()
+for (i in 1:nrow(malignant@meta.data)) {
+  if (malignant$treatment[i] == "pre" && malignant$response[i] == "Responsive") {
+    refined_clusters[i] <- "BCC Responsive Pre-treatment"
+  }
+  else if (malignant$treatment[i] == "pre" && malignant$response[i] == "Nonresponsive") {
+    refined_clusters[i] <- "BCC Nonresponsive Pre-treatment"
+  }
+  else if (malignant$treatment[i] == "post" && malignant$response[i] == "Responsive") {
+    refined_clusters[i] <- "BCC Responsive Post-treatment"
+  }
+  else if (malignant$treatment[i] == "post" && malignant$response[i] == "Nonresponsive") {
+    refined_clusters[i] <- "BCC Nonresponsive Post-treatment" 
+  }
+  else {
+    refined_clusters[i] <- malignant$imported_clusters[i]
+  }
+}
+
+malignant$refined_clusters <- refined_clusters
+Idents(malignant) <- malignant$refined_clusters
+
+malignant <- RenameIdents(object=malignant,
+                          "3" = "PDAC DC Malignant 1",
+                          "4" = "PDAC DC Malignant 2", 
+                          "5" = "PDAC DC Normal",
+                          "6" = "PDAC DC Healthy")
+
+malignant$refined_clusters <- Idents(malignant)
+
+for (i in 1:nrow(malignant@meta.data)) {
+  if (malignant$orig.ident[i] == "H1") {
+    malignant$patient[i] <- "pdacH1"
+  } else if (malignant$orig.ident[i] == "H2") {
+    malignant$patient[i] <- "pdacH2"
+  } else if (malignant$orig.ident[i] == "H3") {
+    malignant$patient[i] <- "pdacH3"
+  }
+}
+
+save(malignant, file="C:\\Users\\Ryan\\Documents\\Nie Research Project\\BCC PDAC Malignant Cells")
+
+exp <- AverageExpression(malignant)
+mhc1.exp <- t(exp$RNA[mhc1.genes,])
+mhc2.exp <- t(exp$RNA[mhc2.genes,])
+
+data <- as.data.frame(t(cbind(rownames(exp), mhc1.exp, mhc2.exp, rowMeans(mhc1.exp), rowMeans(mhc2.exp))))
+rownames(data) <- c(mhc1.genes, mhc2.genes, "MHC Class I", "MHC Class II")
+
+data$gene <- rownames(data)
+data <- melt(data, id.vars="gene")
+data <- data %>% mutate(paired = rep(1:(n()/length(rownames(data))), each=length(rownames(data))), gene=factor(gene))
+
+data %>% ggplot(aes(x=value, y=gene)) +
+  geom_line(aes(group=gene)) +
+  geom_point(aes(color=variable), size=5) +
+  theme(legend.position="top") +
+  labs(title = "MHC Gene Expression", x = "Expression", y = "Gene") +
+  theme_light() +
+  theme(legend.position="top", plot.title = element_text(color="black", size=18, face="bold", hjust = 0.5))
+
+```
+
+
+
+Look at MHC gene expression by individual cell
+
+```{r}
+
+Idents(malignant) <- malignant$refined_clusters
+
+malignant <- RenameIdents(object=malignant,
+                          "PDAC DC Malignant 1" = "PDAC M1",
+                          "PDAC DC Malignant 2" = "PDAC M2",
+                          "PDAC DC Normal" = "PDAC N",
+                          "PDAC DC Healthy" = "PDAC H",
+                          "BCC Responsive Pre-treatment" =  "BCC RPre",
+                          "BCC Responsive Post-treatment" = "BCC RPost",
+                          "BCC Nonresponsive Pre-treatment" = "BCC NRPre",
+                          "BCC Nonresponsive Post-treatment" = "BCC NRPost")
+
+malignant$refined_clusters <- Idents(malignant)
+
+## Look at MHC genes individually
+
+VlnPlot(malignant, features=mhc.genes, pt.size=0)
+
+## Look at MHC scores (all cells) -- CDF
+
+malignant.counts <- malignant@assays$RNA@counts
+
+malignant.mhc1.counts <- data.frame(malignant.counts[mhc1.genes,])
+malignant.mhc2.counts <- data.frame(malignant.counts[mhc2.genes,])
+
+malignant.mhc1.counts["MHC Class I",] <- colSums(malignant.mhc1.counts)
+malignant.mhc2.counts["MHC Class II",] <- colSums(malignant.mhc2.counts)
+
+malignant.mhc1.counts <- data.frame(t(malignant.mhc1.counts))
+malignant.mhc2.counts <- data.frame(t(malignant.mhc2.counts))
+
+mhc1.cdf <- ggplot(malignant.mhc1.counts, aes(MHC.Class.I+1)) + stat_ecdf(geom = "step", size=1) +
+  labs(title="MHC Class I Score", x="Sum of Normalized Count Matrix", y="Cumulative Proportion") +
+  scale_x_log10() + theme_light() +
+  theme(legend.position="top", plot.title = element_text(color="black", size=18, face="bold", hjust = 0.5))
+
+mhc2.cdf <- ggplot(malignant.mhc2.counts, aes(MHC.Class.II+1)) + stat_ecdf(geom = "step", size=1) +
+  labs(title="MHC Class II Score", x="Sum of Count Normalized Matrix", y="Cumulative Proportion") +
+  scale_x_log10() + theme_light() +
+  theme(legend.position="top", plot.title = element_text(color="black", size=18, face="bold", hjust = 0.5))
+
+grid.arrange(mhc1.cdf, mhc2.cdf, ncol=2)
+
+## Look at MHC scores divided by cluster -- CDF
+
+Idents(malignant) <- malignant$refined_clusters
+clusters <- levels(Idents(malignant))
+
+for (i in 1:length(clusters)) {
+  assign(paste0("malignant.", clusters[i]), subset(malignant, idents=clusters[i]))
+}
+
+clusters <- list(`malignant.PDAC M1`, `malignant.PDAC M2`, `malignant.PDAC N`, `malignant.PDAC H`, `malignant.BCC RPre`, `malignant.BCC RPost`, `malignant.BCC NRPre`, `malignant.BCC NRPost`)
+
+MHC.Class.I <- c(0)
+MHC.Class.II <- c(0)
+id <- c(0)
+
+mhc1.cdf.data <- data.frame(MHC.Class.I, id)
+mhc2.cdf.data <- data.frame(MHC.Class.II, id)
+
+for (i in 1:length(clusters)) {
+  counts <- clusters[[i]]@assays$RNA@data
+  mhc1.counts <- data.frame(counts[mhc1.genes,])
+  mhc2.counts <- data.frame(counts[mhc2.genes,])
+  mhc1.counts["MHC Class I",] <- colSums(mhc1.counts)
+  mhc2.counts["MHC Class II",] <- colSums(mhc2.counts)
+  mhc1.counts["id",] <- levels(Idents(malignant))[i]
+  mhc2.counts["id",] <- levels(Idents(malignant))[i]
+  mhc1.counts <- data.frame(t(mhc1.counts))
+  mhc2.counts <- data.frame(t(mhc2.counts))
+  mhc1.cdf.data <- rbind(mhc1.cdf.data, mhc1.counts[,c("MHC.Class.I", "id")])
+  mhc2.cdf.data <- rbind(mhc2.cdf.data, mhc2.counts[,c("MHC.Class.II", "id")])
+}
+
+mhc1.cdf.data <- mhc1.cdf.data[-1,]
+mhc2.cdf.data <- mhc2.cdf.data[-1,]
+mhc1.cdf.data$MHC.Class.I <- as.numeric(mhc1.cdf.data$MHC.Class.I)
+mhc2.cdf.data$MHC.Class.II <- as.numeric(mhc2.cdf.data$MHC.Class.II)
+mhc1.cdf.data$id <- as.factor(mhc1.cdf.data$id)
+mhc2.cdf.data$id <- as.factor(mhc2.cdf.data$id)
+
+mhc1.cdf <- ggplot(mhc1.cdf.data, aes(x=MHC.Class.I, col=id)) + stat_ecdf(geom = "step", size=1) +
+  labs(title="MHC Class I Score", x="Sum of Normalized Count Matrix", y="Cumulative Proportion") +
+  theme_light() +
+  theme(legend.position="top", plot.title = element_text(color="black", size=18, face="bold", hjust = 0.5))
+
+mhc2.cdf <- ggplot(mhc2.cdf.data, aes(x=MHC.Class.II, col=id)) + stat_ecdf(geom = "step", size=1) +
+  labs(title="MHC Class II Score", x="Sum of Normalized Count Matrix", y="Cumulative Proportion") +
+  theme_light() +
+  theme(legend.position="top", plot.title = element_text(color="black", size=18, face="bold", hjust = 0.5))
+
+ggarrange(mhc1.cdf, mhc2.cdf, ncol=2, common.legend=TRUE, legend="bottom")
+
+## Construct PDF / Violin Plots for MHC expression 
+
+mhc1.pdf <- ggplot(mhc1.cdf.data, aes(x=MHC.Class.I+1, fill=id)) + geom_density(alpha=0.3) +
+  labs(title="MHC Class I Score", x="Sum of Count Matrix",y = "Probability Density") +
+  scale_x_log10() + theme_light() +
+  theme(legend.position="top", plot.title = element_text(color="black", size=18, face="bold", hjust=0.5))
+  
+mhc2.pdf <- ggplot(mhc2.cdf.data, aes(x=MHC.Class.II+1, fill=id)) + geom_density(alpha=0.3) +
+  labs(title="MHC Class II Score", x="Sum of Count Matrix",y = "Probability Density") +
+  scale_x_log10() + theme_light() +
+  theme(legend.position="top", plot.title = element_text(color="black", size=18, face="bold", hjust=0.5))
+
+ggarrange(mhc1.pdf, mhc2.pdf, ncol=2, common.legend=TRUE, legend="bottom")
+
+mhc1.vln <- ggplot(mhc1.cdf.data, aes(x=MHC.Class.I+1, factor(id))) + geom_violin() +
+  labs(title="MHC Class I Score", x = "Sum of Normalized Count Matrix", y = "Cluster") +
+  aes(fill=factor(id)) + scale_x_log10() + theme_light() +
+  theme(legend.position="top", plot.title = element_text(color="black", size=18, face="bold", hjust=0.5))
+
+mhc2.vln <- ggplot(mhc2.cdf.data, aes(x=MHC.Class.II+1, factor(id))) + geom_violin() +
+  labs(title="MHC Class II Score", x = "Sum of Normalized Count Matrix", y = "Cluster") +
+  aes(fill=factor(id)) + scale_x_log10() + theme_light() +
+  theme(legend.position="top", plot.title = element_text(color="black", size=18, face="bold", hjust=0.5))
+
+ggarrange(mhc1.vln, mhc2.vln, ncol=2, common.legend=TRUE, legend="bottom")
+
+```
+
+
+
+Look at per-patient MHC scores
+
+```{r}
+
+Idents(malignant) <- malignant$cancer
+malignant.pdac <- subset(malignant, idents="PDAC")
+
+Idents(malignant.pdac) <- malignant.pdac$orig.ident
+patients <- levels(Idents(malignant.pdac))
+
+for (i in 1:length(patients)) {
+  assign(paste0("malignant.", patients[i]), subset(malignant.pdac, idents=patients[i]))
+}
+
+## Look at distribution of cells per patient
+
+ggplot_barcharts(malignant.pdac$refined_clusters, malignant.pdac$orig.ident)
+
+## Construct CDF
+
+infected.patients <- list(malignant.I1, malignant.I2, malignant.I3, malignant.I4, malignant.I5, malignant.I6, malignant.I7, malignant.I8, malignant.I9, malignant.I10, malignant.I11, malignant.I12, malignant.I13, malignant.I14, malignant.I15, malignant.I16)
+
+healthy.patients <- list(malignant.H1, malignant.H2, malignant.H3)
+
+infected.patient.names <- c('I1', 'I2', 'I3', 'I4', 'I5', 'I6', 'I7', 'I8', 'I9', 'I10', 'I11A', 'I11B', 'I12', 'I13', 'I15', 'I16')
+healthy.patient.names <- c('H1', 'H2', 'H3')
+
+mhc1.icdf <- genes_cdf(datasets=infected.patients, genes=mhc1.genes, clusters=infected.patient.names, title="MHC Class I Score: Cancerous Samples") + xlim(0, 21)
+mhc1.hcdf <- genes_cdf(datasets=healthy.patients, genes=mhc1.genes, clusters=healthy.patient.names, title="MHC Class I Score: Non-Cancerous Samples") + xlim(0, 21)
+
+mhc2.icdf <- genes_cdf(datasets=infected.patients, genes=mhc2.genes, clusters=infected.patient.names, title="MHC Class II Score: Cancerous Samples") + xlim(0, 34)
+mhc2.hcdf <- genes_cdf(datasets=healthy.patients, genes=mhc2.genes, clusters=healthy.patient.names, title="MHC Class II Score: Non-Cancerous Samples") + xlim(0, 34)
+
+ggarrange(mhc1.icdf, mhc1.hcdf, mhc2.icdf, mhc2.hcdf, ncol=2, nrow=2, common.legend=TRUE, legend="bottom")
+
+## Construct violion plots
+
+mhc1.vln <- ggplot(mhc1.cdf.data, aes(x=MHC.Class.I, factor(id))) + geom_violin() +
+  labs(title="MHC Class I Score", x = "Sum of Count Matrix", y = "Patient") +
+  aes(fill=factor(id)) + theme_light() +
+  theme(legend.position="top", plot.title = element_text(color="black", size=18, face="bold", hjust=0.5))
+
+mhc2.vln <- ggplot(mhc2.cdf.data, aes(x=MHC.Class.II, factor(id))) + geom_violin() +
+  labs(title="MHC Class II Score", x = "Sum of Count Matrix", y = "Patient") +
+  aes(fill=factor(id)) + theme_light() +
+  theme(legend.position="top", plot.title = element_text(color="black", size=18, face="bold", hjust=0.5))
+
+ggarrange(mhc1.vln, mhc2.vln, ncol=2, common.legend=TRUE, legend="bottom")
+
+## Compare subclusters per patient
+
+levels <- c("M1", "M2", "N")
+
+for (i in 1:length(patients)) {
+  Idents(infected.patients[[i]]) <- infected.patients[[i]]$refined_clusters
+  m1 <- subset(infected.patients[[i]], idents="PDAC DC Malignant 1")
+  m2 <- subset(infected.patients[[i]], idents="PDAC DC Malignant 2")
+  n <- subset(infected.patients[[i]], idents="PDAC DC Normal")
+  
+  subclusters <- list(m1, m2, n)
+  assign(paste0(patient.names[i], ".cdf1"), gene_cdf(datasets=subclusters, genes=mhc1.genes, clusters=levels, title=paste0("MHC I Class Score:  ", patient.names[i])))
+  assign(paste0(patient.names[i], ".cdf2"), gene_cdf(datasets=subclusters, genes=mhc2.genes, clusters=levels, title=paste0("MHC Class II Score: ", patient.names[i])))
+  print(patient.names[i])
+}
+
+patients.cdf1 <- list(I1.cdf1, I2.cdf1, I3.cdf1, I4.cdf1, I5.cdf1, I6.cdf1, I7.cdf1, I8.cdf1, I9.cdf1, I11A.cdf1, I11B.cdf1, I13.cdf1, I15.cdf1, I16.cdf1)
+
+patients.cdf2 <- list(I1.cdf2, I2.cdf2, I3.cdf2, I4.cdf2, I5.cdf2, I6.cdf2, I7.cdf2, I8.cdf2, I9.cdf2, I11A.cdf2, I11B.cdf2, I13.cdf2, I15.cdf2, I16.cdf2)
+
+ggarrange(plotlist=patients.cdf1, ncol=4, nrow=4, common.legend=TRUE, legend="bottom")
+ggarrange(plotlist=patients.cdf2, ncol=4, nrow=4, ommon.legend=TRUE, legend="bottom")
+
+```
+
+
+
+Statistical comparison of MHC Class I and Class II scores, calculated by patient 
+
+```{r}
+
+## Construct boxplot
+
+clusters <- list(`malignant.PDAC M1`, `malignant.PDAC M2`, `malignant.PDAC N`, `malignant.PDAC H`, `malignant.BCC RPre`, `malignant.BCC RPost`, `malignant.BCC NRPre`, `malignant.BCC NRPost`)
+
+clusternames <- c('PDAC.M1','PDAC.M2', 'PDAC.N', 'PDAC.H', 'BCC.RPre', 'BCC.RPost', 'BCC.NRPre', 'BCC.NRPost')
+
+pdacclusters <- list(`malignant.PDAC M1`, `malignant.PDAC M2`, `malignant.PDAC N`, `malignant.PDAC H`)
+
+for (i in 1:length(pdacclusters)) {
+  clusters[[i]]$patient <- clusters[[i]]$orig.ident
+}
+
+for (i in 1:length(clusters)) {
+  Idents(clusters[[i]]) <- clusters[[i]]$patient
+  assign(paste0(clusternames[i], ".exp"), AverageExpression(clusters[[i]]))
+}
+
+cluster.averages <- list(PDAC.M1.exp, PDAC.M2.exp, PDAC.N.exp, PDAC.H.exp, BCC.RPre.exp, BCC.RPost.exp, BCC.NRPre.exp, BCC.NRPost.exp)
+
+for (i in 1:length(cluster.averages)) {
+  assign(paste0(clusternames[i], ".exp.mhc1"), cluster.averages[[i]]$RNA[mhc1.genes, ])
+  assign(paste0(clusternames[i], ".exp.mhc2"), cluster.averages[[i]]$RNA[mhc2.genes, ])
+}
+
+cluster.averages.mhc1 <- list(PDAC.M1.exp.mhc1, PDAC.M2.exp.mhc1, PDAC.N.exp.mhc1, PDAC.H.exp.mhc1, BCC.RPre.exp.mhc1, BCC.RPost.exp.mhc1, BCC.NRPre.exp.mhc1, BCC.NRPost.exp.mhc1)
+
+cluster.averages.mhc2 <- list(PDAC.M1.exp.mhc2, PDAC.M2.exp.mhc2, PDAC.N.exp.mhc2, PDAC.H.exp.mhc2, BCC.RPre.exp.mhc2, BCC.RPost.exp.mhc2, BCC.NRPre.exp.mhc2, BCC.NRPost.exp.mhc2)
+
+for (i in 1:length(cluster.averages.mhc1)) {
+  cluster.averages.mhc1[[i]] <- as.data.frame(colMeans(cluster.averages.mhc1[[i]]))
+  cluster.averages.mhc1[[i]]$patient <- rownames(cluster.averages.mhc1[[i]])
+  cluster.averages.mhc1[[i]]$cluster <- clusternames[i]
+  colnames(cluster.averages.mhc1[[i]]) <- c("score", "patient", "cluster")
+}
+
+for (i in 1:length(cluster.averages.mhc2)) {
+  cluster.averages.mhc2[[i]] <- as.data.frame(colMeans(cluster.averages.mhc2[[i]]))
+  cluster.averages.mhc2[[i]]$patient <- rownames(cluster.averages.mhc2[[i]])
+  cluster.averages.mhc2[[i]]$cluster <- clusternames[i]
+  colnames(cluster.averages.mhc2[[i]]) <- c("score", "patient", "cluster")
+}
+
+cluster.averages.mhc1 <- rbind(cluster.averages.mhc1[[1]], cluster.averages.mhc1[[2]], cluster.averages.mhc1[[3]], cluster.averages.mhc1[[4]], cluster.averages.mhc1[[5]], cluster.averages.mhc1[[6]], cluster.averages.mhc1[[7]], cluster.averages.mhc1[[8]])
+
+cluster.averages.mhc2 <- rbind(cluster.averages.mhc2[[1]], cluster.averages.mhc2[[2]], cluster.averages.mhc2[[3]], cluster.averages.mhc2[[4]], cluster.averages.mhc2[[5]], cluster.averages.mhc2[[6]], cluster.averages.mhc2[[7]], cluster.averages.mhc2[[8]])
+
+comparisons <- list(c("BCC.RPre", "BCC.RPost"), c("BCC.NRPre", "BCC.NRPost"), c("BCC.RPre", "BCC.NRPre"), c("BCC.RPost", "BCC.NRPost"), c("PDAC.M1", "BCC.RPre"), c("PDAC.M1", "BCC.NRPre"), c("PDAC.M2", "BCC.RPre"), c("PDAC.M2", "BCC.NRPre"))
+
+mhc1.score.comparison <- ggboxplot(cluster.averages.mhc1, x="cluster", y="score", color="cluster", title="MHC Class I Score", add="jitter") +
+  stat_compare_means(comparisons = comparisons) +
+  theme(legend.position="none", plot.title = element_text(color="black", size=18, face="bold", hjust = 0.5))
+
+mhc2.score.comparison <- ggboxplot(cluster.averages.mhc2, x="cluster", y="score", color="cluster", title="MHC Class II Score", add="jitter") +
+  stat_compare_means(comparisons = comparisons) +
+  theme(legend.position="none", plot.title = element_text(color="black", size=18, face="bold", hjust = 0.5))
+
+```
+
+
+
+Comparison of MHC Class I scores based on percentage of malignant cells
+
+```{r}
+
+## Calculate percentage of malignant cells
+
+Idents(malignant.pdac) <- malignant.pdac$refined_clusters
+malignant.pdac <- RenameIdents(object=malignant.pdac,
+                               'PDAC M1' = 'Malignant',
+                               'PDAC M2' = 'Malignant', 
+                               'PDAC N' = 'Non-malignant',
+                               'PDAC H' = 'Non-cancerous')
+
+malignant.pdac$malignant <- Idents(malignant.pdac)
+
+pdac.proportions <- ggplot_barcharts(malignant.pdac$malignant, malignant.pdac$orig.ident)
+
+pdac.m1m2.proportions <- ggplot_barcharts(malignant.pdac$refined_clusters, malignant.pdac$orig.ident) +
+  theme_classic() + theme(legend.position="bottom") +
+  labs(y="Cell Proportion Normalized by Patient", x="Patient", fill="Cell Type", legend.position="bottom") +
+  scale_x_discrete(limits=c('I1', 'I2', 'I3', 'I4', 'I5', 'I6', 'I7', 'I8', 'I9', 'I10', 'I11', 'I12', 'I13', 'I14', 'I15', 'I16'))
+
+
+## Create scatter plot of proportion of malignant cells vs. MHC Class I Score
+
+pdac.patients <- list(malignant.I1, malignant.I10, malignant.I11, malignant.I12, malignant.I13, malignant.I14, malignant.I15, malignant.I16, malignant.I2, malignant.I3, malignant.I4, malignant.I5, malignant.I6, malignant.I7, malignant.I8, malignant.I9, malignant.H1, malignant.H2, malignant.H3)
+
+status <- c('Cancerous', 'Cancerous', 'Cancerous', 'Cancerous', 'Cancerous', 'Cancerous', 'Cancerous', 'Cancerous', 'Cancerous', 'Cancerous', 'Cancerous', 'Cancerous', 'Cancerous', 'Cancerous', 'Cancerous', 'Cancerous', 'Normal', 'Normal', 'Normal')
+
+proportion <- rep(0, length(pdac.patients))
+data <- pdac.proportions$plot_env$normalized_dataset
+for (i in 1:16) {
+  proportion[i] <- data$n[2*i+2] / (data$n[2*i+2] + data$n[2*i+3])
+}
+
+mhc1.scores <- rep(0, length(pdac.patients))
+mhc2.scores <- rep(0, length(pdac.patients))
+for (i in 1:length(pdac.patients)) {
+  Idents(pdac.patients[[i]]) <- pdac.patients[[i]]$orig.ident
+  avg <- AverageExpression(pdac.patients[[i]])
+  mhc1.scores[i] <- mean(avg$RNA[mhc1.genes,])
+  mhc2.scores[i] <- mean(avg$RNA[mhc2.genes,])
+}
+
+mhc1.scatter.data <- data.frame(status, proportion, mhc1.scores)
+
+mhc1.scatter <- ggplot(mhc1.scatter.data, aes(x=proportion, y=mhc1.scores, color=status)) + geom_point(size=6) +
+  geom_smooth(data=subset(mhc1.scatter.data, proportion>0), method="lm", se=FALSE, size=2, color="black") + 
+  stat_regline_equation(label.y=12.7, label.x=0.06, aes(label = ..eq.label..), size=8) +
+  stat_regline_equation(label.y=12.1, label.x=0.06, aes(label = ..rr.label..), size=8) +
+  scale_fill_manual(values=c("blue", "red")) +
+  labs(y="MHC Class I Score", x="Proportion of Malignant Ductal Cells", color="Status") +
+  theme_bw(base_size=28) +
+  scale_color_manual(values=c("maroon", "blue"))
+           
+mhc2.scatter.data <- data.frame(status, proportion, mhc2.scores)
+
+mhc2.scatter <- ggplot(mhc2.scatter.data, aes(x=proportion, y=mhc2.scores, color=status)) + geom_point(size=6) +
+  geom_smooth(data=subset(mhc2.scatter.data, proportion>0), method="lm", se=FALSE, size=2, color="black") + 
+  stat_regline_equation(label.y=3.3, label.x=0.06, aes(label = ..eq.label..), size=8) +
+  stat_regline_equation(label.y=3.1, label.x=0.06, aes(label = ..rr.label..), size=8) +
+  scale_fill_manual(values=c("blue", "red")) +
+  labs(y="MHC Class II Score", x="Proportion of Malignant Ductal Cells", color="Status") +
+  theme_bw(base_size=28) +
+  scale_color_manual(values=c("maroon", "blue"))
+           
+ggarrange(mhc1.scatter, mhc2.scatter, ncol=2, common.legend=TRUE, legend="bottom")
+
+## Examine distribution of MHC Class I scores as a function of number of malignant cells 
+
+Idents(malignant.pdac) <- malignant.pdac$malignant
+
+malignant.pdac.lv1 <- merge(malignant.I4, y=c(malignant.I11, malignant.I9, malignant.I13))
+malignant.pdac.lv2 <- merge(malignant.I8, y=c(malignant.I10, malignant.I5, malignant.I7))
+malignant.pdac.lv3 <- merge(malignant.I12, y=c(malignant.I6, malignant.I3, malignant.I2))
+malignant.pdac.lv4 <- merge(malignant.I15, y=c(malignant.I14, malignant.I16, malignant.I1))
+
+malignant.levels <- list(`malignant.PDAC H`, malignant.pdac.lv1, malignant.pdac.lv2, malignant.pdac.lv3, malignant.pdac.lv4)
+percentages <- c("Non-cancerous", "33% - 44%", "44% - 60%", "71% - 86%", "92% - 99%")
+
+malignant.levels.mhc1.cdf <- genes_cdf(datasets=malignant.levels, clusters=percentages, genes=mhc1.genes, title="MHC Class I Score")
+malignant.levels.mhc2.cdf <- genes_cdf(datasets=malignant.levels, clusters=percentages, genes=mhc2.genes, title="MHC Class II Score")
+
+ggarrange(malignant.levels.mhc1.cdf, malignant.levels.mhc2.cdf, ncol=2, common.legend=TRUE, legend="bottom")
+
+mhc1.levels.data <- malignant.levels.mhc1.cdf$data
+colnames(mhc1.levels.data) <- c("MHC Class I", "Proportion")
+mhc1.levels.data$`MHC Class I` <- mhc1.levels.data$`MHC Class I`
+
+malignant.levels.mhc1.pdf <- ggplot(mhc1.levels.data, aes(x=`MHC Class I`, y=factor(Proportion), fill=Proportion)) + geom_violin(draw_quantiles = c(0.25, 0.5, 0.75)) +
+  labs(x = "MHC Class I Score", y = "Cluster") +
+  theme(legend.position="none") + theme_bw()
+
+mhc2.levels.data <- malignant.levels.mhc2.cdf$data
+colnames(mhc2.levels.data) <- c("MHC Class II", "Proportion")
+mhc2.levels.data$`MHC Class II` <- mhc2.levels.data$`MHC Class II`
+
+malignant.levels.mhc2.pdf <- ggplot(mhc2.levels.data, aes(x=`MHC Class II`, y=factor(Proportion), fill=Proportion)) + geom_violin(draw_quantiles = c(0.25, 0.5, 0.75)) +
+  labs(x = "MHC Class II Score", y = "Cluster") +
+  theme(legend.position="none") + theme_bw()
+
+```
+
+
+
+Examine differences in expression of the PD-1 pathway
+
+```{r}
+
+## PD-1 genes for malignant cells
+
+Idents(malignant) <- malignant$refined_clusters
+
+clusters <- list(`malignant.PDAC M1`, `malignant.PDAC M2`, `malignant.PDAC N`, `malignant.PDAC H`, `malignant.BCC RPre`, `malignant.BCC RPost`, `malignant.BCC NRPre`, `malignant.BCC NRPost`)
+
+clusternames <- c("PDAC M1", "PDAC M2", "PDAC N", "PDAC H", "BCC RPre", "BCC RPost", "BCC NRPre", "BCC NRPost")
+
+alldata <- malignant@assays$RNA@data
+pd1.data <- data.frame(alldata["PDCD1",])
+colnames(pd1.data) <- "gene"
+
+ggplot(pd1.data, aes(gene)) + stat_ecdf(geom="step") + scale_x_log10()
+
+pd1.cdf <- gene_cdf(datasets=clusters, genename="PDCD1", clusternames=clusternames, title="PD-1 Gene Expression")
+pdl1.cdf <- gene_cdf(datasets=clusters, genename="CD274", clusternames=clusternames, title="PD-L1 Gene Expression")
+
+ggarrange(pd1.cdf + scale_y_log10(), pdl1.cdf + scale_y_log10(), ncol=2, common.legend=TRUE, legend="bottom")
+
+## PD-1 pathway expression for all PDAC cells
+
+Idents(PDAC.all) <- PDAC.all$cluster
+pdac.clusters <- levels(Idents(PDAC.all))
+
+for (i in 1:length(pdac.clusters)) {
+  assign(paste0("pdac.", pdac.clusters[i]), subset(PDAC.all, idents=pdac.clusters[i]))
+  print(pdac.clusters[i])
+}
+
+pdac.clusters <- list(`pdac.Acinar cells`, `pdac.B cells`, `pdac.CD4+ T Cells`, `pdac.CD8+ T Cells`, `pdac.Ductal cells: Healthy`, `pdac.Ductal cells: Malignant 1`, `pdac.Ductal cells: Malignant 2`, `pdac.Ductal cells: Normal`, `pdac.Endothelial cells`, `pdac.Fibroblasts`, `pdac.Granulocytes`, `pdac.Macrophages`, `pdac.Mast cells`, `pdac.Myeloid cells 1`, `pdac.Myeloid cells 2`, `pdac.NK Cells`, `pdac.pDCs`, `pdac.Perivascular cells`, `pdac.Plasma cells`, `pdac.Proliferating Tregs`, `pdac.Tregs`)
+
+pdac.clusternames <- c("Acinar", "B cells", "CD4+ T cells", "CD8+ T cells", "Ductal: Healthy", "Ductal: Mal1", "Ductal: Mal2", "Ductal: Normal", "Endothelial", "Fibroblasts", "Granulocytes", "Macrophages", "Mast", "Myeloid 1", "Myeloid 2", "NK cells", "pDCs", "Perivascular", "Plasma", "Prolif. Tregs", "Tregs")
+
+pd1.cdf.all <- gene_cdf(datasets=pdac.clusters, genename="PDCD1", clusternames=pdac.clusternames, title="PD-1 Gene Expression")
+
+pdl1.cdf.all <- gene_cdf(datasets=pdac.clusters, genename="CD274", clusternames=pdac.clusternames, title="PD-L1 Gene Expression")
+
+pdl2.cdf.all <- gene_cdf(datasets=pdac.clusters, genename="PDCD1LG2", clusternames=pdac.clusternames, title="PD-L2 Gene Expression")
+
+ggarrange(pd1.cdf.all + scale_y_log10(), pdl1.cdf.all+ scale_y_log10(), pdl2.cdf.all + scale_y_log10(), ncol=3, common.legend=TRUE, legend="bottom")
+
+zap70.cdf.all <- gene_cdf(datasets=pdac.clusters, genename="ZAP70", clusternames=pdac.clusternames, title="ZAP70 Gene Expression") + scale_y_log10()
+
+cd28.cdf.all <- gene_cdf(datasets=pdac.clusters, genename="CD28", clusternames=pdac.clusternames, title="CD28 Gene Expression") + scale_y_log10()
+
+shp2.cdf.all <- gene_cdf(datasets=pdac.clusters, genename="PTPN11", clusternames=pdac.clusternames, title="SHP2 Gene Expression") + scale_y_log10()
+
+batf.cdf.all <- gene_cdf(datasets=pdac.clusters, genename="BATF", clusternames=pdac.clusternames, title="BATF Gene Expression") + scale_y_log10()
+
+ggarrange(zap70.cdf.all, cd28.cdf.all, shp2.cdf.all, batf.cdf.all, ncol=4, common.legend=TRUE, legend="bottom")
+
+## PD-1 pathway expression for all BCC cells
+
+Idents(BCCIO) <- BCCIO$seurat_clusters
+bcc.clusters <- levels(Idents(BCCIO))
+
+for (i in 1:length(bcc.clusters)) {
+  assign(paste0("bcc.", bcc.clusters[i]), subset(BCCIO, idents=bcc.clusters[i]))
+  print(bcc.clusters[i])
+}
+
+bcc.clusters <- list(`bcc.B cells`, `bcc.CAFs`, `bcc.CD4`, `bcc.CD8_activation`, `bcc.CD8_exhausted`, `bcc.CD8_memory`, `bcc.DCs`, `bcc.Endothelial`, `bcc.Macrophages`, `bcc.Melanocytes`, `bcc.Misc.`, `bcc.Myofibroblasts`, `bcc.NK`, `bcc.pDCs`, `bcc.Plasma`, `bcc.T_proliferation`, `bcc.Tregs`, `bcc.Tumor 1`, `bcc.Tumor 2`)
+
+Idents(BCCIO) <- BCCIO$treatment
+BCC.pre <- subset(BCCIO, idents="pre")
+
+Idents(BCC.pre) <- BCC.pre$response
+BCC.pre.R <- subset(BCC.pre, idents="Responsive")
+BCC.pre.NR <- subset(BCC.pre, idents="Nonresponsive")
+
+Idents(BCC.pre.R) <- BCC.pre.R$seurat_clusters
+Idents(BCC.pre.NR) <- BCC.pre.NR$seurat_clusters
+
+for (i in 1:length(bcc.clusters)) {
+  assign(paste0("bcc.preR", bcc.clusters[i]), subset(BCC.pre.R, idents=bcc.clusters[i]))
+  assign(paste0("bcc.preNR", bcc.clusters[i]), subset(BCC.pre.NR, idents=bcc.clusters[i]))
+  print(bcc.clusters[i])
+}
+
+bcc.clusternames <- c("B cells", "CAFs", "CD4+ T cells", "CD8+ T cells: Activated", "CD8+ T cells: Exhausted", "CD8+ T cells: Memory", "Dendritic", "Endothelial", "Macrophages", "Melanocytes", "Miscellaneous", "Myofibroblasts", "NK cells", "pDCs", "Plasma", "Proliferating T cells", "Tregs", "Tumor 1 ", "Tumor 2")
+
+pd1.cdf.bcc <- gene_cdf(datasets=bcc.clusters, genename="PDCD1", clusternames=bcc.clusternames, title="PD-1 Gene Expression")
+
+pdl1.cdf.bcc <- gene_cdf(datasets=bcc.clusters, genename="CD274", clusternames=bcc.clusternames, title="PD-L1 Gene Expression")
+
+pdl2.cdf.bcc <- gene_cdf(datasets=bcc.clusters, genename="PDCD1LG2", clusternames=bcc.clusternames, title="PD-L2 Gene Expression")
+
+ggarrange(pd1.cdf.bcc + scale_y_log10(), pdl1.cdf.bcc+ scale_y_log10(), pdl2.cdf.bcc + scale_y_log10(), ncol=3, common.legend=TRUE, legend="bottom")
+
+zap70.cdf.bcc <- gene_cdf(datasets=bcc.clusters, genename="ZAP70", clusternames=bcc.clusternames, title="ZAP70 Gene Expression") + scale_y_log10()
+
+cd28.cdf.bcc <- gene_cdf(datasets=bcc.clusters, genename="CD28", clusternames=bcc.clusternames, title="CD28 Gene Expression") + scale_y_log10()
+
+shp2.cdf.bcc <- gene_cdf(datasets=bcc.clusters, genename="PTPN11", clusternames=bcc.clusternames, title="SHP2 Gene Expression") + scale_y_log10()
+
+batf.cdf.bcc <- gene_cdf(datasets=bcc.clusters, genename="BATF", clusternames=bcc.clusternames, title="BATF Gene Expression") + scale_y_log10()
+
+ggarrange(zap70.cdf.bcc, cd28.cdf.bcc, shp2.cdf.bcc, batf.cdf.bcc, ncol=4, common.legend=TRUE, legend="bottom")
+
+```
+
+
+
+Differential gene expression between BCC and PDAC: PD-1 pathway
+
+```{r}
+## Specific gene-by-gene comparisons BCC vs. PDAC for certain celltypes
+
+bcc.CD8 <- merge(bcc.CD8_activation, y=c(bcc.CD8_exhausted, bcc.CD8_memory))
+bcc.preRCD8 <- merge(bcc.preRCD8_activation, y=c(bcc.preRCD8_exhausted, bcc.preRCD8_memory))
+bcc.preNRCD8 <- merge(bcc.preNRCD8_activation, y=c(bcc.preNRCD8_exhausted, bcc.preNRCD8_memory))
+
+pdac.allTregs <- merge(`pdac.Proliferating Tregs`, pdac.Tregs)
+
+genes <- c("PDCD1", "CD274", "PDCD1LG2", "PTPN11", "BATF", "ZAP70", "KRAS", "HRAS", "NRAS")
+genenames <- c("PD-1", "PD-L1", "PD-L2", "SHP2", "BATF", "ZAP70", "KRAS", "HRAS", "NRAS")
+
+tcells <- list(bcc.preRCD4, bcc.preRCD8, bcc.preRTregs, bcc.preNRCD4, bcc.preNRCD8, bcc.preNRTregs, `pdac.CD4+ T Cells`, `pdac.CD8+ T Cells`, pdac.Tregs)
+tcellnames <- c("R BCC CD4+", "R BCC CD8+", "R BCC Tregs", "NR BCC CD4+", "NR BCC CD8+", "NR BCC Tregs", "PDAC CD4+", "PDAC CD8+", "PDAC Tregs")
+
+for (i in 1:length(genes)) {
+  assign(paste0("tcell.cdf.", genenames[i]), gene_cdf(datasets=tcells, genename=genes[i], clusternames=tcellnames, title=paste0(genenames[i], " Gene Expression")))
+  print(genenames[i])
+}
+
+ggarrange(`tcell.cdf.PD-1` + ylim(0.7, 1.00), `tcell.cdf.PD-L1` + ylim(0.875, 1.00), `tcell.cdf.PD-L2` + ylim(0.96, 1.00), ncol=3, common.legend=TRUE, legend="bottom")
+ggarrange(`tcell.cdf.SHP2` + ylim(0.80, 1.00), `tcell.cdf.BATF` + ylim(0.1, 1.00), ncol=2, common.legend=TRUE, legend="bottom")
+ggarrange(`tcell.cdf.KRAS` + ylim(0.65, 1.00), `tcell.cdf.HRAS` + ylim(0.88, 1.00), `tcell.cdf.NRAS` + ylim(0.82, 1.00), `tcell.cdf.ZAP70` + ylim(0.64, 1.00), nrow=2, ncol=2, common.legend=TRUE, legend="bottom")
+
+pdac.tcells <- merge(`pdac.CD4+ T Cells`, y=c(`pdac.CD8+ T Cells`, pdac.Tregs))
+bcc.r.tcells <- merge(bcc.preRCD4, y=c(bcc.preRCD8, bcc.preRTregs))
+bcc.nr.tcells <- merge(bcc.preNRCD4, y=c(bcc.preNRCD8, bcc.preNRTregs))
+
+tcells.grouped <- list(pdac.tcells, bcc.r.tcells, bcc.nr.tcells)
+tcells.grouped.names <- c("PDAC", "BCC Responsive", "BCC Nonresponsive")
+
+upgenes <- c("ZAP70", "KRAS", "HRAS", "NRAS")
+upgenes.cdf <- genes_cdf(datasets=tcells.grouped, clusters=tcells.grouped.names, genes=upgenes, title="Down-Regulated Genes") + ylim(0.36, 1.00) + theme_bw()
+
+downgenes <- c("PTPN11", "BATF")
+downgenes.cdf <- genes_cdf(datasets=tcells.grouped, clusters=tcells.grouped.names, genes=downgenes, title="Up-Regulated Genes") + ylim(0.38, 1.00) + theme_bw()
+
+ggarrange(upgenes.cdf, downgenes.cdf, ncol=2, common.legend=TRUE, legend="bottom")
+
+comparisons <- list(c("BCC Nonresponsive", "BCC Responsive"), c("BCC Responsive", "PDAC"), c("BCC Nonresponsive", "PDAC"))
+
+upgenes.boxplot <- ggboxplot(upgenes.cdf$data, x="cluster", y="gene", color="cluster", palette=c("#F8766D", "#00BA38", "#619CFF")) +
+  stat_compare_means(comparisons = comparisons) +
+  labs(y="Gene Expression Score", x="Population", title="Down-Regulated Genes") + 
+  theme_bw() + theme(legend.position="none", plot.title = element_text(color="black", size=18, face="bold", hjust=0.5))
+
+downgenes.boxplot <- ggboxplot(downgenes.cdf$data, x="cluster", y="gene", color="cluster", palette=c("#F8766D", "#00BA38", "#619CFF")) +
+  stat_compare_means(comparisons = comparisons) +
+  labs(y="Gene Expression Score", x="Population", title="Up-Regulated Genes") + 
+  theme_bw() + theme(legend.position="none", plot.title = element_text(color="black", size=18, face="bold", hjust=0.5))
+
+upgenes.plot <- ggarrange(upgenes.boxplot, upgenes.cdf + NoLegend(), ncol=2)
+downgenes.plot <- ggarrange(downgenes.boxplot, downgenes.cdf + NoLegend(), ncol=2)
+
+annotate_figure(upgenes.plot, top=text_grob("Down-Regulated Genes", color="black", face="bold", size=18))
+annotate_figure(downgenes.plot, top=text_grob("Up-Regulated Genes", color="black", face="bold", size=18))
+
+
+```

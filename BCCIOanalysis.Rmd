@@ -514,7 +514,7 @@ grid.arrange(bcc.tcells.pd1.comparison, bcc.tcells.pdl1.comparison, bcc.tcells.p
 
 
 
-##################################################################################################################################
+####################################################################################################################
 
 Examine differences between pretreatment and posttreatment of responders and nonresponders
 
@@ -722,7 +722,7 @@ celltypesnames <- c("Activated CD8+ T Cells", "Exhausted CD8+ T Cells", "Memory 
 ## Create Enhanced Volcano plots
 
 for (i in 1:length(celltypes)) {
-  assign(paste0("BCC.pre.", celltypes[i]), bioc_volcano(dataset=BCC.pre,
+  assign(paste0("BCC.pre.", celltypes[i]), gbioc_volcano(dataset=BCC.pre,
                                                         celltype=celltypes[i],
                                                         group="response",
                                                         ident="Responsive", ident2="Nonresponsive",
@@ -1094,5 +1094,15 @@ grid.arrange(BCC.su009.MHC1.dumbbell, BCC.su009.MHC2.dumbbell, BCC.su009.HSP.dum
 grid.arrange(BCC.su010.MHC1.dumbbell, BCC.su010.MHC2.dumbbell, BCC.su010.HSP.dumbbell, ncol=3)
 grid.arrange(BCC.su012.MHC1.dumbbell, BCC.su012.MHC2.dumbbell, BCC.su012.HSP.dumbbell, ncol=3)
 
+```
+
+
+
+```{r}
+
+
+
 
 ```
+
+
