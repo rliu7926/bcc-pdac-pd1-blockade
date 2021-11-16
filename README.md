@@ -4,7 +4,7 @@ Investigating the genetic basis for the inefficacy of PD-1 blockade in treating 
 Code for the reproduction of all main figures can be found in 01_PD1ResearchFinal.Rmd. Each panel's code is independent -- after loading all necessary packages and datasets each panel can be produced solely with the code listed under the corresponding section. 
 
 
-01: Main Figures
+01: Main Figures 
 02: Supplementary Figures
 
 10: Seurat pre-processing and clustering functions
