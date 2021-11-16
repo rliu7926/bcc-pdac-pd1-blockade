@@ -1,6 +1,10 @@
 ---
 title: "CellChat Analysis"
-output: html_notebook
+output:
+  html_document:
+    df_print: paged
+editor_options:
+  chunk_output_type: inline
 ---
 
 Load Packages and Data
@@ -829,8 +833,6 @@ rename.ident(BCC.overlap, "CD8_exhausted", "CD8+ T cells")
 rename.ident(BCC.overlap, "CD4", "CD4+ T cells")
 rename.ident(BCC.overlap, "NK", "NK cells")
 
-####
-
 ## Define clusters and pathways of interest
 
 celltypes <- c("CD8_activation", "CD8_exhausted", "CD8_memory", "CD4", "Tregs", "T_proliferation", "Macrophages", "Tumor 1", "Tumor 2", "B cells")
@@ -846,5 +848,338 @@ interaction1 <- compareInteractions(pre.response.cellchat, show.legend = F, grou
 interaction2 <- compareInteractions(pre.response.cellchat, show.legend = F, group = c(1,2), measure = "weight")
 interaction1 + interaction2
 
+```
+
+
+###############################################################################
+
+CellChat Analysis for full PDAC datasets
+
+```{r}
+
+## Create CellChat object and perform preprocessing
+
+pdac.all.cellchat <- createCellChat(object=PDAC.all, meta=PDAC.all@meta.data, group.by="cluster")
+
+CellChatDB <- CellChatDB.human
+CellChatDB.use <- subsetDB(CellChatDB, search = "Cell-Cell Adhesion")
+CellChatDB.use <- CellChatDB
+
+pdac.all.cellchat@DB <- CellChatDB.use
+pdac.all.cellchat <- subsetData(pdac.all.cellchat)
+
+pdac.all.cellchat <- identifyOverExpressedGenes(pdac.all.cellchat)
+pdac.all.cellchat <- identifyOverExpressedInteractions(pdac.all.cellchat)
+pdac.all.cellchat <- projectData(pdac.all.cellchat, PPI.human)
+
+pdac.all.cellchat <- computeCommunProb(pdac.all.cellchat)
+  
+save(pdac.all.cellchat, file="C:\\Users\\Ryan\\Documents\\Nie Research Project\\pdac.all.cellchat")
+
+## Look at clustering
+
+pdac.all.cellchat <- computeCommunProb(pdac.all.cellchat)
+pdac.all.cellchat <- filterCommunication(pdac.all.cellchat, min.cells=10)
+
+pdac.all.cellchat <- computeCommunProbPathway(pdac.all.cellchat)
+pdac.all.cellchat <- aggregateNet(pdac.all.cellchat)
+
+groupSize <- as.numeric(table(pdac.all.cellchat@idents))
+netVisual_circle(pdac.all.cellchat@net$count, vertex.weight=groupSize, weight.scale=T, label.edge=F, title.name="Number of Interactions")
+netVisual_circle(pdac.all.cellchat@net$weight, vertex.weight=groupSize, weight.scale=T, label.edge=F, title.name="Interaction Weights")
+
+## Cell-cell communication differences between ductal cell clusters
+
+mat <- pdac.all.cellchat@net$weight
+par(mfrow = c(2,2), xpd=TRUE)
+for (i in 5:8) { # Comparison of ductal cells only 
+  mat2 <- matrix(0, nrow=nrow(mat), ncol=ncol(mat), dimnames=dimnames(mat))
+  mat2[i,] <- mat[i,]
+  netVisual_circle(mat2, vertex.weight=groupSize, weight.scale=T, edge.weight.max=max(mat), title.name=rownames(mat)[i])
+}
+
+vertex.receiver = seq(5, 8)
+netVisual_aggregate(pdac.all.cellchat, signaling=c("MHC-I"), vertex.receiver=vertex.receiver)
+netVisual_aggregate(pdac.all.cellchat, signaling=c("MHC-II"), vertex.receiver=vertex.receiver)
+netVisual_aggregate(pdac.all.cellchat, signaling=c("PD-L1"), vertex.receiver=vertex.receiver)
+netVisual_aggregate(pdac.all.cellchat, signaling=c("PDL2"), vertex.receiver=vertex.receiver)
+
+## Systems analysis of cell-cell communication network 
+
+pdac.all.cellchat <- netAnalysis_computeCentrality(pdac.all.cellchat, slot.name="netP")
+netAnalysis_signalingRole_network(pdac.all.cellchat, signaling=c("MHC-I"), width=16, height=2.5, font.size=10)
+
+netAnalysis_signalingRole_scatter(pdac.all.cellchat, title="All Signaling Pathways")
+netAnalysis_signalingRole_scatter(pdac.all.cellchat, signaling=c("MHC-I"), title="MHC-I Pathway")
+netAnalysis_signalingRole_scatter(pdac.all.cellchat, signaling=c("MHC-II"), title="MHC-II Pathway")
+
+
+netAnalysis_signalingRole_heatmap(pdac.all.cellchat, pattern="outgoing", signaling=c("MHC-I", "MHC-II"))
+netAnalysis_signalingRole_heatmap(pdac.all.cellchat, pattern="incoming", signaling=c("MHC-I", "MHC-II"))
+
+## Identify global communication patterns
+
+selectK(pdac.all.cellchat, pattern="outgoing")
+nPatterns = 5
+pdac.all.cellchat <- identifyCommunicationPatterns(pdac.all.cellchat, pattern="outgoing", k=nPatterns)
+netAnalysis_river(pdac.all.cellchat, pattern="outgoing")
+
+selectK(pdac.all.cellchat, pattern="incoming")
+nPatterns = 4
+pdac.all.cellchat <- identifyCommunicationPatterns(pdac.all.cellchat, pattern="incoming", k=nPatterns)
+netAnalysis_river(pdac.all.cellchat, pattern="incoming")
+
+## Identify signaling groups based on functional/structural similarities (does not work)
+
+pdac.all.cellchat <- computeNetSimilarity(pdac.all.cellchat, type="functional")
+pdac.all.cellchat <- netEmbedding(pdac.all.cellchat, type="functional")
+pdac.all.cellchat <- netClustering(pdac.all.cellchat, type="functional")
+netVisual_embedding(pdac.all.cellchat, type="functional", label.size=3.5)
+
+```
+
+
+
+Create new CellChat object for PDAC with new T cell labels
+
+```{r}
+
+
+pdac.all.cellchat <- createCellChat(object=PDAC.all, meta=PDAC.all@meta.data, group.by="cluster")
+
+CellChatDB <- CellChatDB.human
+CellChatDB.use <- subsetDB(CellChatDB, search = "Cell-Cell Adhesion")
+CellChatDB.use <- CellChatDB
+
+pdac.all.cellchat@DB <- CellChatDB.use
+pdac.all.cellchat <- subsetData(pdac.all.cellchat)
+
+pdac.all.cellchat <- identifyOverExpressedGenes(pdac.all.cellchat)
+pdac.all.cellchat <- identifyOverExpressedInteractions(pdac.all.cellchat)
+pdac.all.cellchat <- projectData(pdac.all.cellchat, PPI.human)
+
+pdac.all.cellchat <- computeCommunProb(pdac.all.cellchat)
+pdac.all.cellchat <- filterCommunication(pdac.all.cellchat, min.cells=10)
+
+pdac.all.cellchat <- computeCommunProbPathway(pdac.all.cellchat)
+pdac.all.cellchat <- aggregateNet(pdac.all.cellchat)
+
+save(pdac.all.cellchat, file="C:\\Users\\Ryan\\Documents\\Nie Research Project\\pdac.all.cellchat")
+
+```
+
+
+
+Comparison of PDAC and BCC cells
+
+```{r}
+
+## Merge PDAC and BCC pre-responders CellChat objects
+
+clusternames <- c('CD8+ Memory', 'CD4+ T Cells', 'B cells', 'Tregs', 'CD8+ Effector', 'CD8+ Exhausted', 'Macrophages', 'Plasma cells', 'Malignant 1', 'Miscellaneous', 'Proliferating T cells', 'CAFs', 'NK Cells', 'pDCs', 'Malignant 2', 'Endothelial cells', 'Dendritic cells', 'Myofibroblasts', 'Melanocytes')
+
+levels(BCC.pre.responders.cellchat@meta$seurat_clusters) <- clusternames
+levels(BCC.pre.responders.cellchat@idents) <- clusternames
+
+all.celltypes <- unique(c(levels(BCC.pre.responders.cellchat@idents), levels(pdac.all.cellchat@idents)))
+
+pdac.all.cellchat.merge <- liftCellChat(pdac.all.cellchat, all.celltypes)
+bcc.preresponders.cellchat.merge <- liftCellChat(BCC.pre.responders.cellchat, all.celltypes)
+
+bcc.preresponders.cellchat.merge@meta$status <- bcc.preresponders.cellchat.merge@meta$treatment
+bcc.preresponders.cellchat.merge@meta$orig.ident <- bcc.preresponders.cellchat.merge@meta$patient
+
+pdac.all.cellchat.merge@meta$seurat_clusters <- pdac.all.cellchat.merge@meta$cluster
+
+mergecolumns <- c('orig.ident', 'nCount_RNA', 'nFeature_RNA', 'seurat_clusters', 'status')
+bcc.preresponders.cellchat.merge@meta <- bcc.preresponders.cellchat.merge@meta[mergecolumns]
+pdac.all.cellchat.merge@meta <- pdac.all.cellchat.merge@meta[mergecolumns]
+
+object.list <- list(PDAC = pdac.all.cellchat.merge, BCC = bcc.preresponders.cellchat.merge)
+merged.cellchat <- mergeCellChat(object.list, add.names = names(object.list), cell.prefix=TRUE)
+
+## Reorder ident levels
+
+pathways.show <- c("MHC-I")
+weight.max <- getMaxWeight(object.list, slot.name=c("netP"), attribute=pathways.show)
+vertex.receiver <- c(1, 2, 4, 5, 6, 11, 13) # T and NK cells
+
+gg1 <- netVisual_aggregate(object.list[[1]], signaling=pathways.show, vertex.receiver=vertex.receiver, edge.weight.max=weight.max[1], edge.width.max=10, signaling.name = paste(pathways.show, names(object.list[1])))
+gg2 <- netVisual_aggregate(object.list[[2]], signaling=pathways.show, vertex.receiver=vertex.receiver, edge.weight.max=weight.max[1], edge.width.max=10, signaling.name = paste(pathways.show, names(object.list[2])))
+
+pathways.show <- c("MHC-II")
+gg3 <- netVisual_aggregate(object.list[[1]], signaling=pathways.show, vertex.receiver=vertex.receiver, edge.weight.max=weight.max[1], edge.width.max=10, signaling.name = paste(pathways.show, names(object.list[1])))
+gg4 <- netVisual_aggregate(object.list[[2]], signaling=pathways.show, vertex.receiver=vertex.receiver, edge.weight.max=weight.max[1], edge.width.max=10, signaling.name = paste(pathways.show, names(object.list[2])))
+
+
+## Compare overall information flow of MHC signaling pathways
+
+gg1 <- rankNet(merged.cellchat, mode="comparison", stacked=T, do.stat=TRUE)
+gg1.mhc.data <- gg1$data[(gg1$data$name == "MHC-I" | gg1$data$name == "MHC-II"),]
+
+all.mhc.ranknet <- ggplot(gg1.mhc.data, aes(fill=group, y=name, x=contribution)) +
+  geom_bar(position="fill", stat="identity") + 
+  geom_vline(xintercept=0.50, linetype="solid", color="black", size=1) + theme_bw() +
+  labs(x="Relative Information Flow", y="Signaling Pathway", fill="Response", title="MHC Pathway Information Flow: All Cells") +
+  theme(legend.position="bottom", plot.title = element_text(color="black", size=18, face="bold", hjust=0.5))
+
+gg2 <- rankNet(merged.cellchat, stacked=T, do.stat=TRUE, sources.use=c(1, 2, 4, 5, 6, 11)) # T Cells
+gg2.mhc.data <- gg2$data[(gg2$data$name == "MHC-I" | gg2$data$name == "MHC-II"),]
+
+tcell.mhc.ranknet <- ggplot(gg2.mhc.data, aes(fill=group, y=name, x=contribution)) +
+  geom_bar(position="fill", stat="identity") + 
+  geom_vline(xintercept=0.50, linetype="solid", color="black", size=1) + theme_bw() +
+  labs(x="Relative Information Flow", y="Signaling Pathway", fill="Response", title="MHC Pathway: T Cells") +
+  theme(legend.position="bottom", plot.title = element_text(color="black", size=18, face="bold", hjust=0.5))
+
+gg3 <- rankNet(merged.cellchat, stacked=T, do.stat=TRUE, sources.use=c(7)) # Macrophages
+gg3.mhc.data <- gg3$data[(gg3$data$name == "MHC-I" | gg3$data$name == "MHC-II"),]
+
+macrophage.mhc.ranknet <- ggplot(gg3.mhc.data, aes(fill=group, y=name, x=contribution)) +
+  geom_bar(position="fill", stat="identity") + 
+  geom_vline(xintercept=0.50, linetype="solid", color="black", size=1) + theme_bw() +
+  labs(x="Relative Information Flow", y="Signaling Pathway", fill="Response", title="MHC Pathway: Macrophages") +
+  theme(legend.position="bottom", plot.title = element_text(color="black", size=18, face="bold", hjust=0.5))
+
+ggarrange(all.mhc.ranknet, tcell.mhc.ranknet, macrophage.mhc.ranknet, ncol=1, common.legend=TRUE, legend="bottom")
+
+
+## Compare information flow for every cluster
+
+clusters <- c(2, 5, 6, 1, 4, 13, 7, 3, 14, 16, 8)
+clusternames <- c('CD4+ T Cells', 'CD8+ Effector', 'CD8+ Exhausted', 'CD8+ Memory', 'Tregs', 'NK Cells', 'Macrophages', 'B Cells', 'pDCs', 'Endothelial Cells', 'Plasma Cells')
+
+all.mhc1data <- gg3.mhc.data # Borrow from previosu section to initialize
+all.mhc2data <- gg3.mhc.data
+all.mhc1data$cluster <- "Filler"
+all.mhc2data$cluster <- "Filler"
+
+for (i in 1:length(clusters)) {
+  data <- rankNet(merged.cellchat, stacked=T, do.stat=TRUE, sources.use=clusters[i])
+  mhc1data <- data$data[(data$data$name == "MHC-I"),]
+  mhc2data <- data$data[(data$data$name == "MHC-II"),]
+  mhc1data$cluster <- clusternames[i]
+  mhc2data$cluster <- clusternames[i]
+  all.mhc1data <- rbind(all.mhc1data, mhc1data)
+  all.mhc2data <- rbind(all.mhc2data, mhc2data)
+}
+
+all.mhc1data <- all.mhc1data[-c(1:4),]
+all.mhc2data <- all.mhc2data[-c(1:4),]
+
+mhc1.ranknet <- ggplot(all.mhc1data, aes(fill=group, y=cluster, x=contribution)) +
+  geom_bar(position="fill", stat="identity") + 
+  geom_vline(xintercept=0.50, linetype="solid", color="black", size=1) + theme_bw() +
+  labs(x="Relative Information Flow", y="Signaling Pathway", fill="Cancer", title="MHC-I Relative Information Flow") +
+  theme(legend.position="bottom", plot.title = element_text(color="black", size=18, face="bold", hjust=0.5))
+
+mhc2.ranknet <- ggplot(all.mhc2data, aes(fill=group, y=cluster, x=contribution)) +
+  geom_bar(position="fill", stat="identity") + 
+  geom_vline(xintercept=0.50, linetype="solid", color="black", size=1) + theme_bw() +
+  labs(x="Relative Information Flow", y="Signaling Pathway", fill="Cancer", title="MHC-II Relative Information Flow") +
+  theme(legend.position="bottom", plot.title = element_text(color="black", size=18, face="bold", hjust=0.5))
+
+ggarrange(mhc1.ranknet, mhc2.ranknet, common.legend=TRUE, legend="bottom")
+
+## Compare differential interactions / interaction strength (BCC = red, PDAC = blue)
+
+gg1 <- netVisual_heatmap(merged.cellchat)
+gg2 <- netVisual_heatmap(merged.cellchat, measure="weight")
+
+cellgroups <- c(2, 5, 6, 1, 11, 4, 7, 9, 15, 22, 23)
+gg1.data.filter <- gg1@matrix[cellgroups, cellgroups]
+gg1.data.filter <- melt(gg1.data.filter)
+gg1.data.filter[is.na(gg1.data.filter)] <- 0
+gg2.data.filter <- gg2@matrix[cellgroups, cellgroups]
+gg2.data.filter <- melt(gg2.data.filter)
+gg2.data.filter[is.na(gg2.data.filter)] <- 0
+
+counts.heatmap.filter <- ggplot(data=gg1.data.filter, aes(x=Var2, y=Var1, fill=value)) + geom_tile() +
+  scale_fill_distiller(palette="RdBu", limits = c(-250, 250)) + theme_bw() +
+  labs(y="Sources (Outgoing)", x="Receptors (Incoming)", fill="", title="Differential Number of Interactions") + 
+  theme(legend.position="right", plot.title = element_text(color="black", size=18, face="bold", hjust=0.5), axis.text.x = element_text(angle=90, vjust=0.5, hjust=1))
+
+weight.heatmap.filter <- ggplot(data=gg2.data.filter, aes(x=Var2, y=Var1, fill=value)) + geom_tile() +
+  scale_fill_distiller(palette="RdBu", limits = c(-2.5, 2.5)) + theme_bw() +
+  labs(y="Sources (Outgoing)", x="Receptors (Incoming)", fill="", title="Differential Interaction Strength") +
+  theme(legend.position="right", plot.title = element_text(color="black", size=18, face="bold", hjust=0.5), axis.text.x = element_text(angle=90, vjust=0.5, hjust=1))
+
+ggarrange(counts.heatmap.filter, weight.heatmap.filter, ncol=1)
+
+## Scatter plot of interaction strength for all cells
+  
+num.link <- sapply(object.list, function(x) {rowSums(x@net$count) + colSums(x@net$count) - diag(x@net$count)})
+weight.MinMax <- c(min(num.link), max(num.link))
+
+object.list[[1]] <- netAnalysis_computeCentrality(object.list[[1]])
+object.list[[2]] <- netAnalysis_computeCentrality(object.list[[2]])
+gg1 <- netAnalysis_signalingRole_scatter(object.list[[1]], title=names(object.list)[1], weight.MinMax=weight.MinMax)
+gg2 <- netAnalysis_signalingRole_scatter(object.list[[2]], title=names(object.list)[2], weight.MinMax=weight.MinMax)
+
+pdac.signaling.scatter.data <- gg1$data
+bcc.signaling.scatter.data <- gg2$data
+pdac.signaling.scatter.data$cancer <- "PDAC"
+bcc.signaling.scatter.data$cancer <- "BCC"
+signaling.scatter <- rbind(pdac.signaling.scatter.data, bcc.signaling.scatter.data)
+
+signaling.scatter <- signaling.scatter[!(signaling.scatter$x == 0 & signaling.scatter$y == 0),]
+
+signaling.scatter.tcell <- signaling.scatter[(signaling.scatter$labels == "CD4+ T Cells" |
+                                                signaling.scatter$labels == "CD8+ Memory" |
+                                                signaling.scatter$labels == "CD8+ Effector" |
+                                                signaling.scatter$labels == "CD8+ Exhausted" |
+                                                signaling.scatter$labels == "Tregs" |
+                                                signaling.scatter$labels == "Proliferating T cells"),]
+
+all.signaling.ggplot <- ggplot(signaling.scatter.tcell, aes(x=x, y=y, shape=cancer, color=labels)) +
+  geom_point(aes(size=3)) + theme_bw() + 
+  labs(x="Outgoing Interaction Strength", y="Incoming Interaction Strength", title="Signaling Strength: All Pathways") +
+  theme(legend.position="right", plot.title = element_text(color="black", size=18, face="bold", hjust=0.5)) +
+  guides(color=guide_legend("Celltype", override.aes=list(size=3)), shape=guide_legend("Cancer", override.aes=list(size=3)), size=FALSE) +
+  scale_shape_manual(values=c(19, 18))
+
+## MHC-I pathway scatterplot
+
+gg1 <- netAnalysis_signalingRole_scatter(pdac.all.cellchat.merge, signaling=c("MHC-I"), title="MHC-I Pathway", weight.MinMax=weight.MinMax)
+gg2 <- netAnalysis_signalingRole_scatter(bcc.preresponders.cellchat.merge, signaling=c("MHC-I"), title="MHC-I Pathway", weight.MinMax=weight.MinMax)
+
+pdac.signaling.scatter.data <- gg1$data
+bcc.signaling.scatter.data <- gg2$data
+pdac.signaling.scatter.data$cancer <- "PDAC"
+bcc.signaling.scatter.data$cancer <- "BCC"
+signaling.scatter <- rbind(pdac.signaling.scatter.data, bcc.signaling.scatter.data)
+
+mhc1.signaling.scatter <- signaling.scatter[!(signaling.scatter$x == 0 & signaling.scatter$y == 0),]
+
+mhc1.signaling.ggplot <- ggplot(mhc1.signaling.scatter, aes(x=x, y=y, shape=cancer, color=labels, label=labels)) +
+  geom_point(aes(size=3)) + theme_bw() + geom_text_repel() +
+  labs(x="Outgoing Interaction Strength", y="Incoming Interaction Strength", title="Signaling Strength: MHC-I") +
+  theme(legend.position="right", plot.title = element_text(color="black", size=30, face="bold", hjust=0.5), axis.title.x = element_text(color="black", size=18, face="plain"), axis.title.y = element_text(color="black", size=18, face="plain"), legend.title=element_text(size=16), legend.text=element_text(size=14)) +
+  guides(color=FALSE, shape=guide_legend("Cancer", override.aes=list(size=3)), size=FALSE) +
+  scale_shape_manual(values=c(19, 18)) + scale_color_manual(values=colorlist[1:29])
+
+## MHC-II pathway scatterplot
+
+pdac.all.cellchat.merge <- netAnalysis_computeCentrality(pdac.all.cellchat.merge)
+bcc.preresponders.cellchat.merge <- netAnalysis_computeCentrality(bcc.preresponders.cellchat.merge)
+gg1 <- netAnalysis_signalingRole_scatter(pdac.all.cellchat.merge, signaling=c("MHC-II"), title="MHC-I Pathway", weight.MinMax=weight.MinMax)
+gg2 <- netAnalysis_signalingRole_scatter(bcc.preresponders.cellchat.merge, signaling=c("MHC-II"), title="MHC-I Pathway", weight.MinMax=weight.MinMax)
+
+pdac.signaling.scatter.data <- gg1$data
+bcc.signaling.scatter.data <- gg2$data
+pdac.signaling.scatter.data$cancer <- "PDAC"
+bcc.signaling.scatter.data$cancer <- "BCC"
+signaling.scatter <- rbind(pdac.signaling.scatter.data, bcc.signaling.scatter.data)
+
+mhc2.signaling.scatter <- signaling.scatter[!(signaling.scatter$x == 0 & signaling.scatter$y == 0),]
+
+mhc2.signaling.ggplot <- ggplot(mhc2.signaling.scatter, aes(x=x, y=y, shape=cancer, color=labels, label=labels)) +
+  geom_point(aes(size=3)) + theme_bw() + geom_text_repel(aes(size=3), point.size=3) +
+  labs(x="Outgoing Interaction Strength", y="Incoming Interaction Strength", title="Signaling Strength: MHC-II") +
+  theme(legend.position="right", plot.title = element_text(color="black", size=30, face="bold", hjust=0.5), axis.title.x = element_text(color="black", size=18, face="plain"), axis.title.y = element_text(color="black", size=18, face="plain"), legend.title=element_text(size=16), legend.text=element_text(size=14)) +
+  guides(color=FALSE, shape=guide_legend("Cancer", override.aes=list(size=3)), size=FALSE) +
+  scale_shape_manual(values=c(19, 18)) + scale_color_manual(values=colorlist[1:29])
+
+ggarrange(mhc1.signaling.ggplot, NULL, mhc2.signaling.ggplot, common.legend=TRUE, legend="bottom", widths=c(1, 0.15, 1), ncol=3)
 
 ```

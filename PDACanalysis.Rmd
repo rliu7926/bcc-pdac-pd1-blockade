@@ -22,6 +22,10 @@ source("DifferentialExpressionFunctions.R", echo=FALSE)
 ## Load PDAC integrated object
 load("C:\\Users\\Ryan\\Documents\\Nie Research Project\\GSE 155698\\PDAC155698.integrated")
 
+## PDAC infected + healthy patients dataset
+load("C:\\Users\\Ryan\\Documents\\Nie Research Project\\GSE 155698\\PDAC.all")
+
+
 ```
 
 
@@ -983,6 +987,62 @@ Idents(PDAC.all) <- PDAC.all$cluster
 DimPlot(PDAC.all, group.by="cluster", label="TRUE", repel="TRUE")
 
 levels(Idents(PDAC.all)) <- c('Acinar cells', 'B cells', 'Ductal cells: Healthy', 'Ductal cells: Normal', 'Ductal cells: Malignant 1', 'Ductal cells: Malignant 2', 'Endothelial cells', 'Fibroblasts', 'Mast cells', 'Myeloid cells 1', 'Myeloid cells 2', 'pDCs', 'Perivascular cells', 'Plasma cells', 'Red blood cells')
+
+save(PDAC.all, file="C:\\Users\\Ryan\\Documents\\Nie Research Project\\GSE 155698\\PDAC.all")
+
+```
+
+###############################################################################
+
+
+
+Recluster PDAC ductal cells without regards to sample origin 
+
+```{r}
+
+PDAC.ductal <- subset(PDAC.all, idents=c("Ductal cells: Malignant 1", "Ductal cells: Malignant 2", "Ductal cells: Normal", "Ductal cells: Healthy"))
+
+PDAC.ductal <- clustering(PDAC.ductal, resolution=0.5)
+
+pdacupregulated.filter <- c('S100P', 'CEACAM6', 'CLDN18', 'GPRC5A', 'PHLDA2', 'CEACAM5', 'LAMC2', 'SFN', 'AHNAK2', 'TFF1', 'SDR16C5', 'LAMA3', 'IFI27', 'TGM2', 'NQO1', 'TPM2', 'S100A4', 'TRIM29', 'CD55', 'TMPRSS4', 'FOXQ1', 'CAPN8', 'PLAUR', 'ADAM28', 'FXYD3', 'TSPAN1', 'FXYD5', 'KCNK1')
+
+DotPlot(PDAC.ductal, features = pdacupregulated.filter, assay = 'RNA', cols = c('White', 'Blue')) + RotatedAxis() + xlab('Marker Genes')+ ylab('Clusters')
+
+PDAC.ductal$malignant <- "filler"
+
+x <- c('M1', 'M1', 'N', 'N', 'M1', 'N', 'M2', 'M2', 'M2', 'M2', 'M1', 'M1', 'M1', 'M1', 'N', 'N', 'M1', 'N', 'N')
+for (i in 1:19) {
+  PDAC.ductal$malignant[PDAC.ductal$seurat_clusters == (i-1)] <- x[i]
+}
+
+Idents(PDAC.ductal) <- PDAC.ductal$malignant
+
+DimPlot(PDAC.ductal, group.by="malignant")
+
+ductal.proportions <- ggplot_barcharts(PDAC.ductal$malignant, PDAC.ductal$orig.ident) +
+  theme_classic() + theme(legend.position="bottom") +
+  labs(y="Cell Proportion Normalized by Patient", x="Patient", fill="Cell Type", legend.position="bottom") +
+  scale_x_discrete(limits=c('I1', 'I2', 'I3', 'I4', 'I5', 'I6', 'I7', 'I8', 'I9', 'I10', 'I11', 'I12', 'I13', 'I14', 'I15', 'I16', 'H1', 'H2', 'H3')) 
+
+```
+
+
+
+Add metadata for patient IDs
+
+```{r}
+
+PDAC.all@meta.data <- subset(PDAC.all@meta.data, select=-c(imported_clusters))
+PDAC.all@meta.data$stage <- 'NA'
+
+PDAC.all$stage[PDAC.all$orig.ident == 'I1' | PDAC.all$orig.ident == 'I4' | PDAC.all$orig.ident == 'I5'| PDAC.all$orig.ident == 'I12'] <- 'Metastatic'
+PDAC.all$stage[PDAC.all$orig.ident == 'I2' | PDAC.all$orig.ident == 'I7' | PDAC.all$orig.ident == 'I8'| PDAC.all$orig.ident == 'I10' | PDAC.all$orig.ident == 'I16'] <- 'Resectable'
+PDAC.all$stage[PDAC.all$orig.ident == 'I3' | PDAC.all$orig.ident == 'I6' | PDAC.all$orig.ident == 'I9'| PDAC.all$orig.ident == 'I11' | PDAC.all$orig.ident == 'I14' | PDAC.all$orig.ident == 'I15'] <- 'Locally advanced'
+PDAC.all$stage[PDAC.all$orig.ident == 'I13'] <- 'Borderline resectable' 
+PDAC.all$stage <- factor(PDAC.all$stage)
+
+PDAC.all$ID <- PDAC.all$orig.ident
+levels(PDAC.all$ID) <- recode_factor(PDAC.all$ID, I1=3210, I2=1324, I3=1317, I4=1314, I5=1306, I6=1302, I7=1299, I8=1296, I9=1294, I10=1262, I11=1261, I12=1253, I13=1238, I14=1246, I15=1229, I16=1141)
 
 save(PDAC.all, file="C:\\Users\\Ryan\\Documents\\Nie Research Project\\GSE 155698\\PDAC.all")
 

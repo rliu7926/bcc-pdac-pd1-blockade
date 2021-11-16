@@ -1147,15 +1147,41 @@ ggarrange(mhc1.vln, mhc2.vln, ncol=2)
 
 
 
-PD-1 Pathway Expression Graphics 
+Marker Genes for Identification of PDAC CD8+ T Cells
+
+```{r}
+
+Idents(PDAC.all) <- PDAC.all$cluster
+pdac.cd8 <- subset(PDAC.all, idents=c('CD8+ Effector', 'CD8+ Memory', 'CD8+ Exhausted'))
+
+cd8markergenes <- c('PFN1', 'TMEM66', 'CXCR4', 'H1FX', 'HERPUD1', 'NCR3', 'DRAXIN', 'BTG1', 'LGALS3', 'LTB', 'RORA', 'APBA2', 'AIM1', 'TMEM173', 'PRF1', 'GFPT2', 'LGALS1', 'GABARAPL1', 'KLRB1', 'TOB1','S100A4', 'CCR6', 'KLRC1', 'SLC4A10', 'S100A6', 'CSF1', 'TNFRSF25', 'PTGER4', 'IL7R', 'GZMB', 'CD40LG','PTGER2', 'VNN2', 'FAM65B', 'NLRC5', 'LAT2', 'BCL2A1', 'NBEAL2', 'ATHL1', 'TRIM56', 'IRS2', 'IFITM3', 'RNF130', 'CD74', 'ADAM28', 'TCF7', 'GZMK', 'HLA-DPB1', 'CLDND1', 'HAVCR2', 'KLRG1', 'IFI44L','ITGB2', 'KLF2', 'EOMES', 'TNFRSF18', 'PPP1R14B', 'KLRC3', 'GPR183', 'CD27', 'KLRF1', 'TIGIT', 'HLA-DPA1')
+
+pdac.cd8.markers <- DotPlot(pdac.cd8, features=cd8markergenes)
+pdac.cd8.markers.data <- pdac.cd8.markers$data
+
+ggplot(data=pdac.cd8.markers.data, aes(x=features.plot, y=id, fill=avg.exp.scaled)) +
+  geom_tile(color="white") + 
+  scale_fill_gradient2(low="black", high="#EFE350FF", mid="#593D9CFF", midpoint=0) +
+  theme_minimal() + theme(axis.text.x = element_text(angle=90, vjust=1, hjust=1)) +
+  labs(x="Gene", y="Cluster", fill="Expression") + coord_equal()
+
+pdac.cd8.markers1 <- DotPlot(pdac.cd8, features=cd8markergenes[1:31])
+pdac.cd8.markers2 <- DotPlot(pdac.cd8, features=cd8markergenes[32:62])
+
+
+```
+
+
+
+Final UMAPs for BCCIO and PDAC
 
 ```{r}
 
 
+DimPlot(BCCIO, label=TRUE, label.size=10) + NoLegend()
+## Saved at 2000 x 1374
 
-
-
-
+DimPlot(PDAC.all, label=TRUE, label.size=10, repel=TRUE) + NoLegend()
 
 
 ```

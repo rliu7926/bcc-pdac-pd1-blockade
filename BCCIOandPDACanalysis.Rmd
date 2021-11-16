@@ -2,7 +2,7 @@
 title: "BCCIO / PDAC Comparison"
 output: html_notebook
 editor_options: 
-  chunk_output_type: inline
+  chunk_output_type: console
 ---
 
 Load Packages and Data
@@ -20,6 +20,8 @@ library(EnhancedVolcano)
 library(gridExtra)
 library(reshape2)
 library(ggpubr)
+library(plotly)
+library(predict3d)
 
 memory.limit(size = 16000000)
 
@@ -31,6 +33,12 @@ load("C:\\Users\\Ryan\\Documents\\Nie Research Project\\GSE 155698\\PDAC.all")
 
 ## BCCIO dataset
 load("C:\\Users\\Ryan\\Documents\\Nie Research Project\\GSE 123813\\BCCIOwithUMAP")
+
+## Melanoma dataset
+load("C:\\Users\\Ryan\\Documents\\Nie Research Project\\Melanoma\\Melanoma")
+
+## PDAC + BCC malignant cells dataset
+load("C:\\Users\\Ryan\\Documents\\Nie Research Project\\BCC PDAC Malignant Cells")
 
 ## Merged dataset (5000 cells from PDAC and BCC, random sample)
 load("C:\\Users\\Ryan\\Documents\\Nie Research Project\\BCC.PDAC.merge")
@@ -1433,7 +1441,7 @@ grid.draw(BCC.PDAC.comparison.malignant)
 
 ################################################################################################################
 
-Compare gene expression between malignnat cells in BCC vs. PDAC
+Compare gene expression between malignant cells in BCC vs. PDAC
 
 ```{r}
 
@@ -1636,10 +1644,10 @@ Look at MHC gene expression by individual cell
 Idents(malignant) <- malignant$refined_clusters
 
 malignant <- RenameIdents(object=malignant,
-                          "PDAC DC Malignant 1" = "PDAC M1",
-                          "PDAC DC Malignant 2" = "PDAC M2",
-                          "PDAC DC Normal" = "PDAC N",
-                          "PDAC DC Healthy" = "PDAC H",
+                          "3" = "PDAC M1",
+                          "4" = "PDAC M2",
+                          "5" = "PDAC N",
+                          "6" = "PDAC H",
                           "BCC Responsive Pre-treatment" =  "BCC RPre",
                           "BCC Responsive Post-treatment" = "BCC RPost",
                           "BCC Nonresponsive Pre-treatment" = "BCC NRPre",
@@ -1726,6 +1734,38 @@ mhc2.cdf <- ggplot(mhc2.cdf.data, aes(x=MHC.Class.II, col=id)) + stat_ecdf(geom 
   theme(legend.position="top", plot.title = element_text(color="black", size=18, face="bold", hjust = 0.5))
 
 ggarrange(mhc1.cdf, mhc2.cdf, ncol=2, common.legend=TRUE, legend="bottom")
+
+## Isolate specific pairs of groups and create visualizations 
+
+datasets <- list(`malignant.BCC RPre`, `malignant.BCC RPost`)
+gg1 <- genes_cdf(datasets=datasets, clusters=c("Pre", "Post"), genes=mhc1.genes, title="MHC Class I: Responders")
+gg2 <- genes_cdf(datasets=datasets, clusters=c("Pre", "Post"), genes=mhc2.genes, title="MHC Class II: Responders")
+
+datasets <- list(`malignant.BCC NRPre`, `malignant.BCC NRPost`)
+gg3 <- genes_cdf(datasets=datasets, clusters=c("Pre", "Post"), genes=mhc1.genes, title="MHC Class I: Non-Responders")
+gg4 <- genes_cdf(datasets=datasets, clusters=c("Pre", "Post"), genes=mhc2.genes, title="MHC Class II: Non-Responders")
+
+ggarrange(gg1, gg2, gg3, gg4, ncol=2, nrow=2, common.legend=TRUE, legend="bottom")
+
+`malignant.PDAC M` <- merge(`malignant.PDAC M1`, `malignant.PDAC M2`)
+
+datasets <- list(`malignant.BCC RPre`, `malignant.BCC NRPre`, `malignant.PDAC M`)
+gg1 <- genes_cdf(datasets=datasets, clusters=c("Responder", "Nonresponder", "PDAC"), genes=mhc1.genes, title="MHC Class I")
+gg2 <- genes_cdf(datasets=datasets, clusters=c("Responder", "Nonresponder", "PDAC"), genes=mhc2.genes, title="MHC Class II")
+
+ggarrange(gg1, gg2, ncol=2, common.legend=TRUE, legend="bottom")
+
+datasets <- list(`malignant.PDAC M`, `malignant.PDAC N`, `malignant.PDAC H`)
+gg1 <- genes_cdf(datasets=datasets, clusters=c("Malignant", "Normal", "Healthy"), genes=mhc1.genes, title="MHC Class I")
+gg2 <- genes_cdf(datasets=datasets, clusters=c("Malignant", "Normal", "Healthy"), genes=mhc2.genes, title="MHC Class II")
+
+`malignant.PDAC D` <- merge(`malignant.PDAC M`, `malignant.PDAC N`)
+
+datasets <- list(`malignant.PDAC D`, `malignant.PDAC H`)
+gg3 <- genes_cdf(datasets=datasets, clusters=c("Cancerous", "Healthy"), genes=mhc1.genes, title="MHC Class I")
+gg4 <- genes_cdf(datasets=datasets, clusters=c("Cancerous", "Healthy"), genes=mhc2.genes, title="MHC Class II")
+
+ggarrange(gg1, gg2, gg3, gg4, ncol=2, nrow=2, common.legend=FALSE, legend="bottom")
 
 ## Construct PDF / Violin Plots for MHC expression 
 
@@ -2002,6 +2042,107 @@ malignant.levels.mhc2.pdf <- ggplot(mhc2.levels.data, aes(x=`MHC Class II`, y=fa
 
 
 
+Repeat statistical analysis without differentiation between cancerous and healthy samples 
+
+```{r}
+
+Idents(PDAC.ductal) <- PDAC.ductal$malignant
+PDAC.ductal <- RenameIdents(object=PDAC.ductal,
+                               'M1' = 'Cancerous',
+                               'M2' = 'Cancerous',
+                               'N' = 'Normal')
+
+PDAC.ductal$malignant <- Idents(PDAC.ductal)
+
+pdac.proportions <- ggplot_barcharts(PDAC.ductal$malignant, PDAC.ductal$orig.ident)
+
+
+patients <- levels(Idents(PDAC.ductal))
+
+for (i in 1:length(patients)) {
+  assign(paste0("ductal.", patients[i]), subset(PDAC.ductal, idents=patients[i]))
+}
+
+pdac.patients <- list(ductal.I1, ductal.I2, ductal.I3, ductal.I4, ductal.I5, ductal.I6, ductal.I7, ductal.I8, ductal.I9, ductal.I10, ductal.I11, ductal.I12, ductal.I13, ductal.I14, ductal.I15, ductal.I16, ductal.H1, ductal.H2, ductal.H3)
+
+## Scatter plot 
+
+proportion <- rep(0, length(pdac.patients))
+data <- pdac.proportions$plot_env$normalized_dataset
+for (i in 1:19) {
+  proportion[i] <- data$n[2*i-1] / (data$n[2*i-1] + data$n[2*i])
+}
+
+mhc1.scores <- rep(0, length(pdac.patients))
+mhc2.scores <- rep(0, length(pdac.patients))
+for (i in 1:length(pdac.patients)) {
+  Idents(pdac.patients[[i]]) <- pdac.patients[[i]]$orig.ident
+  avg <- AverageExpression(pdac.patients[[i]])
+  mhc1.scores[i] <- mean(avg$RNA[mhc1.genes,])
+  mhc2.scores[i] <- mean(avg$RNA[mhc2.genes,])
+}
+
+mhc1.scatter.data <- data.frame(proportion, mhc1.scores)
+
+mhc1.scatter <- ggplot(mhc1.scatter.data, aes(x=proportion, y=mhc1.scores)) + geom_point(size=6) +
+  geom_smooth(data=subset(mhc1.scatter.data, proportion>0), method="lm", se=FALSE, size=2, color="black") + 
+  stat_regline_equation(label.y=12.7, label.x=0.06, aes(label = ..eq.label..), size=8) +
+  stat_regline_equation(label.y=12.1, label.x=0.06, aes(label = ..rr.label..), size=8) +
+  labs(y="MHC Class I Score", x="Proportion of Malignant Ductal Cells") +
+  theme_bw(base_size=28)
+           
+mhc2.scatter.data <- data.frame(proportion, mhc2.scores)
+
+mhc2.scatter <- ggplot(mhc2.scatter.data, aes(x=proportion, y=mhc2.scores)) + geom_point(size=6) +
+  geom_smooth(data=subset(mhc2.scatter.data, proportion>0), method="lm", se=FALSE, size=2, color="black") + 
+  stat_regline_equation(label.y=3.3, label.x=0.06, aes(label = ..eq.label..), size=8) +
+  stat_regline_equation(label.y=3.1, label.x=0.06, aes(label = ..rr.label..), size=8) +
+  labs(y="MHC Class II Score", x="Proportion of Malignant Ductal Cells") +
+  theme_bw(base_size=28)
+           
+ggarrange(mhc1.scatter, mhc2.scatter, ncol=2, common.legend=TRUE, legend="bottom")
+
+## Violin plots
+
+Idents(PDAC.ductal) <- PDAC.ductal$malignant
+
+malignant.pdac.lv0 <- merge(ductal.H1, ductal.H2)
+malignant.pdac.lv1 <- merge(ductal.I4, y=c(ductal.I11, ductal.I9, ductal.I13))
+malignant.pdac.lv2 <- merge(ductal.I8, y=c(ductal.I10, ductal.I5, ductal.I7))
+malignant.pdac.lv3 <- merge(ductal.I12, y=c(ductal.I6, ductal.I3, ductal.I2))
+malignant.pdac.lv4 <- merge(ductal.I15, y=c(ductal.I14, ductal.I16, ductal.I1, ductal.H3))
+
+malignant.levels <- list(malignant.pdac.lv0, malignant.pdac.lv1, malignant.pdac.lv2, malignant.pdac.lv3, malignant.pdac.lv4)
+percentages <- c("06% - 16%", "33% - 44%", "44% - 60%", "71% - 86%", "91% - 99%")
+
+malignant.levels.mhc1.cdf <- genes_cdf(datasets=malignant.levels, clusters=percentages, genes=mhc1.genes, title="MHC Class I Score")
+malignant.levels.mhc2.cdf <- genes_cdf(datasets=malignant.levels, clusters=percentages, genes=mhc2.genes, title="MHC Class II Score")
+
+ggarrange(malignant.levels.mhc1.cdf, malignant.levels.mhc2.cdf, ncol=2, common.legend=TRUE, legend="bottom")
+
+mhc1.levels.data <- malignant.levels.mhc1.cdf$data
+colnames(mhc1.levels.data) <- c("MHC Class I", "Proportion")
+mhc1.levels.data$`MHC Class I` <- mhc1.levels.data$`MHC Class I`
+
+malignant.levels.mhc1.pdf <- ggplot(mhc1.levels.data, aes(x=`MHC Class I`, y=factor(Proportion), fill=Proportion)) + geom_violin(draw_quantiles = c(0.25, 0.5, 0.75)) +
+  labs(x = "MHC Class I Score", y = "Cluster") +
+  theme(legend.position="none") + theme_bw()
+
+mhc2.levels.data <- malignant.levels.mhc2.cdf$data
+colnames(mhc2.levels.data) <- c("MHC Class II", "Proportion")
+mhc2.levels.data$`MHC Class II` <- mhc2.levels.data$`MHC Class II`
+
+malignant.levels.mhc2.pdf <- ggplot(mhc2.levels.data, aes(x=`MHC Class II`, y=factor(Proportion), fill=Proportion)) + geom_violin(draw_quantiles = c(0.25, 0.5, 0.75)) +
+  labs(x = "MHC Class II Score", y = "Cluster") +
+  theme(legend.position="none") + theme_bw()
+
+ggarrange(malignant.levels.mhc1.pdf, malignant.levels.mhc2.pdf, ncol=2, common.legend=TRUE, legend="bottom")
+
+
+```
+
+
+
 Examine differences in expression of the PD-1 pathway
 
 ```{r}
@@ -2112,7 +2253,7 @@ ggarrange(zap70.cdf.bcc, cd28.cdf.bcc, shp2.cdf.bcc, batf.cdf.bcc, ncol=4, commo
 Differential gene expression between BCC and PDAC: PD-1 pathway
 
 ```{r}
-## Specific gene-by-gene comparisons BCC vs. PDAC for certain celltypes
+## Specific gene-by-gene comparisons BCC vs. PDAC for T cells 
 
 bcc.CD8 <- merge(bcc.CD8_activation, y=c(bcc.CD8_exhausted, bcc.CD8_memory))
 bcc.preRCD8 <- merge(bcc.preRCD8_activation, y=c(bcc.preRCD8_exhausted, bcc.preRCD8_memory))
@@ -2168,5 +2309,3667 @@ downgenes.plot <- ggarrange(downgenes.boxplot, downgenes.cdf + NoLegend(), ncol=
 annotate_figure(upgenes.plot, top=text_grob("Down-Regulated Genes", color="black", face="bold", size=18))
 annotate_figure(downgenes.plot, top=text_grob("Up-Regulated Genes", color="black", face="bold", size=18))
 
+## Compare PD-1 expression between B cells, macrophages, and T cells
+
+pd1.gg1 <- gene_cdf(datasets=list(bcc.Macrophages, pdac.Macrophages), clusternames=c("BCC", "PDAC"), genename="PDCD1", title="Macrophages") + ylim(0.95, 1.0)
+pd1.gg2 <- gene_cdf(datasets=list(bcc.CD8_memory, bcc.CD8_activation, bcc.CD8_exhausted, `pdac.CD8+ T Cells`), clusternames=c("BCC CD8+ Memory", "BCC CD8+ Activated", "BCC CD8+ Exhausted", "PDAC CD8+"), genename="PDCD1", title="CD8+ T Cells") + ylim(0.57, 1.0)
+pd1.gg3 <- gene_cdf(datasets=list(bcc.CD4, `pdac.CD4+ T Cells`), clusternames=c("BCC", "PDAC"), genename="PDCD1", title="CD4+ T Cells") + ylim(0.8, 1.0)
+pd1.gg4 <- gene_cdf(datasets=list(pdac.Tregs, `pdac.Proliferating Tregs`, bcc.Tregs), clusternames=c("PDAC Tregs", "PDAC Prolif. Tregs", "BCC Tregs"), genename="PDCD1", title="Tregs") + ylim(0.75, 1.0)
+
+figure <- ggarrange(pd1.gg1, pd1.gg2, pd1.gg3, pd1.gg4, ncol=4, legend="bottom")
+annotate_figure(figure, top=text_grob("PD-1 Gene Expression", color="black", face="bold", size=20))
+
+pdl1.gg1 <- gene_cdf(datasets=list(bcc.Macrophages, pdac.Macrophages), clusternames=c("BCC", "PDAC"), genename="CD274", title="Macrophages") + ylim(0.85, 1.00)
+pdl1.gg2 <- gene_cdf(datasets=list(bcc.CD8_memory, bcc.CD8_activation, bcc.CD8_exhausted, `pdac.CD8+ T Cells`), clusternames=c("BCC CD8+ Memory", "BCC CD8+ Activated", "BCC CD8+ Exhausted", "PDAC CD8+"), genename="CD274", title="CD8+ T Cells") + ylim(0.93, 1.0)
+pdl1.gg3 <- gene_cdf(datasets=list(bcc.CD4, `pdac.CD4+ T Cells`), clusternames=c("BCC", "PDAC"), genename="CD274", title="CD4+ T Cells") + ylim(0.95, 1.0)
+pdl1.gg4 <- gene_cdf(datasets=list(pdac.Tregs, `pdac.Proliferating Tregs`, bcc.Tregs), clusternames=c("PDAC Tregs", "PDAC Prolif. Tregs", "BCC Tregs"), genename="CD274", title="Tregs") + ylim(0.85, 1.0)
+
+figure <- ggarrange(pdl1.gg1, pdl1.gg2, pdl1.gg3, pdl1.gg4, ncol=4, legend="bottom")
+annotate_figure(figure, top=text_grob("PD-L1 Gene Expression", color="black", face="bold", size=20))
+
+pdl2.gg1 <- gene_cdf(datasets=list(bcc.Macrophages, pdac.Macrophages), clusternames=c("BCC", "PDAC"), genename="PDCD1LG2", title="Macrophages") + ylim(0.97, 1.00)
+pdl2.gg2 <- gene_cdf(datasets=list(bcc.CD8_memory, bcc.CD8_activation, bcc.CD8_exhausted, `pdac.CD8+ T Cells`), clusternames=c("BCC CD8+ Memory", "BCC CD8+ Activated", "BCC CD8+ Exhausted", "PDAC CD8+"), genename="PDCD1LG2", title="CD8+ T Cells") + ylim(0.97, 1.0)
+pdl2.gg3 <- gene_cdf(datasets=list(bcc.CD4, `pdac.CD4+ T Cells`), clusternames=c("BCC", "PDAC"), genename="PDCD1LG2", title="CD4+ T Cells") + ylim(0.98, 1.0)
+pdl2.gg4 <- gene_cdf(datasets=list(pdac.Tregs, `pdac.Proliferating Tregs`, bcc.Tregs), clusternames=c("PDAC Tregs", "PDAC Prolif. Tregs", "BCC Tregs"), genename="PDCD1LG2", title="Tregs") + ylim(0.95, 1.0)
+
+figure <- ggarrange(pdl2.gg1, pdl2.gg2, pdl2.gg3, pdl2.gg4, ncol=4, legend="bottom")
+annotate_figure(figure, top=text_grob("PD-L2 Gene Expression", color="black", face="bold", size=20))
+
+## Statistical tests to determine whether differences are significant
+
+bcc.CD8 <- merge(bcc.CD8_memory, y=c(bcc.CD8_activation, bcc.CD8_exhausted))
+pdac.Tregs <- merge(pdac.Tregs, `pdac.Proliferating Tregs`)
+
+pd1.gg2 <- gene_cdf(datasets=list(bcc.CD8, `pdac.CD8+ T Cells`), clusternames=c("BCC", "PDAC"), genename="PDCD1", title="CD8+ T Cells")
+pdl1.gg2 <- gene_cdf(datasets=list(bcc.CD8, `pdac.CD8+ T Cells`), clusternames=c("BCC", "PDAC"), genename="CD274", title="CD8+ T Cells")
+pdl2.gg2 <- gene_cdf(datasets=list(bcc.CD8, `pdac.CD8+ T Cells`), clusternames=c("BCC", "PDAC"), genename="PDCD1LG2", title="CD8+ T Cells")
+
+pd1.gg4 <- gene_cdf(datasets=list(pdac.Tregs, bcc.Tregs), clusternames=c("BCC", "PDAC"), genename="PDCD1", title="CD8+ T Cells")
+pdl1.gg4 <- gene_cdf(datasets=list(pdac.Tregs, bcc.Tregs), clusternames=c("BCC", "PDAC"), genename="CD274", title="CD8+ T Cells")
+pdl2.gg4 <- gene_cdf(datasets=list(pdac.Tregs, bcc.Tregs), clusternames=c("BCC", "PDAC"), genename="PDCD1LG2", title="CD8+ T Cells")
+
+pd1.macrophages.data <- pd1.gg1$data
+pd1.cd8.data <- pd1.gg2$data
+pd1.cd4.data <- pd1.gg3$data
+pd1.tregs.data <- pd1.gg4$data
+
+pdl1.macrophages.data <- pdl1.gg1$data
+pdl1.cd8.data <- pdl1.gg2$data
+pdl1.cd4.data <- pdl1.gg3$data
+pdl1.tregs.data <- pdl1.gg4$data
+
+pdl2.macrophages.data <- pdl2.gg1$data
+pdl2.cd8.data <- pdl2.gg2$data
+pdl2.cd4.data <- pdl2.gg3$data
+pdl2.tregs.data <- pdl2.gg4$data
+
+data <- list(pd1.macrophages.data, pd1.cd8.data, pd1.cd4.data, pd1.tregs.data, pdl1.macrophages.data, pdl1.cd8.data, pdl1.cd4.data, pdl1.tregs.data, pdl2.macrophages.data, pdl2.cd8.data, pdl2.cd4.data, pdl2.tregs.data)
+for (i in 1:length(data)) {
+  data$cluster <- as.factor(data$cluster)
+}
+
+pd1.macrophages.wilcox <- wilcox.test(formula= gene ~ cluster, data = pd1.macrophages.data, paired=FALSE)
+pd1.cd8.wilcox <- wilcox.test(formula= gene ~ cluster, data = pd1.cd8.data, paired=FALSE)
+pd1.cd4.wilcox <- wilcox.test(formula= gene ~ cluster, data = pd1.cd4.data, paired=FALSE)
+pd1.tregs.wilcox <- wilcox.test(formula= gene ~ cluster, data = pd1.tregs.data, paired=FALSE)
+
+pd1.values <- c(pd1.macrophages.wilcox$p.value, pd1.cd8.wilcox$p.value, pd1.cd4.wilcox$p.value, pd1.tregs.wilcox$p.value)
+
+pdl1.macrophages.wilcox <- wilcox.test(formula= gene ~ cluster, data = pdl1.macrophages.data, paired=FALSE)
+pdl1.cd8.wilcox <- wilcox.test(formula= gene ~ cluster, data = pdl1.cd8.data, paired=FALSE)
+pdl1.cd4.wilcox <- wilcox.test(formula= gene ~ cluster, data = pdl1.cd4.data, paired=FALSE)
+pdl1.tregs.wilcox <- wilcox.test(formula= gene ~ cluster, data = pdl1.tregs.data, paired=FALSE)
+
+pdl1.values <- c(pdl1.macrophages.wilcox$p.value, pdl1.cd8.wilcox$p.value, pdl1.cd4.wilcox$p.value, pdl1.tregs.wilcox$p.value)
+
+pdl2.macrophages.wilcox <- wilcox.test(formula= gene ~ cluster, data = pdl2.macrophages.data, paired=FALSE)
+pdl2.cd8.wilcox <- wilcox.test(formula= gene ~ cluster, data = pdl2.cd8.data, paired=FALSE)
+pdl2.cd4.wilcox <- wilcox.test(formula= gene ~ cluster, data = pdl2.cd4.data, paired=FALSE)
+pdl2.tregs.wilcox <- wilcox.test(formula= gene ~ cluster, data = pdl2.tregs.data, paired=FALSE)
+
+pdl2.values <- c(pdl2.macrophages.wilcox$p.value, pdl2.cd8.wilcox$p.value, pdl2.cd4.wilcox$p.value, pdl2.tregs.wilcox$p.value)
+
+pvalues <- c(pd1.values, pdl1.values, pdl2.values)
+genes <- rep(c("PD-1", "PD-L1", "PD-L2"), each=4)
+clusters <- rep(c("Macrophages", "CD8+ T Cells", "CD4+ T Cells", "Tregs"), times=3)
+
+pd1.volcano.data <- data.frame(pvalues, genes, clusters)
+
+objects <- list(pdac.Macrophages, `pdac.CD4+ T Cells`, `pdac.CD8+ T Cells`, pdac.Tregs, bcc.Macrophages, bcc.CD4, bcc.CD8, bcc.Tregs)
+for (i in 1:length(objects)) {
+  objects[[i]]$filler <- "everything"
+  Idents(objects[[i]]) <- objects[[i]]$filler
+}
+
+pdac.macrophages.expression <- AverageExpression(objects[[1]])$RNA[c("PDCD1", "CD274", "PDCD1LG2"),]
+pdac.cd4.expression <- AverageExpression(objects[[2]])$RNA[c("PDCD1", "CD274", "PDCD1LG2"),]
+pdac.cd8.expression <- AverageExpression(objects[[3]])$RNA[c("PDCD1", "CD274", "PDCD1LG2"),]
+pdac.tregs.expression <- AverageExpression(objects[[4]])$RNA[c("PDCD1", "CD274", "PDCD1LG2"),]
+
+bcc.macrophages.expression <- AverageExpression(objects[[5]])$RNA[c("PDCD1", "CD274", "PDCD1LG2"),]
+bcc.cd4.expression <- AverageExpression(objects[[6]])$RNA[c("PDCD1", "CD274", "PDCD1LG2"),]
+bcc.cd8.expression <- AverageExpression(objects[[7]])$RNA[c("PDCD1", "CD274", "PDCD1LG2"),]
+bcc.tregs.expression <- AverageExpression(objects[[8]])$RNA[c("PDCD1", "CD274", "PDCD1LG2"),]
+
+pdac.expression <- c(pdac.macrophages.expression, pdac.cd4.expression, pdac.cd8.expression, pdac.tregs.expression)
+bcc.expression <- c(bcc.macrophages.expression, bcc.cd4.expression, bcc.cd8.expression, bcc.tregs.expression)
+
+log2_exp <- log2(bcc.expression / pdac.expression)
+genes <- rep(c("PD-1", "PD-L1", "PD-L2"), times=4)
+clusters <- rep(c("Macrophages", "CD8+ T Cells", "CD4+ T Cells", "Tregs"), each=3)
+
+pd1.volcano.diffexp.data <- data.frame(log2_exp, genes, clusters)
+
+pd1.volcano.data <- merge(pd1.volcano.data, pd1.volcano.diffexp.data, by=c("genes", "clusters"))
+colnames(pd1.volcano.data) <- c("Gene", "Cluster", "-log10(pvalues)", "log2_exp")
+
+ggplot(data=pd1.volcano.data, aes(x=log2_exp, y=-log10(pvalues), col=Gene, shape=Cluster)) +
+  geom_point(size=5) + theme_bw() +
+  theme(legend.position="right") + xlab("log2 Fold Change") + ylab("-log10 (pvalue)")
+
+## Violin plots to emphasize difference in PD-1 expression in different CD8+ T cell clusters
+## (Use gg2 from the original CDFs in line 2310)
+
+pd1.cd8.data <- pd1.gg2$data
+pdl1.cd8.data <- pdl1.gg2$data
+pdl2.cd8.data <- pdl2.gg2$data
+
+sum.cd8.data <- data.frame(pd1.cd8.data$gene + pdl1.cd8.data$gene + pdl2.cd8.data$gene, pd1.cd8.data$cluster)
+colnames(sum.cd8.data) <- c("gene", "cluster")
+
+comparisons <- list(c("BCC CD8+ Activated", "BCC CD8+ Exhausted"), c("BCC CD8+ Activated", "BCC CD8+ Memory"), c("BCC CD8+ Exhausted", "BCC CD8+ Memory"), c("PDAC CD8+", "BCC CD8+ Activated"), c("PDAC CD8+", "BCC CD8+ Exhausted"), c("PDAC CD8+", "BCC CD8+ Memory"))
+
+ggplot(sum.cd8.data, aes(x=cluster, y=gene, fill=cluster)) +
+  geom_violin() +
+  stat_compare_means(comparisons=comparisons, label.y=c(4.95, 5.5, 5, 6.5, 6, 4.95)) +
+  xlab("Population") + ylab("Sum of Gene Expressions") +
+  theme_bw() + theme(legend.position="None") +
+  scale_fill_manual(values=c("#0073C2FF", "#EFC000FF", "#868686FF", "#CD534CFF"))
+
+
+```
+
+
+
+Look at distribution of T cells before and after treatment in BCC
+
+```{r}
+
+bcc.tcells <- merge(bcc.CD4, y=c(bcc.CD8_memory, bcc.CD8_activation, bcc.CD8_exhausted, bcc.T_proliferation, bcc.Tregs))
+Idents(bcc.tcells) <- bcc.tcells$patient
+
+patients <- levels(Idents(bcc.tcells))
+for (i in 1:length(patients)) {
+  assign(paste0("bcc.tcells.", patients[i]), subset(bcc.tcells, idents=patients[i]))
+}
+
+tcell.list <- list(bcc.tcells.su001, bcc.tcells.su002, bcc.tcells.su003, bcc.tcells.su004, bcc.tcells.su005, bcc.tcells.su006, bcc.tcells.su007, bcc.tcells.su008, bcc.tcells.su009, bcc.tcells.su010, bcc.tcells.su012)
+
+table <- data.frame(matrix(ncol=8, nrow=1))
+colnames(table) <- c("CD4", "CD8_activation", "CD8_exhausted", "CD8_memory", "T_proliferation", "Tregs", "Total", "Patient")
+table[1,] <- c('0', '0', '0', '0', '0', '0', '0', '0')
+
+for (i in 1:length(tcell.list)) {
+  Idents(tcell.list[[i]]) <- tcell.list[[i]]$treatment
+  ntable <- table(Idents(tcell.list[[i]]), tcell.list[[i]]$seurat_clusters)
+  ntable <- data.frame(cbind(ntable, rowSums(ntable), patients[i]))
+  for (c in 1:ncol(ntable)) {
+    ntable[,c] <- as.character(ntable[,c])
+  }
+  table <- dplyr::bind_rows(table, ntable)
+}
+
+table <- table[-1,]
+table[5, 9] <- "82"
+table[6, 9] <- "112"
+table[5, 10] <- "su003"
+table[6, 10] <- "su003"
+table <- subset(table, select = -c(Patient, V6, Total))
+colnames(table) <- c("CD4+", "CD8+ Activated", "CD8+ Exhausted", "CD8+ Memory", "T Prolif.", "Tregs", "Total", "Patient")
+table[is.na(table)] <- 0
+
+table$Patient <- c("su001_pre", "su001_post", "su002_pre", "su002_post", "su003_pre", "su003_post", "su004_pre", "su004_post", "su005_pre", "su005_post", "su006_pre", "su006_post", "su007_pre", "su007_post", "su008_pre", "su008_post", "su009_pre", "su009_post", "su010_pre", "su010_post", "su012_pre", "su012_post")
+
+table.nototal <- subset(table, select = -c(Total))
+
+melted.table <- melt(table.nototal, id.vars="Patient")
+melted.table$value <- as.numeric(melted.table$value)
+
+ggplot(melted.table, aes(fill=variable, y=value, x=Patient)) +
+  geom_col(position="fill") +
+  scale_fill_brewer(palette="Spectral") + theme_bw() +
+  labs(y="Proportion", x="Population") +
+  theme(legend.position="bottom", axis.text.x = element_text(angle=90, hjust=1)) +
+  guides(fill=guide_legend(title="Cluster"))
+
+## Statistical test on exhausted CD8+ T cell percentages
+
+exhausted.table <- table[,c("CD8+ Exhausted", "Total", "Patient")]
+exhausted.table$`CD8+ Exhausted` <- as.numeric(exhausted.table$`CD8+ Exhausted`)
+exhausted.table$Total <- as.numeric(exhausted.table$Total)
+exhausted.table$Proportion <- exhausted.table$`CD8+ Exhausted` / exhausted.table$Total
+exhausted.table$Classification <- c("R Pre", "R Post", "R Pre", "R Post", "R Pre", "R Post", "R Pre", "R Post", "NR Pre", "NR Post", "NR Pre", "NR Post", "NR Pre", "NR Post", "NR Pre", "NR Post", "R Pre", "R Post", "NR Pre", "NR Post", "R Pre", "R Post")
+
+comparisons <- list(c("R Pre", "R Post"), c("NR Pre", "NR Post"), c("R Pre", "NR Pre"), c("R Post", "NR Post"))
+ggboxplot(exhausted.table, x="Classification", y="Proportion", color="Classification", palette="jco", add="jitter") +
+  stat_compare_means(comparisons=comparisons, label.y=c(0.3, 0.3, 0.34, 0.38)) + 
+  theme_bw() + theme(legend.position="none")
+
+```
+
+
+
+Look at distribution of T cells in PDAC samples
+
+```{r}
+
+## Recluster all T cells and NK cells
+
+Idents(PDAC.all) <- PDAC.all$cluster
+
+PDAC.all.tnkcells <- subset(PDAC.all, idents=c("CD4+ T Cells", "CD8+ T Cells", "Tregs", "Proliferating Tregs", "NK Cells"))
+
+pdac.tnkcells <- PDAC.all.tnkcells
+PDAC.all.tnkcells <- preprocessing(PDAC.all.tnkcells)
+PDAC.all.tnkcells <- clustering(PDAC.all.tnkcells, resolution=1)
+
+colorlist <- c("#8b5b00", "#5771fc", "#c5ca10", "#0152d1", "#8ac723", "#6957df", "#95d950", "#f66ff1", "#00af4d", "#c67eff", "#8fb000", "#025fcf", "#f98e10", "#3389ff", "#c3a200", "#583faa", "#4ce089", "#b80084", "#009030", "#ff7be4", "#6f9200", "#a490ff", "#d7c843", "#514798", "#ffb045", "#02a1fc", "#f8632a", "#00caf0", "#b92100", "#00b5b7", "#d50041", "#64d8cc", "#b20061", "#007531", "#ff95dd", "#285f11", "#ff7da3", "#00754f", "#dbb9f7", "#596700", "#02a4cf", "#ff9f67", "#008f88", "#91322e", "#9083b7", "#e2c284", "#7f3e59", "#a3a26a")
+
+DimPlot(PDAC.all.tnkcells, split.by="cluster", cols=colorlist[1:28], label=TRUE)
+
+cd4markers <- c('CD4', 'IL7R', 'CD3E', 'CD3D')
+cd8markers <- c('CD8A', 'IFNY', 'TNF', 'EOMES', 'GZMA', 'LAG3', 'IFNG', 'CD95')
+tregmarkers <- c('CD4', 'CD25', 'FOXP3', 'CD127', 'CD152', 'STAT5')
+
+DotPlot(PDAC.all.tnkcells, features=cd4markers)
+
+Idents(PDAC.all.tnkcells) <- PDAC.all.tnkcells$seurat_clusters
+
+tnkclusters <- c('CD4+ T Cells', 'CD4+ T Cells', 'Tregs', 'CD4+ T Cells', 'NK Cells', 'NK Cells', 'CD8+ T Cells', 'CD8+ T Cells', 'CD4+ T Cells', 'CD8+ T Cells', 'CD8+ T Cells', 'NK Cells', 'CD8+ T Cells', 'CD8+ T Cells', 'CD8+ T Cells', 'CD4+ T Cells', 'CD8+ T Cells', 'CD8+ T Cells', 'CD8+ T Cells', 'NK Cells', 'NK Cells', 'CD4+ T Cells', 'CD8+ T Cells', 'CD8+ T Cells', 'CD4+ T Cells', 'Tregs', 'NK Cells', 'NK Cells')
+
+names(tnkclusters) <- levels(PDAC.all.tnkcells)
+PDAC.all.tnkcells <- RenameIdents(PDAC.all.tnkcells, tnkclusters)
+PDAC.all.tnkcells@meta.data$seurat_clusters <- PDAC.all.tnkcells@active.ident
+
+PDAC.all$cluster[rownames(PDAC.all.tnkcells@meta.data)] <- paste(Idents(PDAC.all.tnkcells))
+
+## Divide CD8+ T cells into activated, exhausted, and memory phenotypes
+
+Idents(PDAC.all) <- PDAC.all$cluster
+PDAC.all.cd8 <- subset(PDAC.all, idents="CD8+ T Cells")
+
+PDAC.all.cd8 <- preprocessing(PDAC.all.cd8)
+PDAC.all.cd8 <- clustering(PDAC.all.cd8, resolution=1)
+
+Idents(PDAC.all.cd8) <- PDAC.all.cd8$seurat_clusters
+DimPlot(PDAC.all.cd8, label=TRUE, cols=colorlist[1:16])
+
+cd8markergenes <- c('PFN1', 'TMEM66', 'CXCR4', 'H1FX', 'HERPUD1', 'NCR3', 'DRAXIN', 'BTG1', 'LGALS3', 'LTB', 'RORA', 'APBA2', 'AIM1', 'TMEM173', 'PRF1', 'GFPT2', 'LGALS1', 'GABARAPL1', 'KLRB1', 'TOB1','S100A4', 'CCR6', 'KLRC1', 'SLC4A10', 'S100A6', 'CSF1', 'TNFRSF25', 'PTGER4', 'I7R', 'GZMB', 'CD40LG','PTGER2', 'VNN2', 'FAM65B', 'NLRC5', 'LAT2', 'BCL2A1', 'NBEAL2', 'ATHL1', 'TRIM56', 'IRS2', 'IFITM3', 'RNF130', 'CD74', 'ADAM28', 'TCF7', 'GZMK', 'HLA-DPB1', 'CLDND1', 'HAVCR2', 'KLRG1', 'IFI44L','ITGB2', 'KLF2', 'EOMES', 'TNFRSF18', 'PPP1R14B', 'KLRC3', 'GPR183', 'CD27', 'KLRF1', 'TIGIT', 'HLA-DPA1')
+
+DotPlot(PDAC.all.cd8, features=cd8markergenes)
+
+cd8clusters <- c('CD8+ Effector', 'CD8+ Effector', 'CD8+ Effector', 'CD8+ Exhausted', 'CD8+ Effector', 'CD8+ Effector', 'CD8+ Exhausted', 'CD8+ Effector', 'CD8+ Exhausted', 'CD8+ Effector', 'CD8+ Exhausted', 'CD8+ Effector', 'CD8+ Effector', 'CD8+ Exhausted', 'CD8+ Memory', 'CD8+ Exhausted')
+
+names(cd8clusters) <- levels(PDAC.all.cd8)
+PDAC.all.cd8 <- RenameIdents(PDAC.all.cd8, cd8clusters)
+PDAC.all.cd8@meta.data$seurat_clusters <- PDAC.all.cd8@active.ident
+
+PDAC.all$cluster[rownames(PDAC.all.cd8@meta.data)] <- paste(Idents(PDAC.all.cd8))
+
+PDAC.all.tnkcells$seurat_clusters <- as.character(PDAC.all.tnkcells$seurat_clusters)
+PDAC.all.tnkcells$seurat_clusters[rownames(PDAC.all.cd8@meta.data)] <- paste(Idents(PDAC.all.cd8))
+
+Idents(PDAC.all) <- PDAC.all$cluster
+Idents(PDAC.all.tnkcells) <- PDAC.all.tnkcells$seurat_clusters
+
+save(PDAC.all, file="C:\\Users\\Ryan\\Documents\\Nie Research Project\\GSE 155698\\PDAC.all")
+
+## Look at T cell population trends
+
+Idents(PDAC.all.tnkcells) <- PDAC.all.tnkcells$seurat_clusters
+DimPlot(PDAC.all.tnkcells, label=TRUE)
+gg1 <- ggplot_barcharts(PDAC.all.tnkcells$seurat_clusters, PDAC.all.tnkcells$orig.ident, normalize="No") + theme_bw()
+gg2 <- ggplot_barcharts(PDAC.all.tnkcells$seurat_clusters, PDAC.all.tnkcells$status, normalize="No") + theme_bw()
+
+gg1 <- gg1$data
+gg2 <- gg2$data
+
+Idents(PDAC.all.tnkcells) <- PDAC.all.tnkcells$orig.ident
+tcell.totalcounts <- table(Idents(PDAC.all.tnkcells))
+cd8effector.counts <- subset(gg1, Batch == 'CD8+ Effector')
+
+cd8effector.proportions <- merge(tcell.totalcounts, cd8effector.counts, by.x="Var1", by.y="Clusters")
+cd8effector.proportions$Proportion <- cd8effector.proportions$n / cd8effector.proportions$Freq
+cd8effector.proportions$Status <- c('H', 'H', 'H', 'I', 'I', 'I', 'I', 'I', 'I', 'I', 'I', 'I', 'I', 'I', 'I', 'I', 'I', 'I', 'I')
+
+gg3 <- ggboxplot(cd8effector.proportions, x='Status', y='Proportion', color='Status', add='jitter') +
+  stat_compare_means(method = 't.test', label.y=0.92, label.x=1.3) +
+  NoLegend() + ggtitle("Proportion of Activated CD8+ T Cells") + theme_bw() +
+  theme(plot.title = element_text(color="black", size=18, face="bold")) + NoLegend()
+ggpar(gg3, ylim=c(0,1))
+
+cd8exhausted.counts <- subset(gg1, Batch == 'CD8+ Exhausted')
+cd8exhausted.proportions <- merge(tcell.totalcounts, cd8exhausted.counts, by.x="Var1", by.y="Clusters", all=TRUE)
+cd8exhausted.proportions$Proportion <- cd8exhausted.proportions$n / cd8exhausted.proportions$Freq
+cd8exhausted.proportions$Status <- c('I', 'I', 'I', 'I', 'I', 'I', 'I', 'I', 'I', 'I', 'I', 'I', 'I', 'I', 'I', 'I', 'H', 'H', 'H')
+cd8exhausted.proportions$Proportion[c(11, 18, 19)] <- 0
+cd8exhausted.proportions$Proportion <- as.numeric(cd8exhausted.proportions$Proportion)
+
+gg4 <- ggboxplot(cd8exhausted.proportions, x='Status', y='Proportion', color='Status', add='jitter') +
+  stat_compare_means(method = 't.test', label.y=0.92, label.x=1.3) +
+  NoLegend() + ggtitle("Proportion of Exhausted CD8+ T Cells") + theme_bw() +
+  theme(plot.title = element_text(color="black", size=18, face="bold")) + NoLegend()
+ggpar(gg4, ylim=c(0,1))
+
+```
+
+
+
+Compare distribution of T cells between BCC and PDAC
+
+```{r}
+
+Idents(BCCIO) <- BCCIO$seurat_clusters
+BCCIO$patient.status <- paste(BCCIO$patient, BCCIO$treatment)
+BCCIO$treatment.status <- paste(BCCIO$response, BCCIO$treatment)
+
+BCCIO <- RenameIdents(BCCIO,
+                      'CD8_memory' = 'CD8+ Memory',
+                      'CD8_activation' = 'CD8+ Effector',
+                      'CD8_exhausted' = 'CD8+ Exhausted',
+                      'CD4' = 'CD4+ T Cells',
+                      'NK' = 'NK Cells',
+                      'Misc.' = 'Miscellaneous',
+                      'Endothelial' = 'Endothelial Cells',
+                      'Plasma' = 'Plasma Cells',
+                      'Tumor 1' = 'Malignant 1',
+                      'Tumor 2' = 'Malignant 2',
+                      'DCs' = 'Dendritic Cells',
+                      'T_proliferation' = 'Proliferating T Cells')
+BCCIO$seurat_clusters <- Idents(BCCIO)
+
+BCC.all.tnkcells <- subset(BCCIO, idents=c('CD4+ T Cells', 'CD8+ Memory', 'CD8+ Effector', 'CD8+ Exhausted', 'Proliferating T Cells', 'NK Cells', 'Tregs'))
+
+gg1 <- ggplot_barcharts(BCC.all.tnkcells$seurat_clusters, BCC.all.tnkcells$patient.status, normalize="No") +
+  theme_bw() + RotatedAxis()
+gg2 <- ggplot_barcharts(BCC.all.tnkcells$seurat_clusters, BCC.all.tnkcells$treatment.status, normalize="No") + 
+  theme_bw() + NoLegend() + RotatedAxis()
+
+Idents(BCC.all.tnkcells) <- BCC.all.tnkcells$patient.status
+bcc.tcell.totalcounts <- table(Idents(BCC.all.tnkcells))
+
+bcc.cd8effector.counts <- subset(gg1$data, Batch == 'CD8+ Effector')
+bcc.cd8exhausted.counts <- subset(gg1$data, Batch == 'CD8+ Exhausted')
+
+bcc.cd8effector.proportions <- merge(bcc.tcell.totalcounts, bcc.cd8effector.counts, by.x="Var1", by.y="Clusters", all=TRUE)
+bcc.cd8exhausted.proportions <- merge(bcc.tcell.totalcounts, bcc.cd8exhausted.counts, by.x="Var1", by.y="Clusters", all=TRUE)
+
+bcc.cd8effector.proportions$Proportion <- bcc.cd8effector.proportions$n / bcc.cd8effector.proportions$Freq
+bcc.cd8exhausted.proportions$Proportion <- bcc.cd8exhausted.proportions$n / bcc.cd8exhausted.proportions$Freq
+
+bcc.cd8effector.proportions$Proportion[is.na(bcc.cd8effector.proportions$Proportion)] <- 0
+bcc.cd8exhausted.proportions$Proportion[is.na(bcc.cd8exhausted.proportions$Proportion)] <- 0
+
+bcc.cd8effector.proportions$Status <- c('R Pre', 'R Post', 'R Pre', 'R Post', 'R Pre', 'R Post', 'R Pre', 'R Post', 'NR Pre', 'NR Post', 'NR Pre', 'NR Post', 'NR Pre', 'NR Post', 'NR Pre', 'NR Post', 'R Pre', 'R Post', 'NR Pre', 'NR Post', 'R Pre', 'R Post')
+bcc.cd8exhausted.proportions$Status <- c('R Pre', 'R Post', 'R Pre', 'R Post', 'R Pre', 'R Post', 'R Pre', 'R Post', 'NR Pre', 'NR Post', 'NR Pre', 'NR Post', 'NR Pre', 'NR Post', 'NR Pre', 'NR Post', 'R Pre', 'R Post', 'NR Pre', 'NR Post', 'R Pre', 'R Post')
+
+comparisons <- list(c('R Pre', 'R Post'), c('NR Pre', 'NR Post'), c('R Pre', 'NR Pre'), c('R Post', 'NR Post'))
+
+gg3 <- ggboxplot(bcc.cd8effector.proportions, x='Status', y='Proportion', color='Status', add='jitter') +
+  stat_compare_means(comparisons=comparisons, label.y=c(0.80, 0.80, 0.86, 0.93)) +
+  NoLegend() + ggtitle("Proportion of Activated CD8+ T Cells") + theme_bw() +
+  theme(plot.title = element_text(color="black", size=18, face="bold")) + NoLegend()
+ggpar(gg3, ylim=c(0,1))
+
+gg4 <- ggboxplot(bcc.cd8exhausted.proportions, x='Status', y='Proportion', color='Status', add='jitter') +
+  stat_compare_means(comparisons=comparisons, label.y=c(0.40, 0.40, 0.43, 0.465)) +
+  NoLegend() + ggtitle("Proportion of Exhausted CD8+ T Cells") + theme_bw() +
+  theme(plot.title = element_text(color="black", size=18, face="bold")) + NoLegend()
+ggpar(gg4, ylim=c(0,0.5))
+
+## Comparison between BCC and PDAC
+
+all.cd8effector.proportions <- rbind(bcc.cd8effector.proportions, cd8effector.proportions)
+all.cd8exhausted.proportions <- rbind(bcc.cd8exhausted.proportions, cd8exhausted.proportions)
+
+all.cd8effector.proportions$Status[all.cd8effector.proportions$Status == "H"] <- "PDAC H"
+all.cd8effector.proportions$Status[all.cd8effector.proportions$Status == "I"] <- "PDAC I"
+all.cd8exhausted.proportions$Status[all.cd8exhausted.proportions$Status == "H"] <- "PDAC H"
+all.cd8exhausted.proportions$Status[all.cd8exhausted.proportions$Status == "I"] <- "PDAC I"
+
+attach(all.cd8effector.proportions)
+all.cd8effector.proportions <- all.cd8effector.proportions[ which(Status != "R Post" & Status != "NR Post"),]
+detach(all.cd8effector.proportions)
+
+attach(all.cd8exhausted.proportions)
+all.cd8exhausted.proportions <- all.cd8exhausted.proportions[ which(Status != "R Post" & Status != "NR Post"),]
+all.cd8exhausted.proportions$Proportion[ is.na(Proportion) ] <- 0
+detach(all.cd8exhausted.proportions)
+
+comparisons <- list(c('R Pre', 'NR Pre'), c('PDAC H', 'PDAC I'), c('R Pre', 'PDAC I'), c('NR Pre', 'PDAC I'))
+
+gg5 <- ggboxplot(all.cd8effector.proportions, x='Status', y='Proportion', color='Status', add='jitter') +
+  stat_compare_means(comparisons=comparisons, label.y=c(0.80, 0.80, 0.86, 0.93)) +
+  NoLegend() + ggtitle("Proportion of Activated CD8+ T Cells") + theme_bw() +
+  theme(plot.title = element_text(color="black", size=18, face="bold")) + NoLegend()
+ggpar(gg5, ylim=c(0,1))
+
+all.cd8exhausted.proportions$Status <- factor(all.cd8exhausted.proportions$Status, levels = c('R Pre', 'NR Pre', 'PDAC H', 'PDAC I'))
+gg6 <- ggboxplot(all.cd8exhausted.proportions, x='Status', y='Proportion', color='Status', add='jitter') +
+  stat_compare_means(comparisons=comparisons, label.y=c(0.40, 0.40, 0.43, 0.465)) +
+  NoLegend() + ggtitle("Proportion of Exhausted CD8+ T Cells") + theme_bw() +
+  theme(plot.title = element_text(color="black", size=18, face="bold")) + NoLegend()
+ggpar(gg6, ylim=c(0,0.5))
+
+```
+
+
+
+PD-1 pathway expression in CD8+ T cell subclusters in BCC and PDAC
+
+```{r}
+
+tnk.cells <- merge(PDAC.all.tnkcells, BCC.all.tnkcells)
+
+Idents(PDAC.all.tnkcells) <- PDAC.all.tnkcells$cluster
+Idents(BCC.all.tnkcells) <- BCC.all.tnkcells$seurat_clusters
+
+pdac.tcell.clusters <- levels(Idents(PDAC.all.tnkcells))
+bcc.tcell.clusters <- levels(Idents(BCC.all.tnkcells))
+
+for (i in 1:length(pdac.tcell.clusters)) {
+  assign(paste0('pdac.', pdac.tcell.clusters[i]), subset(PDAC.all.tnkcells, idents=pdac.tcell.clusters[i]))
+}
+
+for (i in 1:length(bcc.tcell.clusters)) {
+  assign(paste0('bcc.', bcc.tcell.clusters[i]), subset(BCC.rpre.tnkcells, idents=bcc.tcell.clusters[i]))
+}
+
+## CDFs of PD-1/PD-L1/PD-L2 Expression in CD8+ T Cells
+
+gg.pd1 <- gene_cdf(datasets=list(`pdac.CD8+ Effector`, `pdac.CD8+ Exhausted`, `pdac.CD8+ Memory`, `bcc.CD8+ Effector`, `bcc.CD8+ Exhausted`, `bcc.CD8+ Memory`), clusternames=c("PDAC Activated", "PDAC Exhausted", "PDAC Memory", "BCC Activated", "BCC Exhausted", "BCC Memory"), genename="PDCD1", title="CD8+ T Cells: PD-1 Gene Expression")
+gg.pd1 + theme_bw() + theme(plot.title = element_text(color="black", size=18, face="bold", hjust=0.5), legend.position="top")  + ylim(0.5, 1)
+
+gg.pd2 <- gene_cdf(datasets=list(`pdac.CD8+ Effector`, `pdac.CD8+ Exhausted`, `pdac.CD8+ Memory`, `bcc.CD8+ Effector`, `bcc.CD8+ Exhausted`, `bcc.CD8+ Memory`), clusternames=c("PDAC Activated", "PDAC Exhausted", "PDAC Memory", "BCC Activated", "BCC Exhausted", "BCC Memory"), genename="CD274", title="CD8+ T Cells: PD-L1 Gene Expression")
+gg.pd2 + theme_bw() + theme(plot.title = element_text(color="black", size=18, face="bold", hjust=0.5), legend.position="top")  + ylim(0.9, 1)
+
+gg.pd3 <- gene_cdf(datasets=list(`pdac.CD8+ Effector`, `pdac.CD8+ Exhausted`, `pdac.CD8+ Memory`, `bcc.CD8+ Effector`, `bcc.CD8+ Exhausted`, `bcc.CD8+ Memory`), clusternames=c("PDAC Activated", "PDAC Exhausted", "PDAC Memory", "BCC Activated", "BCC Exhausted", "BCC Memory"), genename="PDCD1LG2", title="CD8+ T Cells: PD-L2 Gene Expression")
+gg.pd3 + theme_bw() + theme(plot.title = element_text(color="black", size=18, face="bold", hjust=0.5), legend.position="top")  + ylim(0.9, 1)
+
+## Violin plots and statistical comparisons
+
+cd8.pd1.data <- gg.pd1$data
+cd8.pdl1.data <- gg.pd2$data
+cd8.pdl2.data <- gg.pd3$data
+
+cd8.pd1.data$cluster <- factor(cd8.pd1.data$cluster, levels=c('BCC Activated', 'PDAC Activated', 'BCC Exhausted', 'PDAC Exhausted', 'BCC Memory', 'PDAC Memory'))
+datalist <- list(cd8.pd1.data, cd8.pdl1.data, cd8.pdl2.data)
+for (i in 1:length(datalist)) {
+  datalist[i]$cluster <- as.factor(datalist[i]$cluster)
+  datalist[i]$cluster <- factor(datalist[i]$cluster, levels=c('BCC Activated', 'PDAC Activated', 'BCC Exhausted', 'PDAC Exhausted', 'BCC Memory', 'PDAC Memory'))
+}
+
+comparisons <- list(c('BCC Activated', 'PDAC Activated'), c('BCC Exhausted', 'PDAC Exhausted'), c('BCC Memory', 'PDAC Memory'))
+
+ggplot(cd8.pd1.data, aes(x=cluster, y=gene, fill=cluster)) +
+  geom_violin() + 
+  stat_compare_means(comparisons=comparisons, label.y=c(3.7, 3.7, 3.7)) +
+  xlab("Population") + ylab("Gene Expression") + ggtitle("PD-1 Gene Expression: CD8+ T Cells") +
+  theme_bw() + theme(plot.title = element_text(color="black", size=18, face="bold", hjust=0.5)) + NoLegend() + 
+  scale_fill_manual(values=c('#0073C2FF', '#0073C2FF', '#EFC000FF', '#EFC000FF', '#CD534CFF', '#CD534CFF'))
+
+
+cd8.pdl.data <- data.frame(cd8.pdl1.data$cluster, cd8.pdl1.data$gene + cd8.pdl2.data$gene)
+colnames(cd8.pdl.data) <- c("cluster", "gene")
+cd8.pdl.data$cluster <- factor(cd8.pdl.data$cluster, levels=c('BCC Activated', 'PDAC Activated', 'BCC Exhausted', 'PDAC Exhausted', 'BCC Memory', 'PDAC Memory'))
+
+ggplot(cd8.pdl.data, aes(x=cluster, y=gene, fill=cluster)) +
+  geom_violin() + 
+  stat_compare_means(comparisons=comparisons, label.y=c(3.7, 3.7, 3.7)) +
+  xlab("Population") + ylab("Gene Expression") + ggtitle("PD-L1/PD-L2 Gene Expression: CD8+ T Cells") +
+  theme_bw() + theme(plot.title = element_text(color="black", size=18, face="bold", hjust=0.5)) + NoLegend() + 
+  scale_fill_manual(values=c('#0073C2FF', '#0073C2FF', '#EFC000FF', '#EFC000FF', '#CD534CFF', '#CD534CFF'))
+
+## Modified volcano plot of average expression
+
+pdac.tnk.avgexp <- AverageExpression(PDAC.all.tnkcells)
+bcc.tnk.avpexp <- AverageExpression(BCC.all.tnkcells)
+
+clusters <- c('CD4+ T Cells', 'CD8+ Memory', 'CD8+ Exhausted', 'CD8+ Efector', 'Macrophages', 'Proliferating T )
+
+```
+
+
+
+MHC pathway expression comparison between PDAC and BCC CD8+ T cell subclusters
+
+```{r}
+
+PDAC.all.tnkcells <- subset(PDAC.all, idents=c('CD4+ T Cells', 'CD8+ Memory', 'CD8+ Exhausted', 'CD8+ Effector', 'Tregs', 'NK Cells'))
+
+Idents(BCCIO) <- BCCIO$treatment.status
+BCC.responder.pre <- subset(BCCIO, idents=c('Responsive pre'))
+Idents(BCC.responder.pre) <- BCC.responder.pre$seurat_clusters
+BCC.rpre.tnkcells <- subset(BCC.responder.pre, idents=c('CD4+ T Cells', 'CD8+ Memory', 'CD8+ Exhausted', 'CD8+ Effector', 'Tregs', 'NK Cells'))
+
+Idents(PDAC.all.tnkcells) <- PDAC.all.tnkcells$cluster
+Idents(BCC.rpre.tnkcells) <- BCC.rpre.tnkcells$seurat_clusters
+
+pdac.tcell.clusters <- levels(Idents(PDAC.all.tnkcells))
+bcc.tcell.clusters <- levels(Idents(BCC.rpre.tnkcells))
+
+for (i in 1:length(pdac.tcell.clusters)) {
+  assign(paste0('pdac.', pdac.tcell.clusters[i]), subset(PDAC.all.tnkcells, idents=pdac.tcell.clusters[i]))
+}
+
+for (i in 1:length(bcc.tcell.clusters)) {
+  assign(paste0('bcc.', bcc.tcell.clusters[i]), subset(BCC.rpre.tnkcells, idents=bcc.tcell.clusters[i]))
+}
+
+## CDFs of MHC-1 and MHC-II Scores in CD8+ T Cells
+
+mhc1.genes <- c('HLA-A', 'HLA-B', 'HLA-C', 'HLA-E', 'HLA-F', 'HLA-G')
+mhc2.genes <- c('HLA-DMA', 'HLA-DMB', 'HLA-DOA', 'HLA-DPA1', 'HLA-DPB1', 'HLA-DQA1', 'HLA-DQA2', 'HLA-DQB1', 'HLA-DQB2', 'HLA-DRA', 'HLA-DRB1', 'HLA-DRB5')
+
+gg.mhc1 <- genes_cdf(datasets=list(`pdac.CD8+ Effector`, `pdac.CD8+ Exhausted`, `pdac.CD8+ Memory`, `bcc.CD8+ Effector`, `bcc.CD8+ Exhausted`, `bcc.CD8+ Memory`), clusters=c("PDAC Activated", "PDAC Exhausted", "PDAC Memory", "BCC Activated", "BCC Exhausted", "BCC Memory"), genes=mhc1.genes, title="CD8+ T Cells: MHC-I Gene Score")
+
+gg.mhc2 <- genes_cdf(datasets=list(`pdac.CD8+ Effector`, `pdac.CD8+ Exhausted`, `pdac.CD8+ Memory`, `bcc.CD8+ Effector`, `bcc.CD8+ Exhausted`, `bcc.CD8+ Memory`), clusters=c("PDAC Activated", "PDAC Exhausted", "PDAC Memory", "BCC Activated", "BCC Exhausted", "BCC Memory"), genes=mhc2.genes, title="CD8+ T Cells: MHC-II Gene Score")
+
+
+## Violin plots and statistical comparisons
+
+cd8.mhc1.data <- gg.mhc1$data
+cd8.mhc2.data <- gg.mhc2$data
+
+cd8.mhc1.data$cluster <- factor(cd8.mhc1.data$cluster, levels=c('BCC Activated', 'PDAC Activated', 'BCC Exhausted', 'PDAC Exhausted', 'BCC Memory', 'PDAC Memory'))
+datalist <- list(cd8.mhc1.data, cd8.mhc2.data)
+for (i in 1:length(datalist)) {
+  datalist[i]$cluster <- as.factor(datalist[i]$cluster)
+  datalist[i]$cluster <- factor(datalist[i]$cluster, levels=c('BCC Activated', 'PDAC Activated', 'BCC Exhausted', 'PDAC Exhausted', 'BCC Memory', 'PDAC Memory'))
+}
+
+comparisons <- list(c('BCC Activated', 'PDAC Activated'), c('BCC Exhausted', 'PDAC Exhausted'), c('BCC Memory', 'PDAC Memory'))
+
+cd8.mhc1.ggplot <- ggplot(cd8.mhc1.data, aes(x=cluster, y=gene, fill=cluster)) +
+  geom_violin() + 
+  stat_compare_means(comparisons=comparisons, label.y=c(25, 25, 25)) +
+  xlab("Population") + ylab("Gene Expression") + ggtitle("MHC-I Gene Expression: CD8+ T Cells") +
+  theme_bw() + theme(plot.title = element_text(color="black", size=18, face="bold", hjust=0.5)) + NoLegend() + 
+  scale_fill_manual(values=c('#0073C2FF', '#0073C2FF', '#EFC000FF', '#EFC000FF', '#CD534CFF', '#CD534CFF'))
+
+cd8.mhc2.data$cluster <- factor(cd8.mhc2.data$cluster, levels=c('BCC Activated', 'PDAC Activated', 'BCC Exhausted', 'PDAC Exhausted', 'BCC Memory', 'PDAC Memory'))
+
+cd8.mhc2.ggplot <- ggplot(cd8.mhc2.data, aes(x=cluster, y=gene, fill=cluster)) +
+  geom_violin() + 
+  stat_compare_means(comparisons=comparisons, label.y=c(35, 35, 35)) +
+  xlab("Population") + ylab("Gene Expression") + ggtitle("MHC-II Gene Expression: CD8+ T Cells") +
+  theme_bw() + theme(plot.title = element_text(color="black", size=18, face="bold", hjust=0.5)) + NoLegend() + 
+  scale_fill_manual(values=c('#0073C2FF', '#0073C2FF', '#EFC000FF', '#EFC000FF', '#CD534CFF', '#CD534CFF'))
+
+```
+
+
+
+Examine similarities in the marker genes for BCC and PDAC malignant cells
+
+```{r}
+
+## Identify genes with similar expression in PDAC and BCC clusters
+
+malignant$response[malignant$cancer=="PDAC"] <- "PDAC"
+Idents(malignant) <- malignant$cancer
+
+malignant.response.volcano <- bioc_volcano(malignant, "BCC", "response", "Responsive", "Nonresponsive", 0.05, 0.5, "Malignant Cells")
+
+Idents(malignant) <- malignant$filler
+malignant.cancer.volcano <- bioc_volcano(malignant, "everything", "response", "Responsive", "PDAC", 0.05, 0.5, "BCC Responders vs. PDAC")
+malignant.cancer.data <- malignant.cancer.volcano$data
+
+malignant.cancer.sim <- malignant.cancer.data[(malignant.cancer.data$avg_logFC < 0.5 & malignant.cancer.data$p_val_adj > 10^-10),]
+malignant.genes.sim <- malignant.cancer.sim$GeneNames
+
+## Determine marker genes for BCC and PDAC malignant cells
+
+BCCIO$malignant <- "Nonmalignant"
+PDAC.all$malignant <- "Nonmalignant"
+BCCIO$filler <- "everything"
+PDAC.all$filler <- "everything"
+
+BCCIO$malignant[(BCCIO$seurat_clusters == "Malignant 1" | BCCIO$seurat_clusters == "Malignant 2")] <- "Malignant"
+PDAC.all$malignant[(PDAC.all$cluster == "Ductal cells: Malignant 1" | PDAC.all$cluster == "Ductal cells: Malignant 2")] <- "Malignant"
+
+Idents(BCCIO) <- BCCIO$filler
+Idents(PDAC.all) <- PDAC.all$filler
+
+bcc.malignant.volcano <- bioc_volcano(BCCIO, "everything", "malignant", "Malignant", "Nonmalignant", 0.05, 0.5, "BCC")
+pdac.malignant.volcano <- bioc_volcano(PDAC.all, "everything", "malignant", "Malignant", "Nonmalignant", 0.05, 0.5, "PDAC")
+
+bcc.malignant.upreg.data <- bcc.malignant.volcano$data[(bcc.malignant.volcano$data$avg_logFC > 0.5 & bcc.malignant.volcano$data$p_val_adj < 0.01), ]
+pdac.malignant.upreg.data <- pdac.malignant.volcano$data[(pdac.malignant.volcano$data$avg_logFC > 0.5 & pdac.malignant.volcano$data$p_val_adj < 0.01),]
+
+bcc.malignant.upreg <- bcc.malignant.upreg.data$GeneNames
+pdac.malignant.upreg <- pdac.malignant.upreg.data$GeneNames
+
+common.malignant.upreg <- intersect(bcc.malignant.upreg, pdac.malignant.upreg)
+writeClipboard(common.malignant.upreg)
+
+Idents(malignant) <- malignant$imported_clusters
+malignant <- subset(malignant, idents=c("BCC Malignant 1", "BCC Malignant 2", "PDAC DC Malignant 1", "PDAC DC Malignant 2"))
+
+malignant.upreg.heatmap <- DoHeatmap(object=malignant, group.by="cancer", features=common.malignant.upreg)
+
+Idents(malignant) <- malignant$imported_clusters
+levels(Idents(malignant)) <- c("BCC 1", "BCC 2", "PDAC 1", "PDAC 2")
+malignant.upreg.heatmap.cluster <- DoHeatmap(object=malignant, group.by="ident", features=common.malignant.upreg)
+
+BCC.upreg.heatmap.cluster <- DoHeatmap(object=BCCIO, group.by="malignant", features=common.malignant.upreg)
+PDAC.upreg.heatmap.cluster <- DoHeatmap(object=BCCIO, group.by="malignant", features=common.malignant.upreg)
+
+go.analysis.data <- data.frame(Process = rep(c("Regulation of apoptotic process", "Positive regulation of apoptotic process", "Negative regulation of apoptotic process", "Regulation of programmed cell death", "Positive regulation of programmed cell death", "Negative regulation of programmed cell death", "Regulation of cell death", "Positive regulation of cell death", "Negative regulation of cell death", "Cell surface receptor signaling pathway", "Cell adhesion"), each=3),
+                               Cancer = rep(c("BCC", "PDAC", "Both"), 11),
+                               Enrichment = c(2.91, 2.02, 3.07, 3.44, 1.60, 2.86, 3.08, 2.70, 3.84, 2.88, 2.07, 3.14, 3.54, 1.68, 3.18, 3.01, 2.77, 3.76, 2.81, 2.03, 3.02, 3.54, 1.60, 2.87, 3.11, 2.77, 4.09, 1.99, 1.68, 2.57, 5.03, 3.72, 8.64),
+                               pvaladj = c(7.51*10^-14, 4.70*10^-3, 5.17*10^-2, 3.64*10^-6, 1.00, 1.00, 2.68*10^-8, 2.10*10^-5, 7.02*10^-2, 9.39*10^-14, 9.2*10^-4, 1.99*10^-2, 4.99*10^-7, 1.00, 1.00, 5.66*10^-8, 4.38*10^-6, 9.01*10^-2, 2.998*10^-14, 6.31*10^-4, 2.03*10^-2, 4.40*10^-8, 1.00, 1.00, 3.96*10^-10, 4.18*10^-7, 3.00*10^-3, 1.21*10^-6, 2.81*10^-2, 1.42*10^-2, 6.38*10^-32, 4.30*10^-16, 1.18*10^-20))
+
+colnames(go.analysis.data) <- c("Biological Process", "Cancer", "Fold Enrichment", "p-value")
+go.analysis.data$Significant <- 0
+go.analysis.data$Significant[go.analysis.data$`p-value` < 0.05] <- 1
+
+go.analysis.data$Abbreviations <- rep(c('AP', 'Pos. AP', 'Neg. AP', 'PCD', 'Pos. PCD', 'Neg. PCD', 'CD', 'Pos. CD', 'Neg. CD', 'CS RSP', 'Adhesion'), each=3)
+go.analysis.data$Abbreviations <- factor(go.analysis.data$Abbreviations, levels=c('AP', 'Pos. AP', 'Neg. AP', 'PCD', 'Pos. PCD', 'Neg. PCD', 'CD', 'Pos. CD', 'Neg. CD', 'CS RSP', 'Adhesion'))
+
+ggplot(go.analysis.data, aes(x=Abbreviations, y=`Fold Enrichment`, fill=Cancer)) +
+  geom_bar(stat="identity", position=position_dodge(), aes(alpha=Significant)) + theme_bw() +
+  theme(legend.position="bottom") + guides(alpha=FALSE)
+
+```
+
+
+
+Logistic regression to predict response to PD-1 blockade
+
+```{r}
+
+mhc1.genes <- c('HLA-A', 'HLA-B', 'HLA-C', 'HLA-E', 'HLA-F', 'HLA-G')
+mhc2.genes <- c('HLA-DMA', 'HLA-DMB', 'HLA-DOA', 'HLA-DPA1', 'HLA-DPB1', 'HLA-DQA1', 'HLA-DQA2', 'HLA-DQB1', 'HLA-DQB2', 'HLA-DRA', 'HLA-DRB1', 'HLA-DRB5')
+
+Idents(BCCIO) <- BCCIO$treatment
+bcc.pretreatment <- subset(BCCIO, idents=c("pre"))
+
+Idents(bcc.pretreatment) <- bcc.pretreatment$patient
+bccpre.avgexp.mhc1 <- AverageExpression(bcc.pretreatment, features=mhc1.genes, group.by="patient")
+bccpre.avgexp.mhc2 <- AverageExpression(bcc.pretreatment, features=mhc2.genes, group.by="patient")
+
+bccpre.avgexp.mhc1 <- bccpre.avgexp.mhc1$RNA
+bccpre.avgexp.mhc2 <- bccpre.avgexp.mhc2$RNA
+
+bccpre.mhc1score <- data.frame(colSums(bccpre.avgexp.mhc1) / nrow(bccpre.avgexp.mhc1))
+bccpre.mhc2score <- data.frame(colSums(bccpre.avgexp.mhc2) / nrow(bccpre.avgexp.mhc2))
+
+bccpre.mhcscore <- cbind(bccpre.mhc1score, bccpre.mhc2score)
+bccpre.mhcscore$Response <- c('R', 'R', 'R', 'R', 'N', 'N', 'N', 'N', 'R', 'N', 'R')
+colnames(bccpre.mhcscore) <- c('MHC.I', 'MHC.II', 'Response')
+
+ggplot(bccpre.mhcscore, aes(x=MHC.I, y=MHC.II)) +
+  geom_point(aes(color=Response, size=3)) + theme_bw() +
+  guides(size=FALSE) + theme(legend.position="bottom") +
+  labs(x='MHC I Score', y='MHC II Score')
+
+Idents(PDAC.all) <- PDAC.all$orig.ident
+pdac.avgexp.mhc1 <- (AverageExpression(PDAC.all, features=mhc1.genes, assays="RNA", group.by="orig.ident"))$RNA
+pdac.avgexp.mhc2 <- (AverageExpression(PDAC.all, features=mhc2.genes, assays="RNA", group.by="orig.ident"))$RNA
+
+pdac.mhc1score <- data.frame(colSums(pdac.avgexp.mhc1) / nrow(pdac.avgexp.mhc1))
+pdac.mhc2score <- data.frame(colSums(pdac.avgexp.mhc2) / nrow(pdac.avgexp.mhc2))
+
+pdac.mhcscore <- cbind(pdac.mhc1score, pdac.mhc2score)
+pdac.mhcscore$Response <- c('I', 'I', 'I', 'I', 'I', 'I', 'I', 'I', 'I', 'I', 'I', 'I', 'I', 'I', 'I', 'I', 'H', 'H', 'H')
+colnames(pdac.mhcscore) <- c('MHC.I', 'MHC.II', 'Response')
+
+mhcscores <- rbind(bccpre.mhcscore, pdac.mhcscore)
+
+mhcscores.plot <- ggscatter(mhcscores, x='MHC.I', y='MHC.II', color='Response', add='reg.line', conf.int=FALSE, palette='jco', fullrange=FALSE, rug=TRUE, size=3) +
+  stat_cor(aes(color=Response), label.x=40) +
+  theme_bw() + labs(x='MHC I Score', y='MHC II Score', title='MHC Expression in All Cells') +
+  theme(legend.position="bottom", plot.title = element_text(color="black", size=18, face="bold", hjust=0.5))
+
+## Build logistic regression model for predicting response based on MHC-I / MHC-II score on all cells 
+
+bccpre.mhcscore$Response[bccpre.mhcscore$Response == "R"] <- 1
+bccpre.mhcscore$Response[bccpre.mhcscore$Response == "N"] <- 0
+bccpre.mhcscore$Response <- as.numeric(bccpre.mhcscore$Response)
+
+logistic.mhc1 <- glm(Response ~ MHC.I, data=bccpre.mhcscore, family=binomial)
+logistic.mhc2 <- glm(Response ~ MHC.II, data=bccpre.mhcscore, family=binomial)
+logistic.mhc <- glm(Response~ MHC.I + MHC.II, data=bccpre.mhcscore, family=binomial)
+
+logistic.mhc1.plot <- ggplot(bccpre.mhcscore, aes(x=MHC.I, y=Response)) +
+  geom_point(alpha=0.75, size=3) +
+  stat_smooth(method="glm", se=FALSE, method.args=list(family=binomial), fullrange=T) +
+  theme_bw() + labs(x='MHC-I Score', y='Probability of Response', title='LR Model: MHC-I Score') +
+  theme(plot.title = element_text(color="black", size=18, face="bold", hjust=0.5))
+
+logistic.mhc2.plot <- ggplot(bccpre.mhcscore, aes(x=MHC.II, y=Response)) +
+  geom_point(alpha=0.75, size=3) +
+  stat_smooth(method="glm", se=FALSE, method.args=list(family=binomial)) +
+  theme_bw() + labs(x='MHC-II Score', y='Probability of Response', title='LR Model: MHC-II Score') +
+  theme(plot.title = element_text(color="black", size=18, face="bold", hjust=0.5))
+
+ggarrange(logistic.mhc1.plot, logistic.mhc2.plot)
+
+pdac.mhcscore$Response[pdac.mhcscore$Response == "H"] <- 0.55
+pdac.mhcscore$Response[pdac.mhcscore$Response == "I"] <- 0.45
+pdac.mhcscore$Response <- as.numeric(pdac.mhcscore$Response)
+
+logistic.mhc1.plot.pdac <- logistic.mhc1.plot + geom_point(data=pdac.mhcscore, aes(x=MHC.I, y=Response), color="#CD534C99", size=3) + 
+  guides(colour=FALSE, size=FALSE)
+
+logistic.mhc2.plot.pdac <- logistic.mhc2.plot + geom_point(data=pdac.mhcscore, aes(x=MHC.II, y=Response), color="#CD534C99", size=3) +
+  guides(colour=FALSE, size=FALSE)
+
+ggarrange(logistic.mhc1.plot.pdac, logistic.mhc2.plot.pdac)
+
+predict3d(logistic.mhc, radius=0.5)
+
+
+## Build logistic regression model for predicting response based on MHC scores in T cells only 
+
+Idents(PDAC.all) <- PDAC.all$cluster
+pdac.tcells <- subset(PDAC.all, idents=c('CD4+ T Cells', 'CD8+ Effector', 'CD8+ Exhausted', 'CD8+ Memory', 'NK Cells', 'Tregs'))
+
+Idents(bcc.pretreatment) <- bcc.pretreatment$seurat_clusters
+bcc.tcells <- subset(bcc.pretreatment, idents=c('CD4+ T Cells', 'CD8+ Effector', 'CD8+ Exhausted', 'CD8+ Memory', 'NK Cells', 'Tregs', 'Proliferating T Cells'))
+
+Idents(bcc.tcells) <- bcc.tcells$patient
+bccpre.avgexp.mhc1 <- AverageExpression(bcc.tcells, features=mhc1.genes, group.by="patient")
+bccpre.avgexp.mhc2 <- AverageExpression(bcc.tcells, features=mhc2.genes, group.by="patient")
+
+bccpre.avgexp.mhc1 <- bccpre.avgexp.mhc1$RNA
+bccpre.avgexp.mhc2 <- bccpre.avgexp.mhc2$RNA
+
+bccpre.mhc1score <- data.frame(colSums(bccpre.avgexp.mhc1) / nrow(bccpre.avgexp.mhc1))
+bccpre.mhc2score <- data.frame(colSums(bccpre.avgexp.mhc2) / nrow(bccpre.avgexp.mhc2))
+
+bccpre.mhcscore <- cbind(bccpre.mhc1score, bccpre.mhc2score)
+bccpre.mhcscore$Response <- c('R', 'R', 'R', 'R', 'N', 'N', 'N', 'N', 'R', 'N', 'R')
+colnames(bccpre.mhcscore) <- c('MHC.I', 'MHC.II', 'Response')
+
+Idents(pdac.tcells) <- pdac.tcells$orig.ident
+pdac.avgexp.mhc1 <- (AverageExpression(pdac.tcells, features=mhc1.genes, assays="RNA", group.by="orig.ident"))$RNA
+pdac.avgexp.mhc2 <- (AverageExpression(pdac.tcells, features=mhc2.genes, assays="RNA", group.by="orig.ident"))$RNA
+
+pdac.mhc1score <- data.frame(colSums(pdac.avgexp.mhc1) / nrow(pdac.avgexp.mhc1))
+pdac.mhc2score <- data.frame(colSums(pdac.avgexp.mhc2) / nrow(pdac.avgexp.mhc2))
+
+pdac.mhcscore <- cbind(pdac.mhc1score, pdac.mhc2score)
+pdac.mhcscore$Response <- c('I', 'I', 'I', 'I', 'I', 'I', 'I', 'I', 'I', 'I', 'I', 'I', 'I', 'I', 'I', 'I', 'H', 'H', 'H')
+colnames(pdac.mhcscore) <- c('MHC.I', 'MHC.II', 'Response')
+
+mhcscores <- rbind(bccpre.mhcscore, pdac.mhcscore)
+
+mhcscores.plot <- ggscatter(mhcscores, x='MHC.I', y='MHC.II', color='Response', add='reg.line', conf.int=FALSE, palette='jco', fullrange=FALSE, rug=TRUE, size=3) +
+  stat_cor(aes(color=Response), label.x=40) +
+  theme_bw() + labs(x='MHC I Score', y='MHC II Score', title='MHC Expression in T Cells') +
+  theme(legend.position="bottom", plot.title = element_text(color="black", size=18, face="bold", hjust=0.5))
+
+bccpre.mhcscore$Response[bccpre.mhcscore$Response == "R"] <- 1
+bccpre.mhcscore$Response[bccpre.mhcscore$Response == "N"] <- 0
+bccpre.mhcscore$Response <- as.numeric(bccpre.mhcscore$Response)
+
+logistic.mhc1 <- glm(Response ~ MHC.I, data=bccpre.mhcscore, family=binomial)
+logistic.mhc2 <- glm(Response ~ MHC.II, data=bccpre.mhcscore, family=binomial)
+logistic.mhc <- glm(Response~ MHC.I + MHC.II, data=bccpre.mhcscore, family=binomial)
+
+logistic.mhc1.plot <- ggplot(bccpre.mhcscore, aes(x=MHC.I, y=Response)) +
+  geom_point(alpha=0.75, size=3) +
+  stat_smooth(method="glm", se=FALSE, method.args=list(family=binomial), fullrange=T) +
+  theme_bw() + labs(x='MHC-I Score', y='Probability of Response', title='LR Model: MHC-I Score') +
+  theme(plot.title = element_text(color="black", size=18, face="bold", hjust=0.5))
+
+logistic.mhc2.plot <- ggplot(bccpre.mhcscore, aes(x=MHC.II, y=Response)) +
+  geom_point(alpha=0.75, size=3) +
+  stat_smooth(method="glm", se=FALSE, method.args=list(family=binomial)) +
+  theme_bw() + labs(x='MHC-II Score', y='Probability of Response', title='LR Model: MHC-II Score') +
+  theme(plot.title = element_text(color="black", size=18, face="bold", hjust=0.5))
+
+ggarrange(logistic.mhc1.plot, logistic.mhc2.plot)
+
+pdac.mhcscore$Response[pdac.mhcscore$Response == "H"] <- 0.55
+pdac.mhcscore$Response[pdac.mhcscore$Response == "I"] <- 0.45
+pdac.mhcscore$Response <- as.numeric(pdac.mhcscore$Response)
+
+logistic.mhc1.tcells <- logistic.mhc1.plot + geom_point(data=pdac.mhcscore, aes(x=MHC.I, y=Response), color="#CD534C99", size=3) + 
+  guides(colour=FALSE, size=FALSE)
+
+logistic.mhc2.tcells <- logistic.mhc2.plot + geom_point(data=pdac.mhcscore, aes(x=MHC.II, y=Response), color="#CD534C99", size=3) +
+  guides(colour=FALSE, size=FALSE)
+
+ggarrange(logistic.mhc1.tcells, logistic.mhc2.tcells)
+
+predict3d(logistic.mhc, radius=0.5)
+
+
+## Build logistic regression model for predicting response based on MHC scores in macrophages only 
+
+Idents(PDAC.all) <- PDAC.all$cluster
+pdac.macrophages <- subset(PDAC.all, idents=c('M1 Macrophages', 'M2 Macrophages'))
+
+Idents(bcc.pretreatment) <- bcc.pretreatment$seurat_clusters
+bcc.macrophages <- subset(bcc.pretreatment, idents=c('M1 Macrophages', 'M2 Macrophages'))
+
+Idents(bcc.macrophages) <- bcc.macrophages$patient
+bccpre.avgexp.mhc1 <- AverageExpression(bcc.macrophages, features=mhc1.genes, group.by="patient")
+bccpre.avgexp.mhc2 <- AverageExpression(bcc.macrophages, features=mhc2.genes, group.by="patient")
+
+bccpre.avgexp.mhc1 <- bccpre.avgexp.mhc1$RNA
+bccpre.avgexp.mhc2 <- bccpre.avgexp.mhc2$RNA
+
+bccpre.mhc1score <- data.frame(colSums(bccpre.avgexp.mhc1) / nrow(bccpre.avgexp.mhc1))
+bccpre.mhc2score <- data.frame(colSums(bccpre.avgexp.mhc2) / nrow(bccpre.avgexp.mhc2))
+
+bccpre.mhcscore <- cbind(bccpre.mhc1score, bccpre.mhc2score)
+bccpre.mhcscore$Response <- c('R', 'R', 'R', 'R', 'N', 'N', 'N', 'N', 'R')
+colnames(bccpre.mhcscore) <- c('MHC.I', 'MHC.II', 'Response')
+
+Idents(pdac.macrophages) <- pdac.macrophages$orig.ident
+pdac.avgexp.mhc1 <- (AverageExpression(pdac.macrophages, features=mhc1.genes, assays="RNA", group.by="orig.ident"))$RNA
+pdac.avgexp.mhc2 <- (AverageExpression(pdac.macrophages, features=mhc2.genes, assays="RNA", group.by="orig.ident"))$RNA
+
+pdac.mhc1score <- data.frame(colSums(pdac.avgexp.mhc1) / nrow(pdac.avgexp.mhc1))
+pdac.mhc2score <- data.frame(colSums(pdac.avgexp.mhc2) / nrow(pdac.avgexp.mhc2))
+
+pdac.mhcscore <- cbind(pdac.mhc1score, pdac.mhc2score)
+pdac.mhcscore$Response <- c('I', 'I', 'I', 'I', 'I', 'I', 'I', 'I', 'I', 'I', 'I', 'I', 'I', 'I', 'I', 'I', 'H', 'H', 'H')
+colnames(pdac.mhcscore) <- c('MHC.I', 'MHC.II', 'Response')
+
+mhcscores <- rbind(bccpre.mhcscore, pdac.mhcscore)
+
+mhcscores.plot <- ggscatter(mhcscores, x='MHC.I', y='MHC.II', color='Response', add='reg.line', conf.int=FALSE, palette='jco', fullrange=FALSE, rug=TRUE, size=3) +
+  stat_cor(aes(color=Response), label.x=20) +
+  theme_bw() + labs(x='MHC I Score', y='MHC II Score', title='MHC Expression in T Cells') +
+  theme(legend.position="bottom", plot.title = element_text(color="black", size=18, face="bold", hjust=0.5))
+
+bccpre.mhcscore$Response[bccpre.mhcscore$Response == "R"] <- 1
+bccpre.mhcscore$Response[bccpre.mhcscore$Response == "N"] <- 0
+bccpre.mhcscore$Response <- as.numeric(bccpre.mhcscore$Response)
+
+logistic.mhc1 <- glm(Response ~ MHC.I, data=bccpre.mhcscore, family=binomial)
+logistic.mhc2 <- glm(Response ~ MHC.II, data=bccpre.mhcscore, family=binomial)
+logistic.mhc <- glm(Response~ MHC.I + MHC.II, data=bccpre.mhcscore, family=binomial)
+
+logistic.mhc1.plot <- ggplot(bccpre.mhcscore, aes(x=MHC.I, y=Response)) +
+  geom_point(alpha=0.75, size=3) +
+  stat_smooth(method="glm", se=FALSE, method.args=list(family=binomial), fullrange=T) +
+  theme_bw() + labs(x='MHC-I Score', y='Probability of Response', title='LR Model: MHC-I Score') +
+  theme(plot.title = element_text(color="black", size=18, face="bold", hjust=0.5))
+
+logistic.mhc2.plot <- ggplot(bccpre.mhcscore, aes(x=MHC.II, y=Response)) +
+  geom_point(alpha=0.75, size=3) +
+  stat_smooth(method="glm", se=FALSE, method.args=list(family=binomial), fullrange=T) +
+  theme_bw() + labs(x='MHC-II Score', y='Probability of Response', title='LR Model: MHC-II Score') +
+  theme(plot.title = element_text(color="black", size=18, face="bold", hjust=0.5))
+
+ggarrange(logistic.mhc1.plot, logistic.mhc2.plot)
+
+pdac.mhcscore$Response[pdac.mhcscore$Response == "H"] <- 0.55
+pdac.mhcscore$Response[pdac.mhcscore$Response == "I"] <- 0.45
+pdac.mhcscore$Response <- as.numeric(pdac.mhcscore$Response)
+
+logistic.mhc1.macrophages <- logistic.mhc1.plot + geom_point(data=pdac.mhcscore, aes(x=MHC.I, y=Response), color="#CD534C99", size=3) + 
+  guides(colour=FALSE, size=FALSE)
+
+logistic.mhc2.macrophages <- logistic.mhc2.plot + geom_point(data=pdac.mhcscore, aes(x=MHC.II, y=Response), color="#CD534C99", size=3) +
+  guides(colour=FALSE, size=FALSE)
+
+ggarrange(logistic.mhc1.macrophages, logistic.mhc2.macrophages)
+
+predict3d(logistic.mhc, radius=0.5)
+
+```
+
+
+
+Investigate MHC expression in macrophages
+
+```{r}
+
+mhc1.genes <- c('HLA-A', 'HLA-B', 'HLA-C', 'HLA-E', 'HLA-F', 'HLA-G')
+mhc2.genes <- c('HLA-DMA', 'HLA-DMB', 'HLA-DOA', 'HLA-DPA1', 'HLA-DPB1', 'HLA-DQA1', 'HLA-DQA2', 'HLA-DQB1', 'HLA-DQB2', 'HLA-DRA', 'HLA-DRB1', 'HLA-DRB5')
+mhc.genes <- c(mhc1.genes, mhc2.genes)
+
+Idents(PDAC.all) <- PDAC.all$cluster
+pdac.macrophages <- subset(PDAC.all, idents=c("Macrophages"))
+
+Idents(BCCIO) <- BCCIO$seurat_clusters
+bcc.macrophages <- subset(BCCIO, idents=c("Macrophages"))
+
+Idents(pdac.macrophages) <- pdac.macrophages$cluster
+pdac.allmacs.mhc <- AverageExpression(pdac.macrophages, group.by="cluster")
+
+Idents(bcc.macrophages) <- bcc.macrophages$treatment.status
+bcc.allmacs.mhc <- AverageExpression(bcc.macrophages, group.by="treatment.status")
+
+pdac.allmacs.mhc <- pdac.allmacs.mhc$RNA[mhc.genes,]
+bcc.allmacs.mhc <- bcc.allmacs.mhc$RNA[mhc.genes,]
+
+macrophages.mhc <- cbind(bcc.allmacs.mhc, pdac.allmacs.mhc)
+colnames(macrophages.mhc) <- c('RPre', 'RPost', 'NRPre', 'NRPost', 'PDAC')
+macrophages.mhc$gene <- rownames(macrophages.mhc)
+macrophages.mhc <- melt(macrophages.mhc, id=c("gene"))
+colnames(macrophages.mhc) <- c('Gene', 'Treatment', 'Expression')
+
+macrophages.mhc$Gene <- factor(macrophages.mhc$Gene, levels=c(mhc1.genes, mhc2.genes))
+
+macrophages.stackedbar <- ggplot(macrophages.mhc, aes(fill=Treatment, y=Expression, x=Gene)) + 
+  geom_bar(position="fill", stat="identity") + 
+  geom_hline(yintercept=c(0.20, 0.40, 0.60, 0.80)) +
+  theme_bw() + theme(legend.position="bottom", axis.text.x=element_text(angle=45, vjust=1, hjust=1)) +
+  labs(y="Relative Average Expression", title="Macrophages: MHC Expression") +
+  theme(plot.title = element_text(color="black", size=18, face="bold", hjust=0.5))
+
+
+## Statistical comparison of MHC Class II scores by treatment class
+
+load("C:\\Users\\Ryan\\Documents\\Nie Research Project\\GSE 123813\\BCCresponderpre")
+load("C:\\Users\\Ryan\\Documents\\Nie Research Project\\GSE 123813\\BCCresponderpost")
+load("C:\\Users\\Ryan\\Documents\\Nie Research Project\\GSE 123813\\BCCnonresponderpre")
+load("C:\\Users\\Ryan\\Documents\\Nie Research Project\\GSE 123813\\BCCnonresponderpost")
+
+Idents(pdac.macrophages) <- pdac.macrophages$orig.ident
+pdac.macs.mhc2.pat <- AverageExpression(pdac.macrophages, group.by="orig.ident")
+pdac.macs.mhc2.pat <- pdac.macs.mhc2.pat$RNA[mhc2.genes,]
+
+bcc.objects <- list(BCC.responder.pre, BCC.responder.post, BCC.nonresponder.pre, BCC.nonresponder.post)
+bcctreatments <- c('rpre', 'rpost', 'nrpre', 'nrpost')
+for (i in 1:length(bcc.objects)) {
+  Idents(bcc.objects[[i]]) <- bcc.objects[[i]]$seurat_clusters
+  assign(paste0("bcc.", bcctreatments[i], "macrophages"), subset(bcc.objects[[i]], idents=c("Macrophages")))
+}
+
+bccmacs.objects <- list(bcc.rpremacrophages, bcc.rpostmacrophages, bcc.nrpremacrophages, bcc.nrpostmacrophages)
+for (i in 1:length(bccmacs.objects)) {
+  Idents(bccmacs.objects[[i]]) <- bccmacs.objects[[i]]$patient
+  x <- AverageExpression(bccmacs.objects[[i]], group.by="patient")
+  x <- x$RNA[mhc2.genes,]
+  assign(paste0("bcc", bcctreatments[i], ".macs.mhc2.pat"), x)
+}
+
+macrophages.mhc2.data <- cbind(pdac.macs.mhc2.pat, bccrpre.macs.mhc2.pat, bccrpost.macs.mhc2.pat, bccnrpre.macs.mhc2.pat, bccnrpost.macs.mhc2.pat)
+
+macrophages.mhc2score.data <- data.frame("Score" = colSums(macrophages.mhc2.data)/nrow(macrophages.mhc2.data))
+macrophages.mhc2score.data$Treatment <- c('I', 'I', 'I', 'I', 'I', 'I', 'I', 'I', 'I', 'I', 'I', 'I', 'I', 'I', 'I', 'I', 'H', 'H', 'H', 'RPre', 'RPre', 'RPre', 'RPre', 'RPre', 'RPost', 'RPost', 'RPost', 'RPost', 'RPost', 'RPost', 'NRPre', 'NRPre', 'NRPre', 'NRPre', 'NRPost', 'NRPost', 'NRPost', 'NRPost')
+
+comparisons <- list(c('RPre', 'RPost'), c('NRPre', 'NRPost'), c('H', 'I'), c('RPre', 'NRPre'), c('I', 'RPre'))
+
+macrophages.mhc2score <- ggboxplot(macrophages.mhc2score.data, x="Treatment", y="Score", color="Treatment", palette="jco", add="jitter") +
+  stat_compare_means(comparisons=comparisons, label.y=c(70, 70, 50, 80, 60)) +
+  theme_bw() + theme(legend.position="bottom") +
+  labs(title='MHC Class II Expression: Macrophages', y='MHC-II Score') +
+  theme(plot.title = element_text(color="black", size=18, face="bold", hjust=0.5))
+
+```
+
+
+
+Further clustering of BCC and PDAC macrophages
+
+```{r}
+
+## Recluster PDAC macrophages / myeloid cells
+
+Idents(PDAC.all) <- PDAC.all$seurat_clusters
+DimPlot(PDAC.all, group.by="seurat_clusters", label=TRUE) + NoLegend()
+pdac.myeloid <- subset(PDAC.all, idents=c('MYE1', 'MYE2', 'MYE3'))
+
+pdac.myeloid <- preprocessing(pdac.myeloid)
+pdac.myeloid <- clustering(pdac.myeloid, resolution=0.3)
+
+DimPlot(pdac.myeloid, label=TRUE) + NoLegend()
+FeaturePlot(pdac.myeloid, features=c('CD14')) # macrophages
+FeaturePlot(pdac.myeloid, features=c('FCGR3B')) # granulocytes
+FeaturePlot(pdac.myeloid, features=c('LYZ')) # monocytes
+
+myeloid.clusters <- c('Granulocytes', 'Macrophages', 'Macrophages', 'Monocytes', 'Monocytes', 'Macrophages', 'Granulocytes', 'Granulocytes', 'Macrophages', 'Granulocytes', 'Monocytes', 'Macrophages', 'Macrophages', 'Macrophages', 'Macrophages', 'Macrophages', 'Macrophages')
+
+names(myeloid.clusters) <- levels(pdac.myeloid)
+pdac.myeloid <- RenameIdents(pdac.myeloid, myeloid.clusters)
+pdac.myeloid@meta.data$cluster <- pdac.myeloid@active.ident
+
+PDAC.all$cluster[rownames(pdac.myeloid@meta.data)] <- paste(Idents(pdac.myeloid))
+
+DimPlot(pdac.myeloid, label=TRUE) + NoLegend()
+
+Idents(PDAC.all) <- PDAC.all$cluster
+DimPlot(PDAC.all, group.by="cluster", label=TRUE) + NoLegend()
+
+table(Idents(PDAC.all))
+
+## Subclustering of PDAC macrophages
+
+Idents(PDAC.all) <- PDAC.all$cluster
+pdac.macrophages <- subset(PDAC.all, idents="Macrophages")
+
+pdac.macrophages <- preprocessing(pdac.macrophages)
+pdac.macrophages <- clustering(pdac.macrophages, resolution=0.1)
+
+DimPlot(pdac.macrophages, label=TRUE)
+DimPlot(pdac.macrophages, group.by="orig.ident")
+
+m1.markers <- c('RGS1', 'HLA-DPA1', 'CD74', 'C1QC', 'FCGBP', 'SEPP1', 'CSF1R', 'TREM2', 'S100A4')
+m2.markers <- c('CD40', 'SPP1', 'MARCO', 'APOE', 'CHIT1', 'FABP5', 'CCL18', 'HLA-DQA1', 'COX17', 'LY6E', 'LAMP1', 'HAVCR2', 'SERPINB6', 'IL18', 'CCL2', 'ATF5', 'CXCL3', 'VEGFB', 'SLC2A1')
+
+macrophage.dotplot <- DotPlot(pdac.macrophages, features=c(m1.markers, m2.markers)) + 
+  theme(axis.text.x=element_text(angle=45, vjust=1, hjust=1))
+
+ggplot(data=macrophage.dotplot$data, aes(x=features.plot, y=id, fill=avg.exp.scaled)) +
+  geom_tile(color="white") + 
+  scale_fill_gradient2(low="black", high="#EFE350FF", mid="#593D9CFF", midpoint=0) +
+  theme_minimal() + theme(axis.text.x = element_text(angle=90, vjust=1, hjust=1)) +
+  labs(x="Gene", y="Cluster", fill="Expression") + coord_equal()
+
+DoHeatmap(pdac.macrophages, features=c(m1.markers, m2.markers))
+
+macrophage.clusters <- c('M1 Macrophages', 'M2 Macrophages', 'M2 Macrophages', 'M1 Macrophages', 'M2 Macrophages', 'M1 Macrophages', 'M1 Macrophages', 'M2 Macrophages', 'M1 Macrophages', 'M1 Macrophages', 'M1 Macrophages')
+
+names(macrophage.clusters) <- levels(pdac.macrophages)
+pdac.macrophages <- RenameIdents(pdac.macrophages, macrophage.clusters)
+pdac.macrophages@meta.data$cluster <- pdac.macrophages@active.ident
+
+PDAC.all$cluster[rownames(pdac.macrophages@meta.data)] <- paste(Idents(pdac.macrophages))
+
+DimPlot(pdac.macrophages, label=TRUE) + NoLegend()
+DoHeatmap(pdac.macrophages, features=c(m1.markers, m2.markers))
+
+pdac.macs.prop <- ggplot_barcharts(pdac.macrophages$cluster, pdac.macrophages$orig.ident) +
+  theme_bw() + theme(legend.position="bottom")
+
+## Subclustering of BCC macrophages
+
+bcc.macrophages <- subset(BCCIO, idents=c("Macrophages"))
+
+bcc.macrophages <- preprocessing(bcc.macrophages)
+bcc.macrophages <- clustering(bcc.macrophages, resolution=0.5)
+
+DimPlot(bcc.macrophages, label=TRUE)
+DimPlot(bcc.macrophages, group.by="patient", label=TRUE)
+
+macrophage.dotplot <- DotPlot(bcc.macrophages, features=c(m1.markers, m2.markers)) + 
+  theme(axis.text.x=element_text(angle=45, vjust=1, hjust=1))
+
+ggplot(data=macrophage.dotplot$data, aes(x=features.plot, y=id, fill=avg.exp.scaled)) +
+  geom_tile(color="white") + 
+  scale_fill_gradient2(low="black", high="#EFE350FF", mid="#593D9CFF", midpoint=0) +
+  theme_minimal() + theme(axis.text.x = element_text(angle=90, vjust=1, hjust=1)) +
+  labs(x="Gene", y="Cluster", fill="Expression") + coord_equal()
+
+DoHeatmap(bcc.macrophages, features=c(m1.markers, m2.markers))
+
+macrophage.clusters <- c('M2 Macrophages', 'M1 Macrophages', 'M2 Macrophages', 'M1 Macrophages', 'M1 Macrophages', 'M1 Macrophages', 'M1 Macrophages', 'M2 Macrophages', 'M1 Macrophages', 'M1 Macrophages')
+
+names(macrophage.clusters) <- levels(bcc.macrophages)
+bcc.macrophages <- RenameIdents(bcc.macrophages, macrophage.clusters)
+bcc.macrophages@meta.data$cluster <- bcc.macrophages@active.ident
+
+BCCIO$seurat_clusters <- as.character(BCCIO$seurat_clusters)
+BCCIO$seurat_clusters[rownames(bcc.macrophages@meta.data)] <- paste(Idents(bcc.macrophages))
+Idents(BCCIO) <- BCCIO$seurat_clusters
+
+DimPlot(bcc.macrophages, label=TRUE) + NoLegend()
+DoHeatmap(bcc.macrophages, features=c(m1.markers, m2.markers))
+
+bcc.macs.prop <- ggplot_barcharts(bcc.macrophages$seurat_clusters, bcc.macrophages$patient.status) +
+  theme_bw() + theme(legend.position="bottom", axis.text.x = element_text(angle=45, hjust=1, vjust=1))
+
+save(PDAC.all, file="C:\\Users\\Ryan\\Documents\\Nie Research Project\\GSE 155698\\PDAC.all")
+save(BCCIO, file="C:\\Users\\Ryan\\Documents\\Nie Research Project\\GSE 123813\\BCCIOwithUMAP")
+
+```
+
+
+
+Compare macrophage populations and gene expression
+
+```{r}
+
+## Proportion of macrophages that are M1 
+
+pdac.macs.data <- c()
+bcc.macs.data <- c()
+
+pdac.macs.n <- c(pdac.macs.prop$data$n, 0)
+bcc.macs.n <- c(bcc.macs.prop$data$n[1:10], 0, bcc.macs.prop$data$n[11:19], 0, bcc.macs.prop$data$n[20:30])
+
+for (i in 1:19) {
+  pdac.macs.data[i] <- pdac.macs.n[2*i-1] / (pdac.macs.n[2*i] + pdac.macs.n[2*i-1])
+}
+for (i in 1:16) {
+  bcc.macs.data[i] <- bcc.macs.n[2*i] / (bcc.macs.n[2*i-1] + bcc.macs.n[2*i])
+}
+
+status <- c('I', 'I', 'I', 'I', 'I', 'I', 'I', 'I', 'I', 'I', 'I', 'I', 'I', 'I', 'I', 'I', 'H', 'H', 'H', 'RPost', 'RPre', 'RPost', 'RPre', 'RPost', 'RPre', 'RPost', 'RPre', 'NRPost', 'NRPre', 'NRPost', 'NRPre', 'NRPost', 'NRPre', 'NRPost', 'NRPre')
+
+macrophage.props <- data.frame(Status = status, Proportion = c(pdac.macs.data, bcc.macs.data))
+
+comparisons <- list(c('H', 'I'), c('NRPre', 'NRPost'), c('RPre', 'RPost'), c('RPre', 'NRPre'), c('I', 'NRPre'), c('I', 'RPre'))
+
+ggboxplot(macrophage.props, x="Status", y="Proportion", fill="Status", palette="jco", add="jitter") +
+  stat_compare_means(comparisons=comparisons, label.y=c(1.1, 1.1, 1.1, 1.24, 1.26, 1.35)) + 
+  theme_bw() + labs(title = "Proportion of M1 Macrophages") +
+  theme(legend.position="bottom", plot.title = element_text(color="black", size=18, face="bold", hjust=0.5))
+
+
+## MHC scores for macrophages
+
+mhc1.genes <- c('HLA-A', 'HLA-B', 'HLA-C', 'HLA-E', 'HLA-F', 'HLA-G')
+mhc2.genes <- c('HLA-DMA', 'HLA-DMB', 'HLA-DOA', 'HLA-DPA1', 'HLA-DPB1', 'HLA-DQA1', 'HLA-DQA2', 'HLA-DQB1', 'HLA-DQB2', 'HLA-DRA', 'HLA-DRB1', 'HLA-DRB5')
+mhc.genes <- c(mhc1.genes, mhc2.genes)
+
+Idents(bcc.macrophages) <- bcc.macrophages$patient.status
+Idents(pdac.macrophages) <- pdac.macrophages$orig.ident
+
+bcc.macs.avgexp <- AverageExpression(bcc.macrophages)
+pdac.macs.avgexp <- AverageExpression(pdac.macrophages)
+
+bcc.macs.mhc1 <- bcc.macs.avgexp$RNA[mhc1.genes,]
+bcc.macs.mhc2 <- bcc.macs.avgexp$RNA[mhc2.genes,]
+
+bcc.macs.mhc1 <- data.frame(t(rbind(bcc.macs.mhc1, colSums(bcc.macs.mhc1)/6)))
+bcc.macs.mhc2 <- data.frame(t(rbind(bcc.macs.mhc2, colSums(bcc.macs.mhc2)/12)))
+bcc.macs.mhc <- cbind(bcc.macs.mhc1, bcc.macs.mhc2)[1:16,]
+bcc.macs.mhc$Treatment <- c('RPre', 'RPost', 'RPre', 'RPost', 'RPre', 'RPost', 'RPre', 'RPost', 'NRPre', 'NRPost', 'NRPre', 'NRPost', 'NRPre', 'NRPost', 'NRPre', 'NRPost')
+colnames(bcc.macs.mhc) <- c(mhc1.genes, "MHC-I", mhc2.genes, "MHC-II", "Treatment")
+
+pdac.macs.mhc1 <- pdac.macs.avgexp$RNA[mhc1.genes,]
+pdac.macs.mhc2 <- pdac.macs.avgexp$RNA[mhc2.genes,]
+
+pdac.macs.mhc1 <- data.frame(t(rbind(pdac.macs.mhc1, colSums(pdac.macs.mhc1)/6)))
+pdac.macs.mhc2 <- data.frame(t(rbind(pdac.macs.mhc2, colSums(pdac.macs.mhc2)/12)))
+pdac.macs.mhc <- cbind(pdac.macs.mhc1, pdac.macs.mhc2)
+pdac.macs.mhc$Treatment <- c('I', 'I', 'I', 'I', 'I', 'I', 'I', 'I', 'I', 'I', 'I', 'I', 'I', 'I', 'I', 'I', 'H', 'H', 'H')
+colnames(pdac.macs.mhc) <- c(mhc1.genes, "MHC-I", mhc2.genes, "MHC-II", "Treatment")
+
+macs.mhc <- rbind(pdac.macs.mhc, bcc.macs.mhc)
+
+comparisons <- list(c('H', 'I'), c('NRPre', 'NRPost'), c('RPre', 'RPost'), c('RPre', 'NRPre'), c('I', 'NRPre'), c('I', 'RPre'))
+
+ggboxplot(macs.mhc, x="Treatment", y="HLA-G", fill="Treatment", palette="jco", add="jitter") +
+  stat_compare_means(comparisons=comparisons, label.y=c(0.25, 1.1, 1.1, 1.24, 1.4, 1.26)) + 
+  theme_bw() + labs(title = "HLA-G Gene Expression") +
+  theme(legend.position="bottom", plot.title = element_text(color="black", size=18, face="bold", hjust=0.5))
+
+macs.mhc.pre <- macs.mhc[-c(17, 18, 19, 21, 23, 25, 27, 29, 31, 33, 35),]
+comparisons <- list(c('NRPre', 'RPre'), c('I', 'NRPre'), c('I', 'RPre'))
+macs.mhc.pre$Treatment <- factor(macs.mhc.pre$Treatment , levels=c("RPre", "NRPre", "I"))
+
+
+ggboxplot(macs.mhc.pre, x="Treatment", y="MHC-II", fill="Treatment", palette="jco", add="jitter") +
+  stat_compare_means(comparisons=comparisons, label.y=c(60, 52, 68)) + 
+  theme_bw() + labs(x="", y="MHC II Score", title="MHC-II Scores by Patient") +
+  theme(legend.position="none", plot.title = element_text(color="black", size=18, face="bold", hjust=0.5))
+
+
+## Compare MHC scores separately by subcluster
+
+Idents(bcc.macrophages) <- bcc.macrophages$seurat_clusters
+Idents(pdac.macrophages) <- pdac.macrophages$cluster
+
+bcc.m1m2.avgexp <- AverageExpression(bcc.macrophages)
+pdac.m1m2.avgexp <- AverageExpression(pdac.macrophages)
+
+bcc.m1m2.mhc1 <- bcc.m1m2.avgexp$RNA[mhc1.genes,]
+pdac.m1m2.mhc1 <- pdac.m1m2.avgexp$RNA[mhc1.genes,]
+bcc.m1m2.mhc2 <- bcc.m1m2.avgexp$RNA[mhc2.genes,]
+pdac.m1m2.mhc2 <- pdac.m1m2.avgexp$RNA[mhc2.genes,]
+
+bcc.m1m2.mhc1 <- data.frame(t(rbind(bcc.m1m2.mhc1, colSums(bcc.m1m2.mhc1)/6, colnames(bcc.m1m2.mhc1))))
+pdac.m1m2.mhc1 <- data.frame(t(rbind(pdac.m1m2.mhc1, colSums(pdac.m1m2.mhc1)/6, colnames(pdac.m1m2.mhc1))))
+bcc.m1m2.mhc2 <- data.frame(t(rbind(bcc.m1m2.mhc2, colSums(bcc.m1m2.mhc2)/12, colnames(bcc.m1m2.mhc2))))
+pdac.m1m2.mhc2 <- data.frame(t(rbind(pdac.m1m2.mhc2, colSums(pdac.m1m2.mhc2)/12, colnames(pdac.m1m2.mhc2))))
+
+colnames(bcc.m1m2.mhc1) <- c(mhc1.genes, "MHC-I", "Classification")
+colnames(pdac.m1m2.mhc1) <- c(mhc1.genes, "MHC-I", "Classification")
+colnames(bcc.m1m2.mhc2) <- c(mhc2.genes, "MHC-II", "Classification")
+colnames(pdac.m1m2.mhc2) <- c(mhc2.genes, "MHC-II", "Classification")
+
+bcc.m1m2.mhc1 <- melt(bcc.m1m2.mhc1, id="Classification")
+pdac.m1m2.mhc1 <- melt(pdac.m1m2.mhc1, id="Classification")
+bcc.m1m2.mhc2 <- melt(bcc.m1m2.mhc2, id="Classification")
+pdac.m1m2.mhc2 <- melt(pdac.m1m2.mhc2, id="Classification")
+
+bcc.m1m2.mhc1$value <- as.numeric(bcc.m1m2.mhc1$value)
+bcc.m1m2.mhc2$value <- as.numeric(bcc.m1m2.mhc2$value)
+pdac.m1m2.mhc1$value <- as.numeric(pdac.m1m2.mhc1$value)
+pdac.m1m2.mhc2$value <- as.numeric(pdac.m1m2.mhc2$value)
+
+bcc.m1m2.mhc1group <- ggplot(bcc.m1m2.mhc1, aes(x=variable, y=value, fill=Classification)) +
+  geom_bar(position="dodge", stat="identity") + theme_bw() +
+  labs(x="Gene", y="Expression / Score", title="BCC Macrophages") +
+  theme(legend.position="bottom", plot.title = element_text(color="black", size=18, face="bold", hjust=0.5), axis.text.x=element_text(angle=45, vjust=1, hjust=1))
+
+bcc.m1m2.mhc2group <- ggplot(bcc.m1m2.mhc2, aes(x=variable, y=value, fill=Classification)) +
+  geom_bar(position="dodge", stat="identity") + theme_bw() +
+  labs(x="Gene", y="Expression / Score", title="BCC Macrophages") +
+  theme(legend.position="bottom", plot.title = element_text(color="black", size=18, face="bold", hjust=0.5), axis.text.x=element_text(angle=45, vjust=1, hjust=1))
+
+pdac.m1m2.mhc1group <- ggplot(pdac.m1m2.mhc1, aes(x=variable, y=value, fill=Classification)) +
+  geom_bar(position="dodge", stat="identity") + theme_bw() +
+  labs(x="Gene", y="Expression / Score", title="PDAC Macrophages") +
+  theme(legend.position="bottom", plot.title = element_text(color="black", size=18, face="bold", hjust=0.5), axis.text.x=element_text(angle=45, vjust=1, hjust=1))
+
+pdac.m1m2.mhc2group <- ggplot(pdac.m1m2.mhc2, aes(x=variable, y=value, fill=Classification)) +
+  geom_bar(position="dodge", stat="identity") + theme_bw() +
+  labs(x="Gene", y="Expression / Score", title="PDAC Macrophages") +
+  theme(legend.position="bottom", plot.title = element_text(color="black", size=18, face="bold", hjust=0.5), axis.text.x=element_text(angle=45, vjust=1, hjust=1))
+
+ggarrange(bcc.m1m2.mhc1group, bcc.m1m2.mhc2group, pdac.m1m2.mhc1group, pdac.m1m2.mhc2group, ncol=2, nrow=2,  common.legend=TRUE, legend="bottom")
+
+
+## Statistical comparison of MHC-I and MHC-II scores by subcluster
+
+Idents(bcc.macrophages) <- bcc.macrophages$seurat_clusters
+bcc.macs.patavg.mhc1 <- AverageExpression(bcc.macrophages, features=mhc1.genes, add.ident="patient.status")$RNA
+bcc.macs.patavg.mhc2 <- AverageExpression(bcc.macrophages, features=mhc2.genes, add.ident="patient.status")$RNA
+
+Idents(pdac.macrophages) <- pdac.macrophages$cluster
+pdac.macs.patavg.mhc1 <- AverageExpression(pdac.macrophages, features=mhc1.genes, assays="RNA", add.ident="orig.ident")$RNA
+pdac.macs.patavg.mhc2 <- AverageExpression(pdac.macrophages, features=mhc2.genes, assays="RNA", add.ident="orig.ident")$RNA
+
+bcc.macs.mhc1data <- data.frame(t(rbind(bcc.macs.patavg.mhc1, colSums(bcc.macs.patavg.mhc1)/6)))
+bcc.macs.mhc1data <- cbind(bcc.macs.mhc1data, substr(rownames(bcc.macs.mhc1data), start=1, stop=14))[1:30,]
+
+patient.ids <- c('RPre', 'RPre', 'RPost', 'RPost', 'RPre', 'RPre', 'RPost', 'RPost', 'RPre', 'RPost', 'RPost', 'RPre', 'RPre', 'RPost', 'RPost', 'NRPre', 'NRPre', 'NRPost', 'NRPost', 'NRPre', 'NRPre', 'NRPost', 'NRPre', 'NRPre', 'NRPost', 'NRPost', 'NRPre', 'NRPre', 'NRPost', 'NRPost')
+bcc.macs.mhc1data <- cbind(bcc.macs.mhc1data, patient.ids)
+colnames(bcc.macs.mhc1data) <- c(mhc1.genes, "MHC-I", "Classification", "Treatment")
+
+bcc.macs.mhc2data <- data.frame(t(rbind(bcc.macs.patavg.mhc2, colSums(bcc.macs.patavg.mhc2)/12)))
+bcc.macs.mhc2data <- cbind(bcc.macs.mhc2data, substr(rownames(bcc.macs.mhc2data), start=1, stop=14))[1:30,]
+
+bcc.macs.mhc2data <- cbind(bcc.macs.mhc2data, patient.ids)
+colnames(bcc.macs.mhc2data) <- c(mhc2.genes, "MHC-II", "Classification", "Treatment")
+
+pdac.macs.mhc1data <- data.frame(t(rbind(pdac.macs.patavg.mhc1, colSums(pdac.macs.patavg.mhc1)/6)))
+pdac.macs.mhc1data <- cbind(pdac.macs.mhc1data, substr(rownames(pdac.macs.mhc1data), start=1, stop=14)) 
+
+patient.ids <- rep(c('I', 'H'), c(32, 5))
+pdac.macs.mhc1data <- cbind(pdac.macs.mhc1data, patient.ids)
+colnames(pdac.macs.mhc1data) <- c(mhc1.genes, "MHC-I", "Classification", "Treatment")
+
+pdac.macs.mhc2data <- data.frame(t(rbind(pdac.macs.patavg.mhc2, colSums(pdac.macs.patavg.mhc2)/12)))
+pdac.macs.mhc2data <- cbind(pdac.macs.mhc2data, substr(rownames(pdac.macs.mhc2data), start=1, stop=14)) 
+pdac.macs.mhc2data <- cbind(pdac.macs.mhc2data, patient.ids)
+colnames(pdac.macs.mhc2data) <- c(mhc2.genes, "MHC-II", "Classification", "Treatment")
+
+macs.mhc1data <- rbind(pdac.macs.mhc1data, bcc.macs.mhc1data)
+macs.mhc2data <- rbind(pdac.macs.mhc2data, bcc.macs.mhc2data)
+
+comparisons <- list(c('H', 'I'), c('NRPre', 'NRPost'), c('RPre', 'RPost'), c('RPre', 'NRPre'), c('I', 'NRPre'), c('I', 'RPre'))
+
+m1m2.mhc1.boxplot <- ggboxplot(macs.mhc1data, x="Classification", y="MHC-I", color="Treatment", palette="jco", add="jitter") + stat_compare_means(aes(group=Treatment), label.y=28) +
+  theme_bw() + labs(y="MHC-I Score") + theme(legend.position="bottom")
+
+m1m2.mhc2.boxplot <- ggboxplot(macs.mhc2data, x="Classification", y="MHC-II", color="Treatment", palette="jco", add="jitter") + stat_compare_means(aes(group=Treatment), label.y=72) +
+  theme_bw() + labs(y="MHC-II Score") + theme(legend.position="bottom")
+
+ggarrange(m1m2.mhc1.boxplot, m1m2.mhc2.boxplot, common.legend=TRUE, legend="bottom")
+
+
+## Examine MHC-II score specifically for M1 macrophages
+
+m1macs.mhc2data <- macs.mhc2data[(macs.mhc2data$Classification == 'M1 Macrophages'),]
+
+ggboxplot(m1macs.mhc2data, x="Treatment", y="MHC-II", color="Treatment", palette="jco", add="jitter") +
+  stat_compare_means(comparisons=comparisons, label.y=c(45, 75, 75, 83, 87, 95)) +
+  theme_bw() + labs(y="MHC-II Score") + theme(legend.position="bottom")
+
+```
+
+
+
+Gene expression of M1 and M2 macrophages
+
+```{r}
+
+Idents(PDAC.all) <- PDAC.all$status
+pdac.m1.volcano <- bioc_volcano(PDAC.all, "I", "cluster", "M1 Macrophages", "PDAC", 0.05, 0.5, "Filler") + ggtitle('PDAC M1 Macrophages')
+pdac.m2.volcano <- bioc_volcano(PDAC.all, "I", "cluster", "M2 Macrophages", "PDAC", 0.05, 0.5, "Filler") + ggtitle('PDACM2 Macrophages')
+
+```
+
+
+
+Investigate PD-L1 expression (percentage + activity)
+
+```{r}
+
+## PD-L1 gene expression in all cells
+
+Idents(PDAC.all) <- PDAC.all$orig.ident
+pdac.pdl1.avgexp <- as.vector(unlist(AverageExpression(PDAC.all, features=c('CD274'))$RNA))
+pdac.patients <- rep(c('I', 'H'), c(16, 3))
+
+Idents(bcc.pretreatment) <- bcc.pretreatment$patient
+bcc.pdl1.avgexp <- as.vector(unlist(AverageExpression(bcc.pretreatment, features=c('CD274'))$RNA))
+bcc.patients <- c('RPre', 'RPre', 'RPre', 'RPre', 'NRPre', 'NRPre', 'NRPre', 'NRPre', 'RPre', 'NRPre', 'RPre')
+
+pdl1.avgexp <- data.frame(Expression = c(pdac.pdl1.avgexp, bcc.pdl1.avgexp),
+                          Treatment = c(pdac.patients, bcc.patients))
+
+comparisons = list(c('H', 'I'), c('RPre', 'NRPre'), c('I', 'NRPre'), c('I', 'RPre'))
+
+ggboxplot(pdl1.avgexp, x="Treatment", y="Expression", color="Treatment", palette="jco", add="jitter") +
+  stat_compare_means(comparisons=comparisons, label.y=c(0.20, 0.20, 0.225, 0.25)) + 
+  theme_bw() + labs(y="PD-L1 Expression") + theme(legend.position="bottom")
+
+
+## Percentage of cells expressing PD-L1 
+
+Idents(bcc.pretreatment) <- bcc.pretreatment$treatment.status
+bcc.pretreatment <- RenameIdents(bcc.pretreatment, 'Responsive pre' = 'RPre', 'Nonresponsive pre' = 'NRPre')
+bcc.pretreatment$treatment.status <- Idents(bcc.pretreatment)
+
+bcc.pdl1.cellexp <- data.frame(bcc.pretreatment@assays$RNA@data['CD274',])
+pdac.pdl1.cellexp <- data.frame(PDAC.all@assays$RNA@data['CD274',])
+
+bcc.pdl1.cellexp <- cbind(bcc.pdl1.cellexp, bcc.pretreatment$treatment.status, bcc.pretreatment$patient)
+pdac.pdl1.cellexp <- cbind(pdac.pdl1.cellexp, PDAC.all$status, PDAC.all$orig.ident)
+
+colnames(bcc.pdl1.cellexp) <- c("Expression", "Treatment", "Patient")
+colnames(pdac.pdl1.cellexp) <- c("Expression", "Treatment", "Patient")
+pdl1.cellexp <- rbind(bcc.pdl1.cellexp, pdac.pdl1.cellexp)
+
+pdl1.cellexp$Expression[pdl1.cellexp$Expression > 0] <- 1
+pdl1.cellexp.freq <- data.frame(table(pdl1.cellexp))
+pdl1.cellexp.freq <- pdl1.cellexp.freq[pdl1.cellexp.freq$Freq > 0,]
+
+pdl1.cellexp.freq <- rbind(pdl1.cellexp.freq[1:19,], c(1, "NRPre", "su010", 0), pdl1.cellexp.freq[20:nrow(pdl1.cellexp.freq),])
+
+pdl1.percentages <- c()
+pdl1.cellexp.freq$Freq <- as.numeric(pdl1.cellexp.freq$Freq)
+for (i in 1:(nrow(pdl1.cellexp.freq)/2)) {
+  pdl1.percentages[i] <- pdl1.cellexp.freq$Freq[2*i] / (pdl1.cellexp.freq$Freq[2*i-1] + pdl1.cellexp.freq$Freq[2*i])
+}
+
+pdl1.percentages <- data.frame(Proportion = pdl1.percentages, Treatment=c(bcc.patients, pdac.patients))
+
+ggboxplot(pdl1.percentages, x="Treatment", y="Proportion", color="Treatment", palette="jco", add="jitter") +
+  stat_compare_means(comparisons=comparisons, label.y=c(0.10, 0.10, 0.11, 0.12)) + 
+  theme_bw() + labs(y="Proportion of Total Cells") + theme(legend.position="bottom")
+
+```
+
+
+
+Investigate expression of other possible biomarkers
+
+```{r}
+
+marker.genes <- c('IFNG', 'GZMA', 'GZMB', 'PRF1')
+
+gene_cdf(datasets=list(PDAC.all, bcc.pretreatment), clusternames=c("PDAC", "BCC"), genename="IFNG", title="IFN Gamma Expression") + ylim(0.92, 1.00)
+
+gene_cdf(datasets=list(PDAC.all, bcc.pretreatment), clusternames=c("PDAC", "BCC"), genename="PRF1", title="Perforin 1 Expression") + ylim(0.82, 1.00)
+
+genes_cdf(datasets=list(PDAC.all, bcc.pretreatment), clusters=c("PDAC", "BCC"), genes=c("GZMA", "GZMB"), title="Granzyme A/B Expression") + ylim(0.65, 1.00)
+
+Idents(bcc.pretreatment) <- bcc.pretreatment$patient
+bcc.markers.patavgexp <- data.frame(t((AverageExpression(bcc.pretreatment, features=marker.genes))$RNA))
+
+Idents(PDAC.all) <- PDAC.all$orig.ident
+pdac.markers.patavgexp <- data.frame(t((AverageExpression(PDAC.all, features=marker.genes))$RNA))
+
+
+```
+
+
+
+Logistic regression on MHC scores by cell (all cells)
+
+```{r}
+
+mhc1.genes <- c('HLA-A', 'HLA-B', 'HLA-C', 'HLA-E', 'HLA-F', 'HLA-G')
+mhc2.genes <- c('HLA-DMA', 'HLA-DMB', 'HLA-DOA', 'HLA-DPA1', 'HLA-DPB1', 'HLA-DQA1', 'HLA-DQA2', 'HLA-DQB1', 'HLA-DQB2', 'HLA-DRA', 'HLA-DRB1', 'HLA-DRB5')
+mhc.genes <- c(mhc1.genes, mhc2.genes)
+
+## Determine MHC scores for individual cells
+
+datasource <- VlnPlot(BCCIO, features=mhc.genes[1])
+mhc.cell.data <- datasource$data
+
+for (i in 2:length(mhc.genes)) {
+  datasource <- VlnPlot(BCCIO, features=mhc.genes[i])
+  mhc.cell.data <- cbind(mhc.cell.data, datasource$data)
+}
+
+mhc.cell.data <- subset(mhc.cell.data, select=-c(2, 4, 6, 8, 10, 12, 14, 16, 18, 20, 22, 24, 26, 28, 30, 32, 34))
+for (i in 1:length(mhc.genes)) {
+  mhc.cell.data[i] <- expm1(mhc.cell.data[i])
+}
+bcc.mhc.scores <- data.frame(mhc.cell.data$ident)
+bcc.mhc.scores$MHC1 <- rowSums(mhc.cell.data[1:6]/6)
+bcc.mhc.scores$MHC2 <- rowSums(mhc.cell.data[7:18]/12)
+bcc.mhc.scores$patient <- BCCIO@meta.data$patient
+bcc.mhc.scores$treatment <- BCCIO@meta.data$treatment
+
+bcc.mhc.scores <- bcc.mhc.scores[bcc.mhc.scores$treatment=='pre',]
+bcc.mhc.scores <- bcc.mhc.scores[bcc.mhc.scores$patient != 'su009' & bcc.mhc.scores$patient != 'su010' & bcc.mhc.scores$patient != 'su012', ]
+
+for (i in 1:nrow(bcc.mhc.scores)) {
+  if (bcc.mhc.scores$patient[i] == 'su001' | bcc.mhc.scores$patient[i] == 'su002' | bcc.mhc.scores$patient[i] == 'su003' | bcc.mhc.scores$patient[i] == 'su004') {
+    bcc.mhc.scores$Response[i] <- 1
+  } else {
+    bcc.mhc.scores$Response[i] <- 0
+  }
+}
+
+datasource <- VlnPlot(PDAC.all, features=mhc.genes[1])
+mhc.cell.data <- datasource$data
+
+for (i in 2:length(mhc.genes)) {
+  datasource <- VlnPlot(PDAC.all, features=mhc.genes[i])
+  mhc.cell.data <- cbind(mhc.cell.data, datasource$data)
+}
+
+mhc.cell.data <- subset(mhc.cell.data, select=-c(2, 4, 6, 8, 10, 12, 14, 16, 18, 20, 22, 24, 26, 28, 30, 32, 34))
+for (i in 1:length(mhc.genes)) {
+  mhc.cell.data[i] <- expm1(mhc.cell.data[i])
+}
+pdac.mhc.scores <- data.frame(mhc.cell.data$ident)
+pdac.mhc.scores$MHC1 <- rowSums(mhc.cell.data[1:6]/6)
+pdac.mhc.scores$MHC2 <- rowSums(mhc.cell.data[7:18]/12)
+pdac.mhc.scores$patient <- PDAC.all@meta.data$status
+
+pdac.mhc.scores <- pdac.mhc.scores[pdac.mhc.scores$patient=='I',]
+pdac.mhc.scores$Response <- 0
+
+bcc.mhc.scores <- bcc.mhc.scores[c(1, 2, 3, 6)] ## 14617 cells (training set)
+pdac.mhc.scores <- pdac.mhc.scores[c(1, 2, 3, 5)] ## 46562 cells (testing set)
+mhc.cell.scores <- rbind(bcc.mhc.scores, pdac.mhc.scores)
+
+mhc.cell.scores.export <- mhc.cell.scores[2:3]
+all.cell.status.export <- mhc.cell.scores[4]
+
+write.csv(mhc.cell.scores.export, "AllCellsMHCScores.csv", row.names=FALSE)
+write.csv(all.cell.status.export, "AllCellsResponseStatus.csv", row.names=FALSE)
+
+
+## Logistic regression model
+
+bcc.mhc.scores$Split <- runif(nrow(bcc.mhc.scores), min=-2, max=8)
+
+all.cells.train <- bcc.mhc.scores[bcc.mhc.scores$Split > 0, ]
+all.cells.test <- bcc.mhc.scores[bcc.mhc.scores$Split < 0, ]
+
+all.cells.mhc.model <- glm(Response ~ MHC1 + MHC2, data=all.cells.train, family=binomial)
+all.cells.mhc.model.pred <- predict(all.cells.mhc.model, newdata=all.cells.test, type='response')
+all.cells.mhc.model.res <- ifelse(all.cells.mhc.model.pred > 2233/nrow(bcc.mhc.scores), "R", "NR")
+
+res <- all.cells.test$Response
+table(all.cells.mhc.model.res, res)
+
+logistic.mhc <- glm(Response~ MHC1 + MHC2, data=bcc.mhc.scores, family=binomial)
+predict3d(logistic.mhc, radius=0.5)
+
+
+## Logistic regression models on MHC scores for all cells (MHC I and MHC II separately)
+
+bcc.mhc.scores$Response <- as.numeric(bcc.mhc.scores$Response)
+
+logistic.mhc1.plot <- ggplot(bcc.mhc.scores, aes(x=MHC1, y=Response)) +
+  geom_point(alpha=0.75, size=3) +
+  stat_smooth(method="glm", se=FALSE, method.args=list(family=binomial), fullrange=T) +
+  geom_hline(yintercept=2233/nrow(bcc.mhc.scores)) +
+  theme_bw() + labs(x='MHC-I Score', y='Probability of Response', title='LR Model: MHC-I Score') +
+  theme(plot.title = element_text(color="black", size=18, face="bold", hjust=0.5))
+
+logistic.mhc2.plot <- ggplot(bcc.mhc.scores, aes(x=MHC2, y=Response)) +
+  geom_point(alpha=0.75, size=3) +
+  stat_smooth(method="glm", se=FALSE, method.args=list(family=binomial), fullrange=T) +
+  geom_hline(yintercept=2233/nrow(bcc.mhc.scores)) +
+  theme_bw() + labs(x='MHC-II Score', y='Probability of Response', title='LR Model: MHC-II Score') +
+  theme(plot.title = element_text(color="black", size=18, face="bold", hjust=0.5))
+
+logistic.mhc1.plot + logistic.mhc2.plot
+
+
+## Violin plots of MHC score distribution in BCC R/NR and PDAC (all cells)
+
+mhc.cell.scores$Response <- as.factor(mhc.cell.scores$Response)
+
+mhc.cell.scores$Treatment <- "Filler"
+mhc.cell.scores$Treatment[mhc.cell.scores$Response == 1] <- "BCC R"
+mhc.cell.scores$Treatment[mhc.cell.scores$Response == 0] <- "BCC NR"
+mhc.cell.scores$Treatment[(nrow(bcc.mhc.scores)+1):nrow(mhc.cell.scores)] <- "PDAC"
+
+mhc1.cell.scores.violin <- ggplot(mhc.cell.scores, aes(x=Treatment, y=MHC1, color=Treatment)) +
+  geom_violin() + geom_boxplot(width=0.1) +
+  theme_bw() + theme(legend.position="none") + labs(y="MHC I Score", x="")
+
+mhc2.cell.scores.violin <- ggplot(mhc.cell.scores, aes(x=Treatment, y=MHC2, color=Treatment)) +
+  geom_violin() + geom_boxplot(width=0.1) +
+  theme_bw() + theme(legend.position="none") + labs(y="MHC II Score", x="")
+
+mhc1.cell.scores.violin + mhc2.cell.scores.violin
+
+
+## Classification of cells based on expected response 
+
+logistic.mhc.model <- glm(Response~ MHC1 + MHC2, data=bcc.mhc.scores, family=binomial)
+
+logistic.mhc.prediction <- predict(logistic.mhc.model, newdata=mhc.cell.scores, type='response')
+logistic.mhc.classification <- ifelse(logistic.mhc.prediction > 2233/nrow(bcc.mhc.scores), "R", "NR")
+
+all.cells.classification <- mhc.cell.scores$Response
+table(logistic.mhc.classification, all.cells.classification)
+
+mhc.cell.scores$Prediction <- logistic.mhc.classification
+
+Idents(BCCIO) <- BCCIO$treatment
+BCC.pre <- subset(BCCIO, idents="pre")
+Idents(BCC.pre) <- BCC.pre$patient
+BCC.pre.model <- subset(BCC.pre, idents=c('su001', 'su002', 'su003', 'su004', 'su005', 'su006', 'su007', 'su008'))
+
+Idents(PDAC.all) <- PDAC.all$status
+PDAC.model <- subset(PDAC.all, idents='I')
+PDAC.model$orig.ident <- as.character(PDAC.model$orig.ident)
+
+mhc.cell.scores$Patient <- c(BCC.pre.model$patient, PDAC.model$orig.ident)
+ggplot_barcharts(mhc.cell.scores$Prediction, mhc.cell.scores$Patient, normalize='No') +
+  theme_bw() + theme(legend.position='bottom', axis.text.x=element_text(angle=45, vjust=1, hjust=1)) + 
+  labs(fill='Prediction')
+
+```  
+  
+  
+  
+Logistic regression models on MHC scores for individual cells: Macrophages
+  
+```{r}
+
+## Logistic regression on MHC scores for macrophages only
+
+mhc.cell.scores.macrophages <- mhc.cell.scores[mhc.cell.scores$mhc.cell.data.ident == 'M1 Macrophages' | mhc.cell.scores$mhc.cell.data.ident == 'M2 Macrophages',]
+
+bcc.cell.scores.macrophages <- bcc.mhc.scores[bcc.mhc.scores$mhc.cell.data.ident == 'M1 Macrophages' | bcc.mhc.scores$mhc.cell.data.ident == 'M2 Macrophages',]
+
+logistic.mhc1.plot <- ggplot(bcc.cell.scores.macrophages, aes(x=MHC1, y=Response)) +
+  geom_point(alpha=0.75, size=3) +
+  stat_smooth(method="glm", se=FALSE, method.args=list(family=binomial), fullrange=T) +
+  geom_hline(yintercept=2233/nrow(bcc.mhc.scores)) +
+  theme_bw() + labs(x='MHC-I Score', y='Probability of Response', title='LR Model: MHC-I Score') +
+  theme(plot.title = element_text(color="black", size=18, face="bold", hjust=0.5))
+
+logistic.mhc2.plot <- ggplot(bcc.cell.scores.macrophages, aes(x=MHC2, y=Response)) +
+  geom_point(alpha=0.75, size=3) +
+  stat_smooth(method="glm", se=FALSE, method.args=list(family=binomial), fullrange=T) +
+  geom_hline(yintercept=2233/nrow(bcc.mhc.scores)) +
+  theme_bw() + labs(x='MHC-II Score', y='Probability of Response', title='LR Model: MHC-II Score') +
+  theme(plot.title = element_text(color="black", size=18, face="bold", hjust=0.5))
+
+macrophage.logistic.plot <- ggarrange(logistic.mhc1.plot, logistic.mhc2.plot)
+annotate_figure(macrophage.logistic.plot, top=text_grob("Macrophages", color="black", face="bold", size=24))
+
+## Violin plots for macrophage MHC score distribution
+
+mhc1.cell.scores.violin <- ggplot(mhc.cell.scores.macrophages, aes(x=Treatment, y=MHC1, color=Treatment)) +
+  geom_violin() + geom_boxplot(width=0.1) +
+  theme_bw() + theme(legend.position="none") + labs(y="MHC I Score", x="")
+
+mhc2.cell.scores.violin <- ggplot(mhc.cell.scores.macrophages, aes(x=Treatment, y=MHC2, color=Treatment)) +
+  geom_violin() + geom_boxplot(width=0.1) +
+  theme_bw() + theme(legend.position="none") + labs(y="MHC II Score", x="")
+
+mhc1.cell.scores.violin + mhc2.cell.scores.violin
+
+ggplot(mhc.cell.scores.macrophages, aes(x=Patient, y=MHC2, color=Treatment)) +
+  geom_violin() + geom_boxplot(width=0.1) +
+  theme_bw() + theme(legend.position="none") + labs(y="MHC II Score", x="Patient")
+
+comparisons = list(c("BCC R", "BCC NR"), c("BCC R", "PDAC"), c("BCC NR", "PDAC"))
+
+ggviolin(mhc.cell.scores.macrophages, x="Treatment", y="MHC2", fill="Treatment", add="boxplot", trim=TRUE, add.params = list(fill = "white"), palette="jco") +
+  stat_compare_means(comparisons=comparisons) + theme_bw() + theme(legend.position="none")
+
+ggboxplot(mhc.cell.scores.macrophages, x="Patient", y="MHC2", fill="Treatment", add="boxplot", palette="jco") +
+  stat_compare_means(label="p.signif") + theme_bw() + labs(x="", y="MHC II Score") +
+  theme(legend.position="none", axis.text.x = element_text(angle=45, hjust=1, vjust=1))
+
+## Compare macrophage populations (unfinished)
+
+Idents(PDAC.all) <- PDAC.all$cluster
+PDAC.macrophages <- subset(PDAC.all, idents=c("M1 Macrophages", "M2 Macrophages"))
+Idents(BCCIO) <- BCCIO$seurat_clusters
+BCC.macrophages <- subset(BCCIO, idents=c("M1 Macrophages", "M2 Macrophages"))
+
+Idents(PDAC.all) <- PDAC.all$orig.ident
+Idents(PDAC.macrophages) <- PDAC.macrophages$orig.ident
+Idents(BCCIO) <- BCCIO$patient.status
+Idents(BCC.macrophages) <- BCC.macrophages$patient.status
+
+## Compare MHC II gene expression
+
+Idents(PDAC.macrophages) <- PDAC.macrophages$status
+Idents(BCC.macrophages) <- BCC.macrophages$treatment.status
+
+pdac.macs.avgexp <- AverageExpression(PDAC.macrophages)$RNA
+pdac.macs.avgexp <- pdac.macs.avgexp[mhc.genes,]
+
+bcc.macs.avgexp <- AverageExpression(BCC.macrophages)$RNA
+bcc.macs.avgexp <- bcc.macs.avgexp[mhc.genes,]
+
+macs.avgexp <- cbind(bcc.macs.avgexp, pdac.macs.avgexp)
+macs.avgexp$Class <- rep(c("MHC I", "MHC II"), c(6, 12))
+macs.avgexp$Name <- rownames(macs.avgexp)
+
+ggplot(macs.avgexp, aes(x=`Responsive pre`, y=I, color=Class)) +
+  geom_point(size=3) + geom_text(aes(label=Name), hjust=0, vjust=0) +
+  geom_abline(intercept = 0, slope = 1) +
+  geom_abline(intercept = 0, slope = 2) + 
+  geom_abline(intercept = 0, slope = 0.5) +
+  scale_y_sqrt(limits=c(0.1, 110)) + scale_x_sqrt(limits=c(0.1, 110)) +
+  theme_bw() +
+  labs(y="PDAC", x="BCC Responders", title="MHC Expression: Macrophages") +
+  theme(legend.position="none", plot.title = element_text(color="black", size=18, face="bold", hjust=0.5))
+
+ggplot(macs.avgexp, aes(x=`Responsive pre`, y=`Nonresponsive pre`, color=Class)) +
+  geom_point(size=3) + geom_text(aes(label=Name), hjust=0, vjust=0) +
+  geom_abline(intercept = 0, slope = 1) +
+  geom_abline(intercept = 0, slope = 2) + 
+  geom_abline(intercept = 0, slope = 0.5) +
+  scale_y_sqrt(limits=c(0.1, 110)) + scale_x_sqrt(limits=c(0.1, 110)) +
+  theme_bw() +
+  labs(y="BCC Nonresponders", x="BCC Responders", title="MHC Expression: Macrophages") +
+  theme(legend.position="none", plot.title = element_text(color="black", size=18, face="bold", hjust=0.5))
+
+
+```
+
+
+
+Logistic regression models on MHC scores for individual cells: T Cells
+
+```{r}
+
+## Logistic regression on MHC scores for T cells only 
+
+mhc.cell.scores.tcells <- mhc.cell.scores[(mhc.cell.scores$mhc.cell.data.ident == 'CD8+ Memory' | mhc.cell.scores$mhc.cell.data.ident == 'CD4+ T Cells' | mhc.cell.scores$mhc.cell.data.ident == 'Tregs' | mhc.cell.scores$mhc.cell.data.ident == 'Proliferating T Cells' | mhc.cell.scores$mhc.cell.data.ident == 'CD8+ Exhausted' | mhc.cell.scores$mhc.cell.data.ident == 'CD8+ Effector' | mhc.cell.scores$mhc.cell.data.ident == 'NK Cells' ), ]
+
+bcc.mhc.scores.tcells <- bcc.mhc.scores[(bcc.mhc.scores$mhc.cell.data.ident == 'CD8+ Memory' | bcc.mhc.scores$mhc.cell.data.ident == 'CD4+ T Cells' | bcc.mhc.scores$mhc.cell.data.ident == 'Tregs' | bcc.mhc.scores$mhc.cell.data.ident == 'Proliferating T Cells' | bcc.mhc.scores$mhc.cell.data.ident == 'CD8+ Exhausted' | bcc.mhc.scores$mhc.cell.data.ident == 'CD8+ Effector' | bcc.mhc.scores$mhc.cell.data.ident == 'NK Cells' ), ]
+
+logistic.mhc1.plot <- ggplot(bcc.mhc.scores.tcells, aes(x=MHC1, y=Response)) +
+  geom_point(alpha=0.75, size=3) +
+  stat_smooth(method="glm", se=FALSE, method.args=list(family=binomial), fullrange=T) +
+  geom_hline(yintercept=1774/nrow(bcc.mhc.scores.tcells)) +
+  theme_bw() + labs(x='MHC-I Score', y='Probability of Response', title='LR Model: MHC-I Score') +
+  theme(plot.title = element_text(color="black", size=18, face="bold", hjust=0.5))
+
+logistic.mhc2.plot <- ggplot(bcc.mhc.scores.tcells, aes(x=MHC2, y=Response)) +
+  geom_point(alpha=0.75, size=3) +
+  stat_smooth(method="glm", se=FALSE, method.args=list(family=binomial), fullrange=T) +
+  geom_hline(yintercept=1774/nrow(bcc.mhc.scores.tcells)) +
+  theme_bw() + labs(x='MHC-II Score', y='Probability of Response', title='LR Model: MHC-II Score') +
+  theme(plot.title = element_text(color="black", size=18, face="bold", hjust=0.5))
+
+tcell.logistic.plot <- ggarrange(logistic.mhc1.plot, logistic.mhc2.plot)
+annotate_figure(tcell.logistic.plot, top=text_grob("T Cells", color="black", face="bold", size=24))
+
+## Violin plots for T Cell MHC score distribution
+
+mhc1.cell.scores.violin <- ggplot(mhc.cell.scores.tcells, aes(x=Treatment, y=MHC1, color=Treatment)) +
+  geom_violin() + geom_boxplot(width=0.1) +
+  theme_bw() + theme(legend.position="none") + labs(y="MHC I Score", x="")
+
+mhc2.cell.scores.violin <- ggplot(mhc.cell.scores.tcells, aes(x=Treatment, y=MHC2, color=Treatment)) +
+  geom_violin() + geom_boxplot(width=0.1) +
+  theme_bw() + theme(legend.position="none") + labs(y="MHC II Score", x="")
+
+mhc1.cell.scores.violin + mhc2.cell.scores.violin
+
+## Export datasets
+
+mhc.cell.scores.macrophages.export <- mhc.cell.scores.macrophages[2:3]
+mhc.cell.status.macrophages.export <- mhc.cell.scores.macrophages[4]
+
+mhc.cell.scores.tcells.export <- mhc.cell.scores.tcells[2:3]
+mhc.cell.status.tcells.export <- mhc.cell.scores.tcells[4]
+
+write.csv(mhc.cell.scores.macrophages.export, "MacrophageMHCScores.csv", row.names=FALSE)
+write.csv(mhc.cell.status.macrophages.export, "MacrophageResponseStatus.csv", row.names=FALSE)
+
+write.csv(mhc.cell.scores.tcells.export, "TCellMHCScores.csv", row.names=FALSE)
+write.csv(mhc.cell.status.tcells.export, "TCellResponseStatus.csv", row.names=FALSE)
+
+```
+
+
+
+Create logistic regression model on most differentially expressed genes in malignant cells
+
+```{r}
+
+## Determine most differentially expressed genes (responder > nonresponder) in BCC pre-treatment
+
+Idents(BCCIO) <- BCCIO$seurat_clusters
+BCC.malignant <- subset(BCCIO, idents=c('Malignant 1', 'Malignant 2'))
+Idents(BCC.malignant) <- BCC.malignant$treatment
+BCC.malignant.pre <- subset(BCC.malignant, idents="pre")
+BCC.malignant.pre$everything <- "everything"
+
+Idents(BCC.malignant.pre) <- BCC.malignant.pre$everything
+BCC.malignant.volcano <- bioc_volcano(BCC.malignant.pre, celltype="everything", group="response", ident="Responsive", ident2="Nonresponsive", title="Filler")
+
+BCC.malignant.DE.data <- BCC.malignant.volcano$data[BCC.malignant.volcano$data$p_val_adj < 0.05, ]
+BCC.malignant.DE.genes <- BCC.malignant.DE.data$GeneNames[106:125]
+
+
+## Calculate DE genes score
+
+Idents(PDAC.all) <- PDAC.all$cluster
+PDAC.malignant <- subset(PDAC.all, idents=c('Ductal cells: Malignant 1', 'Ductal cells: Malignant 2'))
+
+de.genes <- c('SEPP1', 'POLR2L', 'RPS26', 'UCP2', 'RPS10', 'NME2', 'RPL36A', 'HLA-DPA1', 'MDK', 'MEST', 'RPL41', 'NBEAL1', 'DAPL1', 'MGST1', 'RPS4Y1', 'RPS29', 'CXCL14', 'MEG3')
+
+Idents(BCC.malignant.pre) <- BCC.malignant.pre$patient
+bcc.mal.de.data <- AverageExpression(BCC.malignant.pre, features=de.genes)$RNA
+bcc.mal.de.scores <- colSums(bcc.mal.de.data)/18
+
+Idents(PDAC.malignant) <- PDAC.malignant$orig.ident
+pdac.mal.de.data <- AverageExpression(PDAC.malignant)$RNA
+pdac.mal.de.data <- pdac.mal.de.data[de.genes,]
+pdac.mal.de.scores <- colSums(pdac.mal.de.data)/18
+
+mal.de.class <- rep(c('BCC R', 'BCC NR', 'PDAC I'), c(4, 4, 16))
+mal.de.response <- rep(c(1, 0, 0.5), c(4, 4, 16))
+malignant.de.scores <- data.frame(Classification=mal.de.class, Score=c(bcc.mal.de.scores, pdac.mal.de.scores), Response=mal.de.response)
+
+bcc.malignant.de.scores <- malignant.de.scores[1:8,]
+pdac.malignant.de.scores <- malignant.de.scores[9:24,]
+
+## Create logistic regression model 
+
+logistic.de <- glm(Response ~ Score, data=bcc.malignant.de.scores, family=binomial)
+summary(logistic.de)
+
+logistic.de.plot <- ggplot(bcc.malignant.de.scores, aes(x=Score, y=Response)) +
+  geom_point(alpha=0.75, size=3) +
+  stat_smooth(method="glm", se=FALSE, method.args=list(family=binomial), fullrange=T) +
+  theme_bw() + labs(x='DE Gene Score', y='Probability of Response', title='LR Model: Top 18 DEGs') +
+  theme(plot.title = element_text(color="black", size=18, face="bold", hjust=0.5))
+
+logistic.de.plot + geom_point(data=pdac.malignant.de.scores, aes(x=Score, y=Response), color="#CD534C99", size=3) +
+  guides(color=FALSE, size=FALSE)
+
+
+## Calculate DE gene scores for individual cells 
+
+datasource <- VlnPlot(BCC.malignant.pre, features=de.genes[1])
+deg.cell.data <- datasource$data
+
+for (i in 2:length(de.genes)) {
+  datasource <- VlnPlot(BCC.malignant.pre, features=de.genes[i])
+  deg.cell.data <- cbind(deg.cell.data, datasource$data)
+}
+
+deg.cell.data <- subset(deg.cell.data, select=-c(2, 4, 6, 8, 10, 12, 14, 16, 18, 20, 22, 24, 26, 28, 30, 32, 34))
+for (i in 1:length(de.genes)) {
+  deg.cell.data[i] <- expm1(deg.cell.data[i])
+}
+
+deg.cell.scores <- data.frame(Score=rowSums(deg.cell.data[,1:18])/18, Patient=deg.cell.data$ident, Classification=BCC.malignant.pre$response, Response=rep(c(1,0), c(40, 2523)))
+
+logistic.de <- glm(Response ~ Score, data=deg.cell.scores, family=binomial)
+summary(logistic.de)
+
+logistic.de.plot <- ggplot(deg.cell.scores, aes(x=Score, y=Response)) +
+  geom_point(alpha=0.75, size=3) + geom_hline(yintercept=40/2563) +
+  stat_smooth(method="glm", se=FALSE, method.args=list(family=binomial), fullrange=T) +
+  theme_bw() + labs(x='DE Gene Score', y='Probability of Response', title='LR Model: Top 18 DEGs') +
+  theme(plot.title = element_text(color="black", size=18, face="bold", hjust=0.5))
+
+datasource <- VlnPlot(PDAC.malignant, features=de.genes[1])
+pdac.deg.cell.data <- datasource$data
+
+for (i in 2:length(de.genes)) {
+  datasource <- VlnPlot(PDAC.malignant, features=de.genes[i])
+  pdac.deg.cell.data <- cbind(pdac.deg.cell.data, datasource$data)
+}
+
+pdac.deg.cell.data <- subset(pdac.deg.cell.data, select=-c(2, 4, 6, 8, 10, 12, 14, 16, 18, 20, 22, 24, 26, 28, 30, 32, 34))
+for (i in 1:length(de.genes)) {
+  pdac.deg.cell.data[i] <- expm1(pdac.deg.cell.data[i])
+}
+
+pdac.deg.cell.scores <- data.frame(Score=rowSums(pdac.deg.cell.data[,1:18])/18, Patient=pdac.deg.cell.data$ident, Classification="PDAC", Response=0.5)
+
+logistic.de.plot + geom_point(data=pdac.deg.cell.scores, aes(x=Score, y=Response), color="#CD534C99", size=3) +
+  guides(color=FALSE, size=FALSE)
+
+deg.cell.scores.all <- rbind(deg.cell.scores, pdac.deg.cell.scores)
+
+comparisons = list(c("Responsive", "Nonresponsive"), c("Responsive", "PDAC"), c("Nonresponsive", "PDAC"))
+
+ggviolin(deg.cell.scores.all, x="Classification", y="Score", fill="Classification", add="boxplot", trim=TRUE, add.params = list(fill = "white"), palette="jco") +
+  stat_compare_means(comparisons=comparisons) + theme_bw() + theme(legend.position="none")
+
+```
+
+
+
+Logistic regression on most differentially expressed genes in macrophages, by patient
+
+```{r}
+
+## Determine DEGs between BCC R and NR
+
+Idents(PDAC.all) <- PDAC.all$cluster
+PDAC.macrophages <- subset(PDAC.all, idents=c('M1 Macrophages', 'M2 Macrophages'))
+
+Idents(BCCIO) <- BCCIO$seurat_clusters
+BCC.macrophages <- subset(BCCIO, idents=c('M1 Macrophages', 'M2 Macrophages'))
+Idents(BCC.macrophages) <- BCC.macrophages$treatment
+BCC.macrophages.pre <- subset(BCC.macrophages, idents='pre')
+
+BCC.macrophages.pre$everything <- "everything"
+Idents(BCC.macrophages.pre) <- BCC.macrophages.pre$everything
+BCC.macrophage.volcano <- bioc_volcano(BCC.macrophages.pre, celltype="everything", group="response", ident="Responsive", ident2="Nonresponsive", title="Filler")
+
+BCC.macrophage.degs <- BCC.macrophage.volcano$data
+BCC.macrophage.degs <- BCC.macrophage.degs[(BCC.macrophage.degs$p_val_adj < 0.05) & ((BCC.macrophage.degs$avg_logFC > 0.5) | (BCC.macrophage.degs$avg_logFC < -0.5)), ]
+
+macrophage.degs.upreg <- BCC.macrophage.degs$GeneNames[42:61]
+macrophage.degs.downreg <- BCC.macrophage.degs$GeneNames[1:20]
+
+
+## Calculate DEG scores (upregulated)
+
+Idents(BCC.macrophages.pre) <- BCC.macrophages.pre$patient
+
+bcc.macs.de.data <- AverageExpression(BCC.macrophages.pre, features=macrophage.degs.upreg)$RNA
+bcc.macs.de.scores <- colSums(bcc.macs.de.data)/20
+bcc.macs.de.scores <- bcc.macs.de.scores[1:8]
+
+Idents(PDAC.macrophages) <- PDAC.macrophages$orig.ident
+pdac.macs.de.data <- AverageExpression(PDAC.macrophages)$RNA
+pdac.macs.de.data <- pdac.macs.de.data[macrophage.degs.upreg,]
+pdac.macs.de.scores <- colSums(pdac.macs.de.data)/20
+
+macs.de.class <- rep(c('BCC R', 'BCC NR', 'PDAC I', 'PDAC H'), c(4, 4, 16, 3))
+macs.de.response <- rep(c(1, 0, 0.45, 0.55), c(4, 4, 16, 3))
+macrophages.de.scores.up <- data.frame(Classification=macs.de.class, Score=c(bcc.macs.de.scores, pdac.macs.de.scores), Response=macs.de.response)
+
+bcc.macrophages.de.scores.up <- macrophages.de.scores.up[1:8,]
+pdac.macrophages.de.scores.up <- macrophages.de.scores.up[9:27,]
+
+## Calculate DEG scores (downregulated)
+
+Idents(BCC.macrophages.pre) <- BCC.macrophages.pre$patient
+
+bcc.macs.de.data <- AverageExpression(BCC.macrophages.pre, features=macrophage.degs.downreg)$RNA
+bcc.macs.de.scores <- colSums(bcc.macs.de.data)/20
+bcc.macs.de.scores <- bcc.macs.de.scores[1:8]
+
+Idents(PDAC.macrophages) <- PDAC.macrophages$orig.ident
+pdac.macs.de.data <- AverageExpression(PDAC.macrophages)$RNA
+pdac.macs.de.data <- pdac.macs.de.data[macrophage.degs.downreg,]
+pdac.macs.de.scores <- colSums(pdac.macs.de.data)/20
+
+macs.de.class <- rep(c('BCC R', 'BCC NR', 'PDAC I', 'PDAC H'), c(4, 4, 16, 3))
+macs.de.response <- rep(c(1, 0, 0.45, 0.55), c(4, 4, 16, 3))
+macrophages.de.scores.down <- data.frame(Classification=macs.de.class, Score=c(bcc.macs.de.scores, pdac.macs.de.scores), Response=macs.de.response)
+
+bcc.macrophages.de.scores.down <- macrophages.de.scores.down[1:8,]
+pdac.macrophages.de.scores.down <- macrophages.de.scores.down[9:27,]
+
+
+## Create logistic regression model (can be run for both upregulated and downregulated)
+
+bcc.macrophages.de.scores <- bcc.macrophages.de.scores.down
+pdac.macropahges.de.scores <- pdac.macrophages.de.scores.down
+
+logistic.de <- glm(Response ~ Score, data=bcc.macrophages.de.scores, family=binomial)
+summary(logistic.de)
+
+logistic.de.plot <- ggplot(bcc.macrophages.de.scores, aes(x=Score, y=Response)) +
+  geom_point(alpha=0.75, size=3) +
+  stat_smooth(method="glm", se=FALSE, method.args=list(family=binomial), fullrange=T) +
+  theme_bw() + labs(x='DE Gene Score', y='Probability of Response', title='LR Model: Top 20 DEGs') +
+  theme(plot.title = element_text(color="black", size=18, face="bold", hjust=0.5))
+
+logistic.de.plot + geom_point(data=pdac.macrophages.de.scores, aes(x=Score, y=Response), color="#CD534C99", size=3) +
+  guides(color=FALSE, size=FALSE)
+
+
+## Create combined logistic regression model 
+
+bcc.macrophage.de.scores <- cbind(bcc.macrophages.de.scores.up[,1:2], bcc.macrophages.de.scores.down[,2], bcc.macrophages.de.scores.up[,3])
+colnames(bcc.macrophage.de.scores) <- c('Classification', 'Upregulated', 'Downregulated', 'Response')
+
+logistic.de.combined <- glm(Response~Upregulated+Downregulated, data=bcc.macrophage.de.scores, family=binomial())
+summary(logistic.de.combined)
+
+predict3d(logistic.de.combined, radius=0.5)
+
+
+## Statistical comparison of score distributions
+
+colnames(macrophages.de.scores) <- c('Classification', 'Upregulated', 'Response', 'Downregulated')
+macrophages.de.scores$Classification <- factor(macrophages.de.scores$Classification, 
+                                                  levels=c('BCC R', 'BCC NR', 'PDAC I', 'PDAC H'))
+
+comparisons = list(c('BCC R', 'BCC NR'), c('BCC R', 'PDAC I'), c('BCC NR', 'PDAC I'))
+
+ggboxplot(macrophages.de.scores, x="Classification", y="Upregulated", color="Classification", palette="jco", add="jitter") +
+  stat_compare_means(comparisons=comparisons) +
+  labs(x="", y="Upregulated DEG Score", title="Macrophages: Upregulated DEGs") +
+  theme_bw() + theme(legend.position='none', plot.title = element_text(color="black", size=18, face="bold", hjust=0.5))
+
+
+## Prepare datasets for export into Python
+
+macrophages.de.scores <- cbind(macrophages.de.scores.up, macrophages.de.scores.down[,2])
+
+macrophage.deg.predictor <- macrophages.de.scores[1:24, c(2,4)]
+colnames(macrophage.deg.predictor) <- c('Upregulated', 'Downregulated')
+macrophage.deg.response <- data.frame(Response=rep(c(1,0), c(4, 20)))
+
+write.csv(macrophage.deg.predictor, "MacrophageDEGScores.csv", row.names=FALSE)
+write.csv(macrophage.deg.response, "MacrophageDEGResponses.csv", row.names=FALSE)
+
+```
+
+
+
+Logistic regression on most differentially expressed genes in macrophages, by cell
+
+```{r}
+
+macrophage.degs <- c(macrophage.degs.upreg, macrophage.degs.downreg)
+
+## Calculate DEG scores (upregulated + downregulated) for BCC pretreatment macrophages
+
+Idents(BCC.macrophages.pre) <- BCC.macrophages.pre$patient
+datasource <- VlnPlot(BCC.macrophages.pre, features=macrophage.degs[1])
+deg.cell.data <- datasource$data
+
+for (i in 2:length(macrophage.degs)) {
+  datasource <- VlnPlot(BCC.macrophages.pre, features=macrophage.degs[i])
+  deg.cell.data <- cbind(deg.cell.data, datasource$data)
+}
+
+deg.cell.data <- deg.cell.data[, (seq_len(ncol(deg.cell.data)) %% 2) == 1]
+for (i in 1:length(macrophage.degs)) {
+  deg.cell.data[i] <- expm1(deg.cell.data[i])
+}
+
+bcc.deg.cell.scores <- data.frame(Upregulated=rowSums(deg.cell.data[1:1173,1:20])/20, 
+                              Downregulated=rowSums(deg.cell.data[1:1173,21:40])/20,
+                              Patient=datasource$data[1:1173,2],
+                              Response=rep(c(1, 0), c(119, 1054)))
+
+## Calculate DEG scores for PDAC macrophages
+
+Idents(PDAC.macrophages) <- PDAC.macrophages$orig.ident
+datasource <- VlnPlot(PDAC.macrophages, features=macrophage.degs[1])
+deg.cell.data <- datasource$data
+
+for (i in 2:length(macrophage.degs)) {
+  datasource <- VlnPlot(PDAC.macrophages, features=macrophage.degs[i])
+  deg.cell.data <- cbind(deg.cell.data, datasource$data)
+}
+
+deg.cell.data <- deg.cell.data[, (seq_len(ncol(deg.cell.data)) %% 2) == 1]
+for (i in 1:length(macrophage.degs)) {
+  deg.cell.data[i] <- expm1(deg.cell.data[i])
+}
+
+pdac.deg.cell.scores <- data.frame(Upregulated=rowSums(deg.cell.data[1:6926,1:20])/20, 
+                              Downregulated=rowSums(deg.cell.data[1:6926,21:40])/20,
+                              Patient=datasource$data[1:6926,2], Response=rep(0.5, 6926))
+
+
+## Create logistic regression model 
+
+logistic.deg.up <- glm(Response ~ Upregulated, data=bcc.deg.cell.scores, family=binomial)
+logistic.deg.down <- glm(Response ~ Downregulated, data=bcc.deg.cell.scores, family=binomial)
+summary(logistic.deg.up)
+summary(logistic.deg.down)
+
+logistic.deg <- glm(Response~Upregulated+Downregulated, data=bcc.deg.cell.scores, family=binomial)
+summary(logistic.deg)
+predict3d(logistic.deg, alpha=0.5)
+
+logistic.de.plot <- ggplot(bcc.deg.cell.scores, aes(x=Upregulated, y=Response)) +
+  geom_point(alpha=0.75, size=3) +
+  geom_hline(yintercept=119/1173) +
+  stat_smooth(method="glm", se=FALSE, method.args=list(family=binomial), fullrange=T) +
+  theme_bw() + labs(x='DE Gene Score', y='Probability of Response', title='LR Model: Top 20 DEGs') +
+  theme(plot.title = element_text(color="black", size=18, face="bold", hjust=0.5))
+
+logistic.de.plot + geom_point(data=pdac.deg.cell.scores, aes(x=Upregulated, y=Response), color="#CD534C99", size=3) +
+  guides(color=FALSE, size=FALSE)
+
+
+## Statistical comparison of score distributions
+
+bcc.deg.cell.scores$Classification <- rep(c('BCC R', 'BCC NR'), c(119, 1054))
+pdac.deg.cell.scores$Classification <- 'PDAC'
+macrophage.deg.cell.scores <- rbind(bcc.deg.cell.scores, pdac.deg.cell.scores)
+
+comparisons = list(c('BCC R', 'BCC NR'), c('BCC R', 'PDAC'), c('BCC NR', 'PDAC'))
+
+ggviolin(macrophage.deg.cell.scores, x="Classification", y="Upregulated", color="Classification", palette="jco", add="boxplot", trim=TRUE) +
+  stat_compare_means(comparisons=comparisons, label.y=c(110, 120, 100)) +
+  labs(x="", y="Upregulated DEG Score", title="Macrophages: Upregulated DEGs") +
+  theme_bw() + theme(legend.position='none', plot.title = element_text(color="black", size=18, face="bold", hjust=0.5))
+
+ggboxplot(macrophage.deg.cell.scores, x="Patient", y="Upregulated", color="Classification", palette="jco") +
+  labs(x="", y="Upregulated DEG Score", title="Macrophages: Upregulated DEGs") +
+  theme_bw() + theme(legend.position='none', plot.title = element_text(color="black", size=18, face="bold", hjust=0.5), axis.text.x = element_text(angle=90, vjust=0.5, hjust=1))
+
+
+## Compare similarity in upregulated DEG score distributions
+
+patients <- c('su001', 'su002', 'su003', 'su004', 'su005', 'su006', 'su007', 'su008', 'I1', 'I2', 'I3', 'I4', 'I5', 'I6', 'I7', 'I8', 'I9', 'I10', 'I11', 'I12', 'I13', 'I14', 'I15', 'I16')
+
+kstest.df <- data.frame(matrix(ncol=length(patients), nrow=length(patients)))
+
+colnames(kstest.df) <- patients
+rownames(kstest.df) <- patients
+
+for (i in 1:length(patients)) {
+  for (j in 1:length(patients)) {
+    if (i >= j) {
+      kstest.df[i,j] <- ks.test(x=macrophage.deg.cell.scores$Upregulated[macrophage.deg.cell.scores$Patient == patients[i]], y=macrophage.deg.cell.scores$Upregulated[macrophage.deg.cell.scores$Patient == patients[j]])
+    }
+  }
+}
+
+kstest.df$Patient <- rownames(kstest.df)
+kstest.df <- melt(kstest.df)
+colnames(kstest.df) <- c('PatientX', 'PatientY', 'KSTest')
+kstest.df$PatientX <- factor(kstest.df$PatientX, levels=rev(patients))
+kstest.df$PatientY <- factor(kstest.df$PatientY, levels=patients)
+
+ggplot(kstest.df, aes(PatientX, PatientY, fill=KSTest)) + 
+  geom_tile() + scale_fill_distiller(palette='BrBG') +
+  xlim(rev(levels(kstest.df$PatientX))) +
+  labs(x='', y='', title='KS Test: Upregulated DEGs Macrophage Score') + theme_bw() + 
+  theme(legend.position='right', plot.title = element_text(color="black", size=18, face="bold", hjust=0.5), axis.text.x = element_text(angle=90, vjust=0.5, hjust=1))
+
+
+## Determine proportion of "responsive" macrophages per patient
+
+logistic.deg.up.pred <- predict(logistic.deg.up, newdata=macrophage.deg.cell.scores, type='response')
+logistic.deg.up.res <- ifelse(logistic.deg.up.pred > 119/1173, "R", "NR")
+
+res <- macrophage.deg.cell.scores$Patient
+logistic.deg.prop.data <- data.frame(table(logistic.deg.up.res, res))
+colnames(logistic.deg.prop.data) <- c('Prediction', 'Patient', 'Frequency')
+
+logistic.deg.prop.data$Total <- c(rep(table(Idents(BCC.macrophages.pre)), each=2), rep(table(Idents(PDAC.macrophages)), each=2))
+logistic.deg.prop.data <- logistic.deg.prop.data[-c(17,18, 51, 52, 53, 54, 55, 56),]
+logistic.deg.prop.data$Proportion <- logistic.deg.prop.data$Frequency / logistic.deg.prop.data$Total
+
+logistic.deg.prop <- data.frame(Prop = logistic.deg.prop.data$Proportion[c(TRUE, FALSE)],
+                                Class = rep(c('BCC R', 'BCC NR', 'PDAC'), c(4, 4, 16)))
+
+logistic.deg.prop$Class <- factor(logistic.deg.prop$Class, levels=c('BCC R', 'BCC NR', 'PDAC'))
+comparisons = list(c('BCC NR', 'BCC R'), c('BCC NR', 'PDAC'), c('BCC R', 'PDAC'))
+
+ggboxplot(logistic.deg.prop, x="Class", y="Prop", color="Class", palette="jco", add="jitter") +
+  stat_compare_means(comparisons=comparisons, label.y=c(1, 1.1, 1.2)) +
+  labs(x="", y="Proportion", title="Proportion of \"Nonresponsive\" Cells") +
+  theme_bw() + theme(legend.position='none', plot.title = element_text(color="black", size=18, face="bold", hjust=0.5))
+
+```
+
+
+
+Determine weighted MHC score for macrophages
+
+```{r}
+
+Idents(BCCIO) <- BCCIO$seurat_clusters
+BCC.macrophages <- subset(BCCIO, idents=c('M1 Macrophages', 'M2 Macrophages'))
+Idents(BCC.macrophages) <- BCC.macrophages$treatment
+BCC.macrophages.pre <- subset(BCC.macrophages, idents='pre')
+
+Idents(PDAC.all) <- PDAC.all$cluster
+PDAC.macrophages <- subset(PDAC.all, idents=c('M1 Macrophages', 'M2 Macrophages'))
+
+mhc1.genes <- c('HLA-A', 'HLA-B', 'HLA-C', 'HLA-E', 'HLA-F', 'HLA-G')
+mhc2.genes <- c('HLA-DMA', 'HLA-DMB', 'HLA-DOA', 'HLA-DPA1', 'HLA-DPB1', 'HLA-DQA1', 'HLA-DQA2', 'HLA-DQB1', 'HLA-DQB2', 'HLA-DRA', 'HLA-DRB1', 'HLA-DRB5')
+mhc.genes <- c(mhc1.genes, mhc2.genes)
+
+## Copied from above segment 
+
+BCC.macrophages.pre$everything <- "everything"
+Idents(BCC.macrophages.pre) <- BCC.macrophages.pre$everything
+
+BCC.macrophage.volcano <- bioc_volcano(BCC.macrophages.pre, celltype="everything", group="response", ident="Responsive", ident2="Nonresponsive", title="Filler")
+
+BCC.macrophage.degs <- BCC.macrophage.volcano$data
+BCC.macrophage.degs <- BCC.macrophage.degs[(BCC.macrophage.degs$p_val_adj < 0.05) & ((BCC.macrophage.degs$avg_logFC > 0.5) | (BCC.macrophage.degs$avg_logFC < -0.5)), ]
+
+macrophage.degs <- BCC.macrophage.degs$GeneNames[42:61]
+
+Idents(BCC.macrophages.pre) <- BCC.macrophages.pre$patient
+datasource <- VlnPlot(BCC.macrophages.pre, features=macrophage.degs[1])
+deg.cell.data <- datasource$data
+
+for (i in 2:length(macrophage.degs)) {
+  datasource <- VlnPlot(BCC.macrophages.pre, features=macrophage.degs[i])
+  deg.cell.data <- cbind(deg.cell.data, datasource$data)
+}
+
+deg.cell.data <- deg.cell.data[, (seq_len(ncol(deg.cell.data)) %% 2) == 1]
+for (i in 1:length(macrophage.degs)) {
+  deg.cell.data[i] <- expm1(deg.cell.data[i])
+}
+deg.cell.data$patient <- datasource$data$ident
+deg.cell.data <- deg.cell.data[1:1173,]
+deg.cell.data$Response <- rep(c(1, 0), c(119, 1054))
+
+
+Idents(PDAC.macrophages) <- PDAC.macrophages$orig.ident
+datasource <- VlnPlot(PDAC.macrophages, features=macrophage.degs[1])
+pdac.deg.cell.data <- datasource$data
+
+for (i in 2:length(macrophage.degs)) {
+  datasource <- VlnPlot(PDAC.macrophages, features=macrophage.degs[i])
+  pdac.deg.cell.data <- cbind(pdac.deg.cell.data, datasource$data)
+}
+
+pdac.deg.cell.data <- pdac.deg.cell.data[, (seq_len(ncol(pdac.deg.cell.data)) %% 2) == 1]
+for (i in 1:length(macrophage.degs)) {
+  pdac.deg.cell.data[i] <- expm1(pdac.deg.cell.data[i])
+}
+
+pdac.deg.cell.data$patient <- datasource$data$ident
+pdac.deg.cell.data$Response <- rep(c(0.51, 0.49), c(6926, 1165))
+
+
+## Logistic regression model on all cells individually
+
+macrophage.deg.model <- glm(Response~CKS2+CD74+`HLA-DQB2`+S100B+`HLA-DPB1`+RPS29+CPVL+HSPD1+CST3+`HLA-DMA`+`HLA-DRB5`+HSPB1+`HLA-DQB1`+`HLA-DRB1`+`HLA-DPA1`+FCER1A+`HLA-DQA1`+DNAJB1+HSPA6+HSPA1B, data=deg.cell.data, family=binomial)
+
+deg.cellscore.data <- data.frame(Score=macrophage.deg.model$fitted.values,
+                                 Patient=deg.cell.data$patient,
+                                 Response=deg.cell.data$Response)
+
+ggplot(deg.cellscore.data, aes(x=Score, y=Response)) +
+  geom_point(alpha=0.75, size=3) +
+  geom_hline(yintercept=119/1173) +
+  stat_smooth(method="glm", se=FALSE, method.args=list(family=binomial), fullrange=T) +
+  theme_bw() + labs(x='Weighted DEG Score', y='Probability of Response', title='LR Model: Top 20 DEGs, Weighted') +
+  theme(plot.title = element_text(color="black", size=18, face="bold", hjust=0.5))
+
+macrophage.deg.predictions <- predict(macrophage.deg.model, deg.cell.data, type="response")
+macrophage.deg.predres <- ifelse(macrophage.deg.predictions > 119/1173, 1, 0)
+
+deg.cellscore.data$Prediction <- macrophage.deg.predres
+mean(deg.cellscore.data$Prediction == deg.cellscore.data$Response) # 83.3% of cells were correctly classified
+
+table(deg.cellscore.data$Response, deg.cellscore.data$Prediction)
+
+deg.cell.data.combined <- rbind(deg.cell.data, pdac.deg.cell.data)
+
+macrophage.deg.predictions.all <- predict(macrophage.deg.model, deg.cell.data.combined, type="response")
+macrophage.deg.predres.all <- ifelse(macrophage.deg.predictions.all > 119/1173, 1, 0)
+
+table(deg.cell.data.combined$Response, macrophage.deg.predres.all)
+
+deg.cell.data.combined$Prediction <- macrophage.deg.predictions.all
+deg.cell.data.combined$Response <- as.factor(deg.cell.data.combined$Response)
+
+ggboxplot(deg.cell.data.combined, x="patient", y="Prediction", fill="Response", trim=TRUE, palette="jco") +
+  theme_bw() + theme(legend.position="none", plot.title = element_text(color="black", size=18, face="bold", hjust=0.5), axis.text.x=element_text(angle=45, hjust=1, vjust=1)) +
+  labs(title='Distribution of Response Probabilities', y='Probability', x='')
+
+ggviolin(deg.cell.data.combined, x="Response", y="Prediction", fill="Response", trim=TRUE, palette="jco") +
+  theme_bw() + theme(legend.position="none") + coord_flip() + labs(x="Prediction", y="")
+
+```
+
+
+
+Determine weighted MHC score for T cells
+
+```{r}
+
+Idents(BCCIO) <- BCCIO$seurat_clusters
+BCC.tcells <- subset(BCCIO, idents=c('CD8+ Memory', 'CD4+ T Cells', 'Tregs', 'Proliferating T Cells', 'CD8+ Exhausted', 'CD8+ Effector', 'NK Cells'))
+Idents(BCC.tcells) <- BCC.tcells$treatment
+BCC.tcells.pre <- subset(BCC.tcells, idents='pre')
+
+Idents(PDAC.all) <- PDAC.all$cluster
+PDAC.tcells <- subset(PDAC.all, idents=c('CD4+ T Cells', 'NK Cells', 'CD8+ Exhausted', 'CD8+ Effector', 'CD8+ Memory', 'Tregs'))
+
+mhc1.genes <- c('HLA-A', 'HLA-B', 'HLA-C', 'HLA-E', 'HLA-F', 'HLA-G')
+mhc2.genes <- c('HLA-DMA', 'HLA-DMB', 'HLA-DOA', 'HLA-DPA1', 'HLA-DPB1', 'HLA-DQA1', 'HLA-DQA2', 'HLA-DQB1', 'HLA-DQB2', 'HLA-DRA', 'HLA-DRB1', 'HLA-DRB5')
+mhc.genes <- c(mhc1.genes, mhc2.genes)
+
+## Copied from above segment 
+
+BCC.tcells.pre$everything <- "everything"
+Idents(BCC.tcells.pre) <- BCC.tcells.pre$everything
+
+BCC.tcells.volcano <- bioc_volcano(BCC.tcells.pre, celltype="everything", group="response", ident="Responsive", ident2="Nonresponsive", title="Filler")
+
+BCC.tcells.degs <- BCC.tcells.volcano$data
+BCC.tcells.upreg <- BCC.tcells.degs$GeneNames[79:81]
+BCC.tcells.downreg <- BCC.tcells.degs$GeneNames[1:10]
+BCC.tcells.genes <- c(BCC.tcells.upreg, BCC.tcells.downreg)
+
+Idents(BCC.tcells.pre) <- BCC.tcells.pre$patient
+datasource <- VlnPlot(BCC.tcells.pre, features=BCC.tcells.genes[1])
+deg.cell.data <- datasource$data
+
+for (i in 2:length(BCC.tcells.genes)) {
+  datasource <- VlnPlot(BCC.tcells.pre, features=BCC.tcells.genes[i])
+  deg.cell.data <- cbind(deg.cell.data, datasource$data)
+}
+
+deg.cell.data <- deg.cell.data[, (seq_len(ncol(deg.cell.data)) %% 2) == 1]
+for (i in 1:length(BCC.tcells.genes)) {
+  deg.cell.data[i] <- expm1(deg.cell.data[i])
+}
+deg.cell.data$patient <- datasource$data$ident
+deg.cell.data$Response <- rep(c(1, 0, 1, 0, 1), c(1774, 5065, 3916, 87, 2484))
+
+
+Idents(PDAC.tcells) <- PDAC.tcells$orig.ident
+datasource <- VlnPlot(PDAC.tcells, features=BCC.tcells.genes[1])
+pdac.deg.cell.data <- datasource$data
+
+for (i in 2:length(BCC.tcells.genes)) {
+  datasource <- VlnPlot(PDAC.tcells, features=BCC.tcells.genes[i])
+  pdac.deg.cell.data <- cbind(pdac.deg.cell.data, datasource$data)
+}
+
+pdac.deg.cell.data <- pdac.deg.cell.data[, (seq_len(ncol(pdac.deg.cell.data)) %% 2) == 1]
+for (i in 1:length(BCC.tcells.genes)) {
+  pdac.deg.cell.data[i] <- expm1(pdac.deg.cell.data[i])
+}
+
+pdac.deg.cell.data$patient <- datasource$data$ident
+pdac.deg.cell.data$Response <- rep(c(0.51, 0.49), c(10010, 1948))
+
+
+## Logistic regression model on all cells individually
+
+tcell.deg.model <- glm(Response~RPS4Y1+ZBED2+CXCL13+HSPA1A+HSPA1B+HSP90AA1+MT1E+DNAJB1+HSPE1+HSPH1+HSPD1+HSPB1+IFITM3, data=deg.cell.data, family=binomial)
+
+deg.cellscore.data <- data.frame(Score=tcell.deg.model$fitted.values,
+                                 Patient=deg.cell.data$patient,
+                                 Response=deg.cell.data$Response)
+
+ggplot(deg.cellscore.data, aes(x=Score, y=Response)) +
+  geom_point(alpha=0.75, size=3) +
+  geom_hline(yintercept=8174/13326) +
+  stat_smooth(method="glm", se=FALSE, method.args=list(family=binomial), fullrange=T) +
+  theme_bw() + labs(x='Weighted DEG Score', y='Probability of Response', title='LR Model: Top 20 DEGs, Weighted') +
+  theme(plot.title = element_text(color="black", size=18, face="bold", hjust=0.5))
+
+tcell.deg.predictions <- predict(tcell.deg.model, deg.cell.data, type="response")
+tcell.deg.predres <- ifelse(tcell.deg.predictions > 8174/13326, 1, 0)
+
+deg.cellscore.data$Prediction <- tcell.deg.predres
+mean(deg.cellscore.data$Prediction == deg.cellscore.data$Response) # 72.9% of cells were correctly classified
+
+table(deg.cellscore.data$Response, deg.cellscore.data$Prediction)
+
+deg.cell.data.combined <- rbind(deg.cell.data, pdac.deg.cell.data)
+
+tcell.deg.predictions.all <- predict(tcell.deg.model, deg.cell.data.combined, type="response")
+tcell.deg.predres.all <- ifelse(tcell.deg.predictions.all > 8174/13326, 1, 0)
+
+table(deg.cell.data.combined$Response, tcell.deg.predres.all)
+
+deg.cell.data.combined$Prediction <- tcell.deg.predictions.all
+deg.cell.data.combined$Response <- as.factor(deg.cell.data.combined$Response)
+
+ggboxplot(deg.cell.data.combined, x="patient", y="Prediction", fill="Response", trim=TRUE, palette="jco") +
+  theme_bw() + theme(legend.position="none", plot.title = element_text(color="black", size=18, face="bold", hjust=0.5), axis.text.x=element_text(angle=45, hjust=1, vjust=1)) +
+  labs(title='Distribution of Response Probabilities', y='Probability', x='')
+
+ggviolin(deg.cell.data.combined, x="Response", y="Prediction", fill="Response", trim=TRUE, palette="jco") +
+  theme_bw() + theme(legend.position="none") + coord_flip() + labs(x="Prediction", y="")
+
+```
+
+
+
+Determine weighted MHC score for CD8+ T cells
+
+```{r}
+
+Idents(BCCIO) <- BCCIO$seurat_clusters
+BCC.tcells <- subset(BCCIO, idents=c('CD8+ Memory', 'CD8+ Exhausted', 'CD8+ Effector'))
+Idents(BCC.tcells) <- BCC.tcells$treatment
+BCC.tcells.pre <- subset(BCC.tcells, idents='pre')
+
+Idents(PDAC.all) <- PDAC.all$cluster
+PDAC.tcells <- subset(PDAC.all, idents=c('CD8+ Exhausted', 'CD8+ Effector', 'CD8+ Memory'))
+
+mhc1.genes <- c('HLA-A', 'HLA-B', 'HLA-C', 'HLA-E', 'HLA-F', 'HLA-G')
+mhc2.genes <- c('HLA-DMA', 'HLA-DMB', 'HLA-DOA', 'HLA-DPA1', 'HLA-DPB1', 'HLA-DQA1', 'HLA-DQA2', 'HLA-DQB1', 'HLA-DQB2', 'HLA-DRA', 'HLA-DRB1', 'HLA-DRB5')
+mhc.genes <- c(mhc1.genes, mhc2.genes)
+
+## Copied from above segment 
+
+BCC.tcells.pre$everything <- "everything"
+Idents(BCC.tcells.pre) <- BCC.tcells.pre$everything
+
+BCC.tcells.volcano <- bioc_volcano(BCC.tcells.pre, celltype="everything", group="response", ident="Responsive", ident2="Nonresponsive", title="Filler")
+
+BCC.tcells.degs <- BCC.tcells.volcano$data[BCC.tcells.volcano$data$Sig == "FC_P", ]
+BCC.tcells.upreg <- BCC.tcells.degs$GeneNames[24:35]
+BCC.tcells.downreg <- BCC.tcells.degs$GeneNames[1:23]
+BCC.tcells.genes <- c(BCC.tcells.upreg, BCC.tcells.downreg)
+
+Idents(BCC.tcells.pre) <- BCC.tcells.pre$patient
+datasource <- VlnPlot(BCC.tcells.pre, features=BCC.tcells.genes[1])
+deg.cell.data <- datasource$data
+
+for (i in 2:length(BCC.tcells.genes)) {
+  datasource <- VlnPlot(BCC.tcells.pre, features=BCC.tcells.genes[i])
+  deg.cell.data <- cbind(deg.cell.data, datasource$data)
+}
+
+deg.cell.data <- deg.cell.data[, (seq_len(ncol(deg.cell.data)) %% 2) == 1]
+for (i in 1:length(BCC.tcells.genes)) {
+  deg.cell.data[i] <- expm1(deg.cell.data[i])
+}
+deg.cell.data$patient <- datasource$data$ident
+deg.cell.data$Response <- rep(c(1, 0, 1, 0, 1), c(468, 1509, 3330, 62, 513))
+
+
+Idents(PDAC.tcells) <- PDAC.tcells$orig.ident
+datasource <- VlnPlot(PDAC.tcells, features=BCC.tcells.genes[1])
+pdac.deg.cell.data <- datasource$data
+
+for (i in 2:length(BCC.tcells.genes)) {
+  datasource <- VlnPlot(PDAC.tcells, features=BCC.tcells.genes[i])
+  pdac.deg.cell.data <- cbind(pdac.deg.cell.data, datasource$data)
+}
+
+pdac.deg.cell.data <- pdac.deg.cell.data[, (seq_len(ncol(pdac.deg.cell.data)) %% 2) == 1]
+for (i in 1:length(BCC.tcells.genes)) {
+  pdac.deg.cell.data[i] <- expm1(pdac.deg.cell.data[i])
+}
+
+pdac.deg.cell.data$patient <- datasource$data$ident
+pdac.deg.cell.data$Response <- rep(c(0.51, 0.49), c(3300, 1379))
+
+
+## Logistic regression model on all cells individually
+
+tcell.deg.model <- glm(Response~LMNA+RPS4Y1+DUSP4+ZFP36L2+RPS26+ZBED2+KRT86+CXCL13, data=deg.cell.data, family=binomial)
+
+deg.cellscore.data <- data.frame(Score=tcell.deg.model$fitted.values,
+                                 Patient=deg.cell.data$patient,
+                                 Response=deg.cell.data$Response)
+
+ggplot(deg.cellscore.data, aes(x=Score, y=Response)) +
+  geom_point(alpha=0.75, size=3) +
+  geom_hline(yintercept=4311/5882) +
+  stat_smooth(method="glm", se=FALSE, method.args=list(family=binomial), fullrange=T) +
+  theme_bw() + labs(x='Weighted DEG Score', y='Probability of Response', title='LR Model: Top 20 DEGs, Weighted') +
+  theme(plot.title = element_text(color="black", size=18, face="bold", hjust=0.5))
+
+tcell.deg.predictions <- predict(tcell.deg.model, deg.cell.data, type="response")
+tcell.deg.predres <- ifelse(tcell.deg.predictions > 8174/13326, 1, 0)
+
+deg.cellscore.data$Prediction <- tcell.deg.predres
+mean(deg.cellscore.data$Prediction == deg.cellscore.data$Response) # 78.3% of cells were correctly classified
+
+table(deg.cellscore.data$Response, deg.cellscore.data$Prediction)
+
+deg.cell.data.combined <- rbind(deg.cell.data, pdac.deg.cell.data)
+
+tcell.deg.predictions.all <- predict(tcell.deg.model, deg.cell.data.combined, type="response")
+tcell.deg.predres.all <- ifelse(tcell.deg.predictions.all > 8174/13326, 1, 0)
+
+table(deg.cell.data.combined$Response, tcell.deg.predres.all)
+
+deg.cell.data.combined$Prediction <- tcell.deg.predictions.all
+deg.cell.data.combined$Response <- as.factor(deg.cell.data.combined$Response)
+levels(deg.cell.data.combined$Response) <- c('BCC NR', 'PDAC H', 'PDAC I', 'BCC R')
+
+ggboxplot(deg.cell.data.combined, x="patient", y="Prediction", fill="Response", palette="jco") +
+  theme_bw() + theme(legend.position="none", plot.title = element_text(color="black", size=18, face="bold", hjust=0.5), axis.text.x=element_text(angle=45, hjust=1, vjust=1)) +
+  labs(title='Distribution of Response Probabilities', y='Probability', x='') + coord_flip()
+
+ggviolin(deg.cell.data.combined, x="Response", y="Prediction", fill="Response", trim=TRUE, palette="jco", add="boxplot", add.params=list(fill="white")) +
+  theme_bw() + theme(legend.position="none") + labs(x="", y="Prediction")
+
+## Statistical comparison of proportion of cells designated as responsive
+
+deg.cell.data.prop <- data.frame(table(deg.cell.data.combined$patient, tcell.deg.predres.all))
+deg.cell.data.prop <- deg.cell.data.prop[1:30,]
+deg.cell.data.prop$Total <- c(data.frame(table(Idents(BCC.tcells.pre)))$Freq, data.frame(table(Idents(PDAC.tcells)))$Freq)
+deg.cell.data.prop$Proportion <- deg.cell.data.prop$Freq/deg.cell.data.prop$Total
+deg.cell.data.prop$Response <- factor(rep(c('BCC R', 'BCC NR', 'BCC R', 'BCC NR', 'BCC R', 'PDAC I', 'PDAC H'), c(4, 4, 1, 1, 1, 16, 3)), levels=c('BCC R', 'BCC NR', 'PDAC I', 'PDAC H'))
+colnames(deg.cell.data.prop) <- c('Patient', 'Prediction', 'Nonresponsive', 'Total', 'Proportion', 'Response')
+
+palette <- c('#CD534C99', '#0073C299', '#86868699', '#EFC00099')
+comparisons <- list(c('BCC NR', 'BCC R'), c('BCC NR', 'PDAC I'), c('BCC R', 'PDAC I'))
+ggboxplot(deg.cell.data.prop, x="Response", y="Proportion", color="Response", palette=palette, add="jitter") + 
+  stat_compare_means(comparisons=comparisons, label.y=c(0.95, 1.03, 1.1)) +
+  theme_bw() + theme(legend.position="none") + labs(y='Proportion of Nonresponsive Cells', x='')
+
+## Export data for analysis in Python
+
+df1 <- deg.cell.data[, 1:35]
+df2 <- data.frame(Response=rep(c(1, 0, 1, 0, 1), c(468, 1509, 3330, 62, 513)))
+
+df3 <- pdac.deg.cell.data[, 1:35]
+df4 <- data.frame(Response=rep(0, 4679))
+
+write.csv(df1, "CD8DEGScoresBCC.csv", row.names=FALSE)
+write.csv(df2, "CD8DEGResponsesBCC.csv", row.names=FALSE)
+write.csv(df3, "CD8DEGScoresPDAC.csv", row.names=FALSE)
+write.csv(df4, "CD8DEGResponsesPDAC.csv", row.names=FALSE)
+
+```
+
+
+
+Statistical analysis of results from MLPClassifier (Python)
+
+```{r}
+
+## Compare proportion of responsive cells in BCC pre-treatment and PDAC
+
+BCCpredictionsMLP <- read.csv("C:\\Users\\Ryan\\Documents\\Nie Research Project\\BCCpredictionsMLP.csv")
+PDACpredictionsMLP <- read.csv("C:\\Users\\Ryan\\Documents\\Nie Research Project\\PDACpredictionsMLP.csv")
+
+BCCpredictionsMLP <- data.frame(Prediction=BCCpredictionsMLP$X0,
+                                Response=deg.cell.data$Response, 
+                                Patient=deg.cell.data$patient)
+PDACpredictionsMLP <- data.frame(Prediction=PDACpredictionsMLP$X0,
+                                 Response=pdac.deg.cell.data$Response,
+                                 Patient=pdac.deg.cell.data$patient)
+
+BCCpropMLP <- data.frame(table(BCCpredictionsMLP$Prediction, BCCpredictionsMLP$Patient))
+PDACpropMLP <- data.frame(table(PDACpredictionsMLP$Prediction, PDACpredictionsMLP$Patient))
+
+BCCpropMLP <- data.frame(Nonresponsive = BCCpropMLP$Freq[seq_len(nrow(BCCpropMLP)) %% 2 == 1],
+                         Responsive = BCCpropMLP$Freq[seq_len(nrow(BCCpropMLP)) %% 2 == 0],
+                         Patient = BCCpropMLP$Var2[seq_len(nrow(BCCpropMLP)) %% 2 == 0],
+                         Response = rep(c('R', 'NR', 'R', 'NR', 'R'), c(4, 4, 1, 1, 1)))
+PDACpropMLP <- data.frame(Nonresponsive = PDACpropMLP$Freq[seq_len(nrow(PDACpropMLP)) %% 2 == 1],
+                         Responsive = PDACpropMLP$Freq[seq_len(nrow(PDACpropMLP)) %% 2 == 0],
+                         Patient = PDACpropMLP$Var2[seq_len(nrow(PDACpropMLP)) %% 2 == 0],
+                         Response = rep(c('I', 'H'), c(16, 3)))
+
+MLPprop <- rbind(BCCpropMLP, PDACpropMLP)
+MLPprop$Total <- MLPprop$Responsive + MLPprop$Nonresponsive
+MLPprop$Proportion <- MLPprop$Responsive / MLPprop$Total
+
+MLPprop$Response <- factor(MLPprop$Response, levels=c('R', 'NR', 'I', 'H'))
+MLPprop$Response <- recode_factor(MLPprop$Response, R='BCC R', NR='BCC NR', I='PDAC', H='PDAC Adj.')
+
+comparisons <- list(c('R', 'NR'), c('R', 'I'), c('NR', 'I'))
+comparisons <- list(c('BCC R', 'BCC NR'), c('BCC R', 'PDAC'), c('BCC NR', 'PDAC'))
+ggboxplot(MLPprop, x="Response", y="Proportion", color="Response", palette=palette, add="jitter") + 
+  stat_compare_means(comparisons=comparisons, label.y=c(1.0, 1.2, 1.1, 1.0)) +
+  labs(y='Proportion of Responsive Cells', x='', title='BCC Neural Net Classifier') +
+  theme_bw() + theme(legend.position="none", plot.title = element_text(color="black", size=18, face="bold", hjust=0.5))
+
+
+## Calculate gene expression for BCC post-treatment T cells 
+
+BCC.tcells.post <- subset(BCC.tcells, idents='post')
+
+Idents(BCC.tcells.post) <- BCC.tcells.post$patient
+datasource <- VlnPlot(BCC.tcells.post, features=BCC.tcells.genes[1])
+deg.cell.data <- datasource$data
+
+for (i in 2:length(BCC.tcells.genes)) {
+  datasource <- VlnPlot(BCC.tcells.post, features=BCC.tcells.genes[i])
+  deg.cell.data <- cbind(deg.cell.data, datasource$data)
+}
+
+deg.cell.data <- deg.cell.data[, (seq_len(ncol(deg.cell.data)) %% 2) == 1]
+for (i in 1:length(BCC.tcells.genes)) {
+  deg.cell.data[i] <- expm1(deg.cell.data[i])
+}
+
+deg.cell.data$patient <- datasource$data$ident
+deg.cell.data$Response <- rep(c(1, 0, 1, 0, 1), c(2589, 3892, 3951, 266, 128))
+
+
+df1 <- deg.cell.data[, 1:35]
+df2 <- data.frame(Response=rep(c(1, 0, 1, 0, 1), c(2589, 3892, 3951, 266, 128)))
+
+write.csv(df1, "CD8DEGScoresBCCPost.csv", row.names=FALSE)
+write.csv(df2, "CD8DEGResponsesBCCPost.csv", row.names=FALSE)
+
+## Compare proportion of responsive cells pre- and post-treatment in BCC
+
+BCCpostpredictionsMLP <- read.csv("C:\\Users\\Ryan\\Documents\\Nie Research Project\\BCCpostpredictionsMLP.csv")
+
+BCCpostpredictionsMLP <- data.frame(Prediction=BCCpostpredictionsMLP$X0,
+                                Response=deg.cell.data$Response, 
+                                Patient=deg.cell.data$patient)
+
+BCCpostpropMLP <- data.frame(table(BCCpostpredictionsMLP$Prediction, BCCpostpredictionsMLP$Patient))
+
+BCCpostpropMLP <- data.frame(Nonresponsive = BCCpostpropMLP$Freq[seq_len(nrow(BCCpostpropMLP)) %% 2 == 1],
+                         Responsive = BCCpostpropMLP$Freq[seq_len(nrow(BCCpostpropMLP)) %% 2 == 0],
+                         Patient = BCCpostpropMLP$Var2[seq_len(nrow(BCCpostpropMLP)) %% 2 == 0],
+                         Response = rep(c('R', 'NR', 'R', 'NR', 'R'), c(4, 4, 1, 1, 1)))
+
+BCCpostpropMLP$Total <- BCCpostpropMLP$Responsive + BCCpostpropMLP$Nonresponsive
+BCCpostpropMLP$Proportion <- BCCpostpropMLP$Responsive / BCCpostpropMLP$Total
+
+BCCpropMLPall <- data.frame(Pretreatment = MLPprop$Proportion[1:11],
+                            Posttreatment = BCCpostpropMLP$Proportion,
+                            Patient = BCCpostpropMLP$Patient,
+                            Response = BCCpostpropMLP$Response)
+
+BCCpropMLPall <- melt(BCCpropMLPall)
+colnames(BCCpropMLPall) <- c('Patient', 'Response', 'Treatment', 'Proportion')
+
+ggpaired(BCCpropMLPall, x='Treatment', y='Proportion', color='black', line.color='Response', point.size=3, line.size=1, palette='jco') + stat_compare_means(paired=TRUE, label.y=c(1.1, 1.1), label.x=c(1.25, 2)) +
+  theme_bw() + labs(x='', y='Proportion of Responsive Cells') +
+  theme(legend.position='None', panel.grid.major = element_blank())
+
+ggpaired(BCCpropMLPall, x='Response', y='Proportion', color='Response', line.color='gray', line.size=0.4, palette='jco', facet.by='Treatment') +
+  stat_compare_means(label.y=1.1, label.x=1.3) +
+  theme_bw() + labs(x='', y='Proportion of Responsive Cells') +
+  theme(legend.position='None', panel.grid.major = element_blank())
+
+```
+
+
+
+Export data for gene expression on all cells
+
+```{r}
+
+Idents(BCCIO) <- BCCIO$seurat_clusters
+bcc.cd8 <- subset(BCCIO, idents=c('CD8+ Memory', 'CD8+ Exhausted', 'CD8+ Effector'))
+Idents(bcc.cd8) <- bcc.cd8$treatment
+bcc.cd8.pre <- subset(bcc.cd8, idents='pre')
+
+Idents(PDAC.all) <- PDAC.all$cluster
+pdac.cd8 <- subset(PDAC.all, idents=c('CD8+ Exhausted', 'CD8+ Effector', 'CD8+ Memory'))
+
+## Identify highly variable features
+
+bcc.cd8.pre <- FindVariableFeatures(bcc.cd8.pre, selection.method="vst", nfeatures=2212)
+featureplot <- VariableFeaturePlot(bcc.cd8.pre)
+vargenes <- c(mhc.genes, hsp.genes, head(VariableFeatures(bcc.cd8.pre), 10))
+LabelPoints(plot=featureplot, points=vargenes, repel=TRUE)
+
+pdac.cd8 <- FindVariableFeatures(pdac.cd8, selection.method="vst", nfeatures=2212)
+featureplot <- VariableFeaturePlot(pdac.cd8)
+LabelPoints(plot=featureplot, points=vargenes, repel=TRUE) + theme(legend.position="None")
+
+## Determine list of variable features with expression data in BCC and PDAC
+
+common.genes <- intersect(rownames(bcc.cd8.pre), rownames(pdac.cd8))
+var.genes <- intersect(VariableFeatures(bcc.cd8.pre), common.genes) ## 2000 genes total 
+
+bcc.cd8.geneexp <- FetchData(object=bcc.cd8.pre, vars=var.genes)
+pdac.cd8.geneexp <- FetchData(object=pdac.cd8, vars=var.genes)
+
+for (i in 1:length(var.genes)) {
+  bcc.cd8.geneexp[i] <- expm1(bcc.cd8.geneexp[i])
+  pdac.cd8.geneexp[i] <- expm1(pdac.cd8.geneexp[i])
+}
+
+bcc.cd8.geneexp$patient <- bcc.cd8.pre$patient
+bcc.cd8.geneexp$response <- rep(c(1, 0, 1, 0, 1), c(468, 1509, 3330, 62, 513))
+
+pdac.cd8.geneexp$patient <- pdac.cd8$orig.ident
+pdac.cd8.geneexp$response <- rep(c(0.51, 0.49), c(3300, 1379))
+
+## Export gene expression data to csv (Python)
+
+df1 <- bcc.cd8.geneexp[, 1:2000]
+df2 <- data.frame(Response=rep(c(1, 0, 1, 0, 1), c(468, 1509, 3330, 62, 513)))
+df3 <- pdac.cd8.geneexp[, 1:2000]
+df4 <- data.frame(Response=rep(c(0.51, 0.49), c(3300, 1379)))
+df5 <- colnames(df1)
+
+write.csv(df1, "CD8VarGenesDataBCC.csv", row.names=FALSE)
+write.csv(df2, "CD8VarGenesResponsesBCC.csv", row.names=FALSE)
+write.csv(df3, "CD8VarGenesDataPDAC.csv", row.names=FALSE)
+write.csv(df4, "CD8VarGenesResponsesPDAC.csv", row.names=FALSE)
+write.csv(df5, "CD8VarGenesNames.csv", row.names=FALSE)
+write.csv(common.genes, "BCCandPDACGenes.csv", row.names=FALSE)
+
+```
+
+
+
+Determine BCC and PDAC gene expression for highly variable melanoma genes
+
+```{r}
+
+melanoma.genes <- read.csv("C:\\Users\\Ryan\\Documents\\Nie Research Project\\MelanomaGenes.csv")
+melanoma.genes <- as.character(melanoma.genes$X0)
+
+bcc.cd8.geneexp <- FetchData(object=bcc.cd8.pre, vars=melanoma.genes)
+pdac.cd8.geneexp <- FetchData(object=pdac.cd8, vars=melanoma.genes)
+
+for (i in 1:length(melanoma.genes)) {
+  bcc.cd8.geneexp[i] <- expm1(bcc.cd8.geneexp[i])
+  pdac.cd8.geneexp[i] <- expm1(pdac.cd8.geneexp[i])
+}
+
+write.csv(bcc.cd8.geneexp, "CD8MelanomaGenesDataBCC", row.names=FALSE)
+write.csv(pdac.cd8.geneexp, "CD8MelanomaGenesDataPDAC", row.names=FALSE)
+
+```
+
+
+
+Investigate impact of PDAC state on MHC/PD-1 expression for CD8+ T cells
+
+```{r}
+
+Idents(PDAC.all) <- PDAC.all$cluster
+pdac.cd8 <- subset(PDAC.all, idents=c('CD8+ Exhausted', 'CD8+ Effector', 'CD8+ Memory'))
+
+Idents(pdac.cd8) <- pdac.cd8$orig.ident
+levels(Idents(pdac.cd8)) <- c('H1', 'H2', 'H3', 'I2', 'I7', 'I8', 'I10', 'I16', 'I13', 'I3', 'I6', 'I9', 'I11', 'I14', 'I15', 'I1', 'I14', 'I15', 'I12')
+
+pdac.cd8.mhcdot <- DotPlot(pdac.cd8, features=mhc.genes)
+pdac.cd8.mhcdot.data <- pdac.cd8.mhcdot$data
+
+ggplot(data=pdac.cd8.mhcdot.data, aes(x=features.plot, y=id, fill=avg.exp.scaled)) +
+  geom_tile(color="white") + 
+  scale_fill_gradient2(low="black", high="#EFE350FF", mid="#593D9CFF", midpoint=0) +
+  theme_minimal() + theme(axis.text.x = element_text(angle=90, vjust=1, hjust=1)) +
+  labs(x="Gene", y="Cluster", fill="Expression") + coord_equal()
+
+
+## CDF of MHC-I and MHC-II score distribution at different stages -- CD8+ T cells
+
+Idents(pdac.cd8) <- pdac.cd8$stage
+pdac.cd8.res <- subset(pdac.cd8, idents='Resectable')
+pdac.cd8.bor <- subset(pdac.cd8, idents='Borderline resectable')
+pdac.cd8.adv <- subset(pdac.cd8, idents='Locally advanced')
+pdac.cd8.met <- subset(pdac.cd8, idents='Metastatic')
+pdac.cd8.adj <- subset(pdac.cd8, idents='NA')
+pdac.cd8.datasets <- list(pdac.cd8.res, pdac.cd8.bor, pdac.cd8.adv, pdac.cd8.met, pdac.cd8.adj)
+
+pdac.cd8.state.mhc1 <- genes_cdf(datasets=pdac.cd8.datasets, clusters=c('Resectable', 'Borderline resectable', 'Locally advanced', 'Metastatic', 'Adjacent'), genes=mhc1.genes, title="MHC-I Expression")
+
+ggviolin(pdac.cd8.state.mhc1$data, x="cluster", y="gene", fill="cluster", add="boxplot", trim=TRUE, add.params = list(fill = "white"), palette="jco") +
+  stat_compare_means(label.y=23) + stat_compare_means(ref.group='Adjacent', label='p.format', label.y=21) +
+  theme_bw() + labs(y='MHC-I Score', x='', title='PDAC CD8+ T Cells: MHC-I') +
+  theme(legend.position="none", plot.title=element_text(color="black", size=18, face="bold", hjust=0.5))
+
+pdac.cd8.state.mhc2 <- genes_cdf(datasets=pdac.cd8.datasets, clusters=c('Resectable', 'Borderline resectable', 'Locally advanced', 'Metastatic', 'Adjacent'), genes=mhc2.genes, title="MHC-II Expression")
+
+ggviolin(pdac.cd8.state.mhc2$data, x="cluster", y="gene", fill="cluster", add="boxplot", trim=TRUE, add.params = list(fill = "white"), palette="jco") +
+  stat_compare_means(label.y=27) + stat_compare_means(ref.group='Adjacent', label='p.format', label.y=24) +
+  theme_bw() + labs(y='MHC-II Score', x='', title='PDAC CD8+ T Cells: MHC-II') +
+  theme(legend.position="none", plot.title=element_text(color="black", size=18, face="bold", hjust=0.5))
+
+pd1.genes <- c('PDCD1', 'CD274', 'PDCD1LG2')
+
+pdac.cd8.state.pd1 <- genes_cdf(datasets=pdac.cd8.datasets, clusters=c('Resectable', 'Borderline resectable', 'Locally advanced', 'Metastatic', 'Adjacent'), genes=pd1.genes, title="PD-1 Expression")
+
+ggviolin(pdac.cd8.state.pd1$data, x="cluster", y="gene", fill="cluster", add="boxplot", trim=TRUE, add.params = list(fill = "white"), palette="jco") +
+  stat_compare_means(label.y=3.9) + stat_compare_means(ref.group='Adjacent', label='p.format', label.y=3.6) +
+  theme_bw() + labs(y='PD-1 Score', x='', title='PDAC CD8+ T Cells: PD-1') +
+  theme(legend.position="none", plot.title=element_text(color="black", size=18, face="bold", hjust=0.5))
+
+```
+
+
+
+Investigate impact of PDAC state on MHC/PD-1 expression for malignant cells
+
+```{r}
+
+Idents(PDAC.all) <- PDAC.all$cluster
+pdac.malignant <- subset(PDAC.all, idents=c('Ductal cells: Malignant 1', 'Ductal cells: Malignant 2'))
+
+Idents(pdac.malignant) <- pdac.malignant$orig.ident
+levels(Idents(pdac.malignant)) <- c('H1', 'H2', 'H3', 'I2', 'I7', 'I8', 'I10', 'I16', 'I13', 'I3', 'I6', 'I9', 'I11', 'I14', 'I15', 'I1', 'I14', 'I15', 'I12')
+
+pdac.malignant.mhcdot <- DotPlot(pdac.malignant, features=mhc.genes)
+pdac.malignant.mhcdot.data <- pdac.malignant.mhcdot$data
+
+ggplot(data=pdac.malignant.mhcdot.data, aes(x=features.plot, y=id, fill=avg.exp.scaled)) +
+  geom_tile(color="white") + 
+  scale_fill_gradient2(low="black", high="#EFE350FF", mid="#593D9CFF", midpoint=0) +
+  theme_minimal() + theme(axis.text.x = element_text(angle=90, vjust=1, hjust=1)) +
+  labs(x="Gene", y="Cluster", fill="Expression") + coord_equal()
+
+
+## CDF of MHC-I and MHC-II score distribution at different stages -- CD8+ T cells
+
+Idents(pdac.malignant) <- pdac.malignant$stage
+pdac.malignant.res <- subset(pdac.malignant, idents='Resectable')
+pdac.malignant.bor <- subset(pdac.malignant, idents='Borderline resectable')
+pdac.malignant.adv <- subset(pdac.malignant, idents='Locally advanced')
+pdac.malignant.met <- subset(pdac.malignant, idents='Metastatic')
+
+Idents(PDAC.all) <- PDAC.all$cluster
+pdac.malignant.adj <- subset(PDAC.all, idents=c('Ductal cells: Healthy'))
+
+pdac.malignant.datasets <- list(pdac.malignant.res, pdac.malignant.bor, pdac.malignant.adv, pdac.malignant.met, pdac.malignant.adj)
+
+pdac.malignant.state.mhc1 <- genes_cdf(datasets=pdac.malignant.datasets, clusters=c('Resectable', 'Borderline resectable', 'Locally advanced', 'Metastatic', 'Adjacent'), genes=mhc1.genes, title="MHC-I Expression")
+
+ggviolin(pdac.malignant.state.mhc1$data, x="cluster", y="gene", fill="cluster", add="boxplot", trim=TRUE, add.params = list(fill = "white"), palette="jco") +
+  stat_compare_means(label.y=23) + stat_compare_means(ref.group='Adjacent', label='p.format', label.y=21) +
+  theme_bw() + labs(y='MHC-I Score', x='', title='PDAC Malignant Cells: MHC-I') +
+  theme(legend.position="none", plot.title=element_text(color="black", size=18, face="bold", hjust=0.5))
+
+pdac.malignant.state.mhc2 <- genes_cdf(datasets=pdac.malignant.datasets, clusters=c('Resectable', 'Borderline resectable', 'Locally advanced', 'Metastatic', 'Adjacent'), genes=mhc2.genes, title="MHC-II Expression")
+
+ggviolin(pdac.malignant.state.mhc2$data, x="cluster", y="gene", fill="cluster", add="boxplot", trim=TRUE, add.params = list(fill = "white"), palette="jco") +
+  stat_compare_means(label.y=40) + stat_compare_means(ref.group='Adjacent', label='p.format', label.y=35) +
+  theme_bw() + labs(y='MHC-II Score', x='', title='PDAC Malignant Cells: MHC-II') +
+  theme(legend.position="none", plot.title=element_text(color="black", size=18, face="bold", hjust=0.5))
+
+pdac.malignant.state.pd1 <- genes_cdf(datasets=pdac.malignant.datasets, clusters=c('Resectable', 'Borderline resectable', 'Locally advanced', 'Metastatic', 'Adjacent'), genes=pd1.genes, title="PD-1 Expression")
+
+ggviolin(pdac.malignant.state.pd1$data, x="cluster", y="gene", fill="cluster", add="boxplot", trim=TRUE, add.params = list(fill = "white"), palette="jco") +
+  stat_compare_means(label.y=2.8) + stat_compare_means(ref.group='Adjacent', label='p.format', label.y=2.5) +
+  theme_bw() + labs(y='PD-1 Score', x='', title='PDAC Malignant Cells: PD-1') +
+  theme(legend.position="none", plot.title=element_text(color="black", size=18, face="bold", hjust=0.5))
+
+```
+
+
+
+Create Seurat object for melanoma dataset
+
+```{r}
+
+library(tidyverse)
+library(Matrix)
+library(Seurat)
+
+mat <- readMM("C:\\Users\\Ryan\\Documents\\Nie Research Project\\Melanoma\\mat.mtx")
+obs <- read_csv("C:\\Users\\Ryan\\Documents\\Nie Research Project\\Melanoma\\obs.csv")
+vars <- read_csv("C:\\Users\\Ryan\\Documents\\Nie Research Project\\Melanoma\\var_names.csv") 
+
+rownames(mat) <- vars$X1
+colnames(mat) <- rep("Cell", ncol(mat))
+obj <- CreateSeuratObject(mat)
+obj@meta.data <- obs
+rownames(obj@meta.data) <- colnames(mat)
+
+melanoma <- obj
+remove(mat, obs, vars, obj)
+
+save(melanoma, file="C:\\Users\\Ryan\\Documents\\Nie Research Project\\Melanoma\\Melanoma")
+
+```
+
+
+
+Determine most highly variable genes between melanoma responders and nonresponders (CD8+ T Cells)
+
+```{r}
+
+## Identify list of genes that are duplicated between BCC, PDAC, and melanoma
+
+bcc.genes <- rownames(BCCIO@assays$RNA)
+pdac.genes <- rownames(PDAC.all@assays$RNA)
+melanoma.genes <- rownames(melanoma@assays$RNA)
+
+common.genes <- intersect(bcc.genes, pdac.genes)
+common.genes <- intersect(common.genes, melanoma.genes)
+
+## Determine highly variable genes in melanoma CD8+ T cells
+
+Idents(melanoma) <- melanoma$ClusterIdents
+melanoma_CD8 <- subset(melanoma, idents=c('T Cells (CD8+) 3', 'T Cells (CD8+) 2', 'Maybe Memory CD8+ T Cells'))
+melanoma_CD8@meta.data <- melanoma@meta.data %>% filter(melanoma@meta.data$ClusterIdents == 'T Cells (CD8+) 3' | 
+                                                  melanoma@meta.data$ClusterIdents == 'T Cells (CD8+) 2' |
+                                                  melanoma@meta.data$ClusterIdents == 'Maybe Memory CD8+ T Cells')
+
+Idents(melanoma_CD8) <- melanoma_CD8$Treatment
+melanoma_CD8pre <- subset(melanoma_CD8, idents='Pre')
+melanoma_CD8pre@meta.data <- melanoma_CD8@meta.data %>% filter(melanoma_CD8@meta.data$Treatment == 'Pre')
+
+melanoma_CD8pre <- FindVariableFeatures(melanoma_CD8pre, selection.method="vst", nfeatures=2000)
+featureplot <- VariableFeaturePlot(melanoma_CD8pre)
+
+genesofinterest <- c(mhc.genes, hsp.genes, head(VariableFeatures(melanoma_CD8pre), 10))
+LabelPoints(plot=featureplot, points=genesofinterest, repel=TRUE)
+
+df <- featureplot$data
+df <- df %>% filter(rownames(df) %in% common.genes)
+df <- df[order(df$variance.standardized),]
+df$colors <- rep(c("No", "Yes"), c(nrow(df)-2000, 2000))
+vargenes <- tail(rownames(df), 20)
+
+group.colors <- c(Yes='#FF0000', No='#000000')
+ggplot(df, aes(x=mean, y=variance.standardized, color=colors)) + geom_point() +
+  scale_x_continuous(trans='log10') +
+  scale_colour_manual(values=group.colors) + 
+  theme_classic() + labs(y='Standardized Variance', x='Average Expression')
+
+LabelPoints(plot=featureplot, points=vargenes, repel=TRUE) + theme(legend.position="None")
+
+## Compare with highly variable genes identified with Python 
+
+python_vargenes <- read.csv("C:\\Users\\Ryan\\Documents\\Nie Research Project\\MelanomaGenes.csv")
+python_vargenes$R <- tail(rownames(df), 1990)
+vargenes.overlap <- intersect(python_vargenes$X0, python_vargenes$R)
+
+df$PythonColor <- "No"
+df[as.character(python_vargenes$X0),]$PythonColor <- "Yes"
+
+group.colors <- c(Yes='#FF0000', No='#000000')
+ggplot(df, aes(x=mean, y=variance.standardized, color=PythonColor)) + geom_point() +
+  scale_x_continuous(trans='log10') +
+  scale_colour_manual(values=group.colors) + 
+  theme_classic() + theme(legend.position='None') + labs(y='Standardized Variance', x='Average Expression')
+
+
+## Determine overlap in highly variable genes for BCC and melanoma 
+
+melanoma.var <- rev(tail(rownames(df), 2000))
+bcc.var <- read_csv("C:\\Users\\Ryan\\Documents\\Nie Research Project\\CD8VarGenesNames.csv")$x
+overlap <- data.frame(Total=c(1:2000), Genes=rep(0, 2000), Proportion=rep(0, 2000))
+
+lp <- function(s, n, k) {
+  P <- matrix(NA, nrow=k+1, ncol=s, dimnames=list(0:k, 1:s))
+  P[, 1] <- c(rep(-Inf, k), 0)
+  for (u in 2:s) 
+    for (i in 0:k) {
+      q <- P[i:k+1, u-1] + lchoose(i:k, i) + lchoose(n-(i:k), k-i) - lchoose(n, k)
+      q.0 <- max(q, na.rm=TRUE)
+      P[i+1, u] <- q.0 + log(sum(exp(q - q.0)))
+    }
+  return(P)
+}
+p <- function(...) zapsmall(exp(lp(...)))
+
+for (i in 1:2000) {
+  overlap$Genes[i] <- length(intersect(bcc.var[1:i], melanoma.var[1:i]))
+  overlap$Proportion[i] <- overlap$Genes[i] / i
+  overlap$Probability[i] <- sum(p(2, length(common.genes), overlap$Total[i])[overlap$Genes[i]:overlap$Total[i]+1, 2])
+  print(i)
+}
+
+gg1 <- ggplot(overlap) + geom_line(mapping=aes(x=Total, y=Proportion)) +
+  theme_bw() + labs(y='Proportion of Common Genes', x='')
+
+gg2 <- ggplot(overlap) + geom_line(mapping=aes(x=Total, y=Probability)) +
+  geom_line(mapping=aes(x=Total, y=0.05)) + scale_y_log10() + 
+  theme_bw() + labs(y='P-val', x='Top n Highly Variable Genes')
+
+geneoverlap <- ggarrange(gg1, gg2, ncol=1, heights=c(3,1))
+remove(gg1, gg2)
+
+
+## Determine DEGs between responders and nonresponders
+
+melanoma_CD8pre$everything <- 'Everything'
+Idents(melanoma_CD8pre) <- melanoma_CD8pre$everything
+melanoma_CD8pre.volcano <- bioc_volcano(melanoma_CD8pre, celltype="Everything", group="Response", ident="Responsive", ident2="Non-responsive", title = "Filler")
+
+
+## Compare DEGs for BCC and PDAC
+
+melanomaDEGdata <- melanoma_CD8pre.volcano$data
+bccDEGdata <- BCC.tcells.volcano$data
+
+df1 <- filter(melanomaDEGdata, grepl('HLA', GeneNames))
+df2 <- filter(melanomaDEGdata, grepl('HSP', GeneNames))
+df3 <- filter(bccDEGdata, grepl('HLA', GeneNames))
+df4 <- filter(bccDEGdata, grepl('HSP', GeneNames))
+DEGcomparisondata <- rbind(df1, df2, df3, df4)
+remove(df1, df2, df3, df4)
+DEGcomparisondata$Cancer <- rep(c("Melanoma", "BCC"), c(30, 15))
+DEGcomparisondata$Class <- rep(c("MHC", "HSP", "MHC", "HSP"), c(16, 14, 5, 10))
+DEGcomparisondata$p_val_log <- -log10(DEGcomparisondata$p_val_adj)
+
+ggplot(DEGcomparisondata) + geom_point(mapping=aes(x=avg_logFC, y=p_val_log, color=Class, shape=Cancer, size=3)) +
+  scale_color_manual(values=c("#0073C299", "#A7303099")) + scale_shape_manual(values=c(16, 7)) +
+  theme_bw() + labs(x='Log2 fold change', y='-Log10(P)', title='') +
+  guides(size=FALSE, color=guide_legend(override.aes=list(size=3)), shape=guide_legend(override.aes=list(size=3))) +
+  theme(legend.position='bottom', axis.title=element_text(color="black", size=18), axis.text=element_text(size=16), legend.text=element_text(size=16), legend.title=element_text(size=16))
+  
+
+## Save Seurat object and export data for analysis in Python 
+
+melanoma_CD8pre.geneexp <- FetchData(object=melanoma_CD8pre, vars=melanoma.var)
+
+for (i in 1:length(melanoma.var)) {
+  melanoma_CD8pre.geneexp[i] <- expm1(melanoma_CD8pre.geneexp[i])
+}
+
+melanoma_CD8pre.geneexp$patient <- melanoma_CD8pre$PatientStripped
+melanoma_CD8pre.geneexp$response <- rep(c(1, 0), c(1532, 1219))
+
+
+## Filter BCC and PDAC data for highly variable melanoma genes
+
+BCC.CD8pre.geneexp <- FetchData(object=BCC.tcells.pre, vars=melanoma.var)
+PDAC.CD8pre.geneexp <- FetchData(object=PDAC.tcells, vars=melanoma.var)
+
+for (i in 1:length(melanoma.var)) {
+  BCC.CD8pre.geneexp[i] <- expm1(BCC.CD8pre.geneexp[i])
+  PDAC.CD8pre.geneexp[i] <- expm1(PDAC.CD8pre.geneexp[i])
+}
+
+BCC.CD8pre.geneexp$patient <- BCC.tcells.pre$patient
+PDAC.CD8pre.geneexp$patient <- PDAC.tcells$orig.ident
+BCC.CD8pre.geneexp$response <- rep(c(1, 0, 1, 0, 1), c(468, 1509, 3330, 62, 513))
+PDAC.CD8pre.geneexp$response <- rep(c(0.51, 0.49), c(3300, 1379))
+
+## Export gene expression data to csv (Python)
+
+df1 <- melanoma_CD8pre.geneexp[, 1:2000]
+df2 <- data.frame(Response=rep(c(1, 0), c(1532, 1219)))
+df3 <- colnames(df1)
+
+write.csv(df1, "CD8VarGenesDataMelanoma.csv", row.names=FALSE)
+write.csv(df2, "CD8VarGenesResponsesMelanoma.csv", row.names=FALSE)
+write.csv(df3, "CD8VarGenesNamesMelanoma.csv", row.names=FALSE)
+
+df1 <- BCC.CD8pre.geneexp[, 1:2000]
+df2 <- PDAC.CD8pre.geneexp[, 1:2000]
+df3 <- data.frame(Response=rep(c(1, 0, 1, 0, 1), c(468, 1509, 3330, 62, 513)))
+df4 <- data.frame(Response=rep(c(0.51, 0.49), c(3300, 1379)))
+
+write.csv(df1, "CD8MelanomaVarGenesDataBCC.csv", row.names=FALSE)
+write.csv(df2, "CD8MelanomaVarGenesDataPDAC.csv", row.names=FALSE)
+write.csv(df3, "CD8MelanomaVarGenesResponsesBCC.csv", row.names=FALSE)
+write.csv(df4, "CD8MelanomaVarGenesResponsesPDAC.csv", row.names=FALSE)
+remove(df1, df2, df3, df4)
+
+```
+
+
+
+Per-patient analysis of results from Python (AdaBoost on top 2000 highly variable genes for melanoma)
+
+```{r}
+
+melanoma.pred <- read_csv("C:\\Users\\Ryan\\Documents\\Nie Research Project\\MelanomaPredictionsVar.csv")$`0`
+bcc.pred <- read_csv("C:\\Users\\Ryan\\Documents\\Nie Research Project\\BCCPredictionsMelanomaVar.csv")$`0`
+pdac.pred <- read_csv("C:\\Users\\Ryan\\Documents\\Nie Research Project\\PDACPredictionsMelanomaVar.csv")$`0`
+
+melanoma.pred.patient <- data.frame(Prediction=melanoma.pred, Patient=melanoma_CD8pre$PatientStripped)
+bcc.pred.patient <- data.frame(Prediction=bcc.pred, Patient=BCC.tcells.pre$patient)
+pdac.pred.patient <- data.frame(Prediction=pdac.pred, Patient=PDAC.tcells$orig.ident)
+
+melanoma.prop.patient <- data.frame(table(melanoma.pred.patient$Prediction, melanoma.pred.patient$Patient))
+pdac.prop.patient <- data.frame(table(pdac.pred.patient$Prediction, pdac.pred.patient$Patient))
+
+melanoma.props <- data.frame(Nonresponsive = melanoma.prop.patient$Freq[seq_len(nrow(melanoma.prop.patient)) %% 2 == 1],
+                             Responsive = melanoma.prop.patient$Freq[seq_len(nrow(melanoma.prop.patient)) %% 2 == 0],
+                             Patient = melanoma.prop.patient$Var2[seq_len(nrow(melanoma.prop.patient)) %% 2 == 0],
+                             Response = c('R', 'R', 'R', 'NR', 'NR', 'R', 'NR', 'R', 'NR', 'R', 'R', 'NR', 'NR', 'R', 'R', 'NR', 'NR', 'R', 'R'))
+pdac.props <- data.frame(Nonresponsive = pdac.prop.patient$Freq[seq_len(nrow(pdac.prop.patient)) %% 2 == 1],
+                         Responsive = pdac.prop.patient$Freq[seq_len(nrow(pdac.prop.patient)) %% 2 == 0],
+                         Patient = pdac.prop.patient$Var2[seq_len(nrow(pdac.prop.patient)) %% 2 == 0],
+                         Response = rep(c('I', 'H'), c(16, 3)))
+
+ADAprop <- rbind(melanoma.props, pdac.props)
+ADAprop$Total <- ADAprop$Responsive + ADAprop$Nonresponsive
+ADAprop$Proportion <- ADAprop$Responsive / ADAprop$Total
+
+ADAprop$Response <- factor(ADAprop$Response, levels=c('R', 'NR', 'I', 'H'))
+ADAprop$Response <- recode_factor(ADAprop$Response, R='Melanoma R', NR='Melanoma NR', I='PDAC', H='PDAC Adj.')
+
+palette <- c('#CD534C99', '#0073C299', '#86868699', '#EFC00099')
+comparisons <- list(c('Melanoma R', ' Melanoma NR'), c('Melanoma R', 'PDAC'), c('Melanoma NR', 'PDAC'))
+
+ggboxplot(ADAprop, x="Response", y="Proportion", color="Response", palette=palette, add="jitter") + 
+  stat_compare_means(comparisons=comparisons, label.y=c(1.0, 1.2, 1.1)) +
+  labs(y='Proportion of Responsive Cells', x='', title='Melanoma AdaBoost Classifier') +
+  theme_bw() + theme(legend.position="none", plot.title = element_text(color="black", size=18, face="bold", hjust=0.5))
+
+```
+
+
+
+
+
+###########################################
+
+Miscellaneous things
+
+```{r}
+
+## Single-cell comparison of MHC-I scores between ductal cell subpopulations (Figure 3C)
+
+Idents(PDAC.all) <- PDAC.all$cluster
+PDAC.ductal <- subset(PDAC.all, idents=c('Ductal cells: Malignant 1', 'Ductal cells: Malignant 2', 'Ductal cells: Normal', 'Ductal cells: Healthy'))
+
+pdac.ductal.mhc1 <- FetchData(object=PDAC.ductal, vars=mhc1.genes)
+pdac.ductal.mhc2 <- FetchData(object=PDAC.ductal, vars=mhc2.genes)
+
+pdac.ductal.mhc1$Score <- rowMeans(pdac.ductal.mhc1)
+pdac.ductal.mhc1$Patient <- PDAC.ductal$orig.ident
+pdac.ductal.mhc1$Cluster <- as.factor(PDAC.ductal$cluster)
+
+pdac.ductal.mhc1$Cluster <- recode_factor(pdac.ductal.mhc1$Cluster, `Ductal cells: Healthy`='Adj.',
+                                          `Ductal cells: Malignant 1`='Malignant',
+                                          `Ductal cells: Malignant 2`='Malignant',
+                                          `Ductal cells: Normal`='Normal')
+comparisons <- list(c('Malignant', 'Normal'), c('Malignant', 'Adj.'), c('Normal', 'Adj.'))
+
+palette <- c('#6f8fad', '#2b2c31', '#c3c9c3')
+ggviolin(pdac.ductal.mhc1, x="Cluster", y="Score", fill="Cluster", add="boxplot", trim=TRUE, add.params = list(fill = "white"), palette=palette) +
+  stat_compare_means(comparisons=comparisons) + labs(y='MHC-I Score', x='', title='PDAC Ductal Cells') +
+  theme_bw() + theme(legend.position='none', plot.title = element_text(color="black", size=18, face="bold", hjust=0.5)) 
+
+
+pdac.ductal.mhc2$Score <- rowMeans(pdac.ductal.mhc2)
+pdac.ductal.mhc2$Patient <- PDAC.ductal$orig.ident
+pdac.ductal.mhc2$Cluster <- as.factor(PDAC.ductal$cluster)
+
+pdac.ductal.mhc2$Cluster <- recode_factor(pdac.ductal.mhc1$Cluster, `Ductal cells: Healthy`='Adj.',
+                                          `Ductal cells: Malignant 1`='Malignant',
+                                          `Ductal cells: Malignant 2`='Malignant',
+                                          `Ductal cells: Normal`='Normal')
+comparisons <- list(c('Malignant', 'Normal'), c('Malignant', 'Adj.'), c('Normal', 'Adj.'))
+
+palette <- c('#6f8fad', '#2b2c31', '#c3c9c3')
+ggviolin(pdac.ductal.mhc2, x="Cluster", y="Score", fill="Cluster", add="boxplot", trim=TRUE, add.params = list(fill = "white"), palette=palette) +
+  stat_compare_means(comparisons=comparisons) + labs(y='MHC-II Score', x='', title='PDAC Ductal Cells') +
+  scale_y_sqrt() + theme_bw() + theme(legend.position='none', plot.title = element_text(color="black", size=18, face="bold", hjust=0.5)) 
+
+## Comparison of MHC scores between malignant and normal ductal cells in PDAC per patient (Figure 3D + 3E)
+
+PDAC.ductal$cluster <- recode_factor(PDAC.ductal$cluster, `Ductal cells: Healthy`='Adj.',
+                                          `Ductal cells: Malignant 1`='Malignant',
+                                          `Ductal cells: Malignant 2`='Malignant',
+                                          `Ductal cells: Normal`='Normal')
+PDAC.ductal$cluster_patient <- paste(PDAC.ductal$orig.ident, PDAC.ductal$cluster)
+
+Idents(PDAC.ductal) <- PDAC.ductal$cluster_patient
+PDAC.ductal.averages <- AverageExpression(PDAC.ductal)
+
+pdac.ductal.mhc1.patient <- data.frame(t(PDAC.ductal.averages[["RNA"]][mhc1.genes,]))
+pdac.ductal.mhc1.patient$Cluster <- rownames(pdac.ductal.mhc1.patient)
+
+pdac.ductal.mhc1.patient <- pdac.ductal.mhc1.patient %>% mutate(Status = case_when(
+    endsWith(Cluster, "Normal") ~ "Normal",
+    endsWith(Cluster, "Malignant") ~ "Malignant",
+    endsWith(Cluster, "Adj.") ~ "Adj."))
+pdac.ductal.mhc1.patient$Score <- rowMeans(pdac.ductal.mhc1.patient[,1:6])
+
+ggboxplot(pdac.ductal.mhc1.patient[1:32,], x="Status", y="Score", color="Status", add="jitter") +
+  stat_compare_means(comparisons = list(c('Malignant', 'Normal'))) + 
+  theme_bw() + labs(x='', y='MHC-I Score', title='PDAC Ductal') + 
+  theme(legend.position="none", plot.title = element_text(color="black", size=18, face="bold", hjust = 0.5))
+
+pdac.ductal.mhc2.patient <- data.frame(t(PDAC.ductal.averages[["RNA"]][mhc2.genes,]))
+pdac.ductal.mhc2.patient$Cluster <- rownames(pdac.ductal.mhc2.patient)
+
+pdac.ductal.mhc2.patient <- pdac.ductal.mhc2.patient %>% mutate(Status = case_when(
+    endsWith(Cluster, "Normal") ~ "Normal",
+    endsWith(Cluster, "Malignant") ~ "Malignant",
+    endsWith(Cluster, "Adj.") ~ "Adj."))
+pdac.ductal.mhc2.patient$Score <- rowMeans(pdac.ductal.mhc2.patient[,1:6])
+
+ggboxplot(pdac.ductal.mhc2.patient[1:32,], x="Status", y="Score", color="Status", add="jitter") +
+  stat_compare_means(comparisons = list(c('Malignant', 'Normal'))) + 
+  theme_bw() + labs(x='', y='MHC-II Score', title='PDAC Ductal') + 
+  theme(legend.position="none", plot.title = element_text(color="black", size=18, face="bold", hjust = 0.5))
+
+
+## 
+
+Idents(BCCIO) <- BCCIO$seurat_clusters
+BCC.malignant <- subset(BCCIO, idents=c('Malignant 1', 'Malignant 2'))
+
+Idents(BCC.malignant) <- BCC.malignant$patient.status
+BCC.malignant.averages <- AverageExpression(BCC.malignant)
+
+bcc.malignant.mhc1.patient <- data.frame(t(BCC.malignant.averages[["RNA"]][mhc1.genes,]))
+bcc.malignant.mhc1.patient$Cluster <- rownames(bcc.malignant.mhc1.patient)
+bcc.malignant.mhc1.patient$Response <- rep(c('R', 'NR'), c(6, 9))
+bcc.malignant.mhc1.patient <- bcc.malignant.mhc1.patient %>% mutate(Treatment = case_when(
+    endsWith(Cluster, "pre") ~ "Pre",
+    endsWith(Cluster, "post") ~ "Post"))
+bcc.malignant.mhc1.patient$Score <- rowMeans(bcc.malignant.mhc1.patient[,1:6])
+bcc.malignant.mhc1.patient$Status <- paste(bcc.malignant.mhc1.patient$Response, bcc.malignant.mhc1.patient$Treatment)
+
+ggboxplot(bcc.malignant.mhc1.patient, x="Status", y="Score", color="Status", add="jitter") +
+  stat_compare_means(comparisons = list(c('R Pre', 'R Post'), c('NR Pre', 'NR Post'))) + 
+  theme_bw() + labs(x='', y='MHC-I Score', title='BCC Malignant') + 
+  theme(legend.position="none", plot.title = element_text(color="black", size=18, face="bold", hjust = 0.5))
+
+
+bcc.malignant.mhc2.patient <- data.frame(t(BCC.malignant.averages[["RNA"]][mhc2.genes,]))
+bcc.malignant.mhc2.patient$Cluster <- rownames(bcc.malignant.mhc2.patient)
+bcc.malignant.mhc2.patient$Response <- rep(c('R', 'NR'), c(6, 9))
+bcc.malignant.mhc2.patient <- bcc.malignant.mhc2.patient %>% mutate(Treatment = case_when(
+    endsWith(Cluster, "pre") ~ "Pre",
+    endsWith(Cluster, "post") ~ "Post"))
+bcc.malignant.mhc2.patient$Score <- rowMeans(bcc.malignant.mhc2.patient[,1:6])
+bcc.malignant.mhc2.patient$Status <- paste(bcc.malignant.mhc2.patient$Response, bcc.malignant.mhc2.patient$Treatment)
+
+ggboxplot(bcc.malignant.mhc2.patient, x="Status", y="Score", color="Status", add="jitter") +
+  stat_compare_means(comparisons = list(c('R Pre', 'R Post'), c('NR Pre', 'NR Post'))) + 
+  theme_bw() + labs(x='', y='MHC-II Score', title='BCC Malignant') + 
+  theme(legend.position="none", plot.title = element_text(color="black", size=18, face="bold", hjust = 0.5))
+
+
+## Compare MHC scores between BCC malignant cells by treatment class (Figure 3G / 3H)
+
+bcc.malignant.mhc1 <- FetchData(object=BCC.malignant, vars=mhc1.genes)
+bcc.malignant.mhc2 <- FetchData(object=BCC.malignant, vars=mhc2.genes)
+
+bcc.malignant.mhc1$Score <- rowMeans(bcc.malignant.mhc1)
+bcc.malignant.mhc1$Patient <- BCC.malignant$patient
+bcc.malignant.mhc1$Response.Treatment <- as.factor(BCC.malignant$treatment.status)
+
+bcc.malignant.mhc1$Response.Treatment <- recode_factor(bcc.malignant.mhc1$Response.Treatment,
+                                          `Nonresponsive post` = 'NR Post',
+                                          `Nonresponsive pre`='NR Pre',
+                                          `Responsive post`='R Post',
+                                          `Responsive pre`='R Pre')
+
+comparisons = list(c('R Pre', 'R Post'), c('NR Pre', 'NR Post'))
+palette=c('#ec7c71', '#bc0d07', '#e779b8', '#bc4899')
+ggviolin(bcc.malignant.mhc1, x="Response.Treatment", y="Score", fill="Response.Treatment", add="boxplot", trim=TRUE, add.params = list(fill = "white"), palette=palette) +
+  stat_compare_means(comparisons=comparisons) + labs(y='MHC-I Score', x='', title='BCC Malignant Cells') +
+  theme_bw() + theme(legend.position='none', plot.title = element_text(color="black", size=18, face="bold", hjust=0.5)) 
+
+
+
+bcc.malignant.mhc2$Score <- rowMeans(bcc.malignant.mhc2)
+bcc.malignant.mhc2$Patient <- BCC.malignant$patient
+bcc.malignant.mhc2$Response.Treatment <- as.factor(BCC.malignant$treatment.status)
+
+bcc.malignant.mhc2$Response.Treatment <- recode_factor(bcc.malignant.mhc2$Response.Treatment,
+                                          `Nonresponsive post` = 'NR Post',
+                                          `Nonresponsive pre`='NR Pre',
+                                          `Responsive post`='R Post',
+                                          `Responsive pre`='R Pre')
+
+comparisons = list(c('R Pre', 'R Post'), c('NR Pre', 'NR Post'))
+palette=c('#ec7c71', '#bc0d07', '#e779b8', '#bc4899')
+ggviolin(bcc.malignant.mhc2, x="Response.Treatment", y="Score", fill="Response.Treatment", add="boxplot", trim=TRUE, add.params = list(fill = "white"), palette=palette) +
+  stat_compare_means(comparisons=comparisons) + 
+  labs(y='MHC-II Score', x='', title='BCC Malignant Cells') + scale_y_sqrt() + 
+  theme_bw() + theme(legend.position='none', plot.title = element_text(color="black", size=18, face="bold", hjust=0.5)) 
+
+```
+
+
+
+Compare responders and nonresponders
+
+```{r}
+
+## Figure 1D 
+
+ggplot_barcharts(BCCIO$response, BCCIO$seurat_clusters, colors='Spectral', normalize='Yes') +
+  geom_hline(yintercept=0.50) + labs(y='Normalized Proportion', x='', fill='Treatment') + 
+  theme_bw() + theme(axis.text.x = element_text(angle = 45, vjust = 1, hjust=1))
+
+## Volcano plot of responders vs. nonresponders, all cells (Figure 1E)
+
+celltype.markers <- FindMarkers(BCCIO, subset.ident='everything', group.by='response', ident.1='Responsive')
+celltype.markers_tibble <- as_tibble(celltype.markers, rownames='GeneNames')
+celltype.markers_tibble <- arrange(celltype.markers_tibble, avg_logFC)
+
+hsp.genes <- c('HSP90B1', 'HSPA1A', 'HSPA1B', 'HSPA6', 'HSPB1', 'HSPH1')
+deg.genes <- celltype.markers_tibble$GeneNames[c(1, 2, 3, 341, 342, 343)]
+
+EnhancedVolcano(celltype.markers_tibble,
+                lab = celltype.markers_tibble$GeneNames,
+                x = 'avg_logFC', y = 'p_val_adj',
+                pCutoff = 0.05, FCcutoff = 0.5,
+                title = "BCC Responders vs. Nonresponders",
+                selectLab=c(mhc1.genes, mhc2.genes, hsp.genes, deg.genes),
+                subtitle='', labSize=6)
+
+## Compare proportion of all cells that are T cells (Figure 1F)
+
+gg1 <- ggplot_barcharts(BCCIO$patient.status, BCCIO$seurat_clusters)
+
+gg1data <- data.frame(gg1$data)
+gg1data.append <- data.frame(Clusters = c('CD8+ Effector', 'CD8+ Exhausted', 'Proliferating T Cells', 'Proliferating T Cells', 'Proliferating T Cells'),
+                             Batch = c('su012 post', 'su002 pre', 'su003 post', 'su003 pre', 'su010 pre'),
+                             n = 0, 
+                             normalize = 0,
+                             .group = c(21, 4, 6, 5, 20))
+gg1data <- rbind(gg1data, gg1data.append)
+gg1data <- gg1data[order(gg1data$.group),]
+
+TotalCells <- c(10429, 1149, 205, 143, 824, 235, 813, 706, 3797, 2712, 4051, 5207, 249, 1925, 5032, 2540, 4991, 4063, 527, 108, 783, 2540)
+Idents(BCCIO) <- BCCIO$patient.status
+df1 <- data.frame(Total = TotalCells,
+                  CD4 = gg1data$n[gg1data$Clusters == 'CD4+ T Cells'],
+                  CD8Memory = gg1data$n[gg1data$Clusters == 'CD8+ Memory'],
+                  CD8Effector = gg1data$n[gg1data$Clusters == 'CD8+ Effector'],
+                  CD8Exhausted = gg1data$n[gg1data$Clusters == 'CD8+ Exhausted'],
+                  Tregs = gg1data$n[gg1data$Clusters == 'Tregs'],
+                  Proliferating = gg1data$n[gg1data$Clusters == 'Proliferating T Cells'])
+
+df1$TCells <- rowSums(df1) - df1$Total
+df1$Proportion <- df1$TCells / df1$Total
+df1$Status <- c('R Post', 'R Pre', 'R Post', 'R Pre', 'R Post', 'R Pre', 'R Post', 'R Pre', 'NR Post', 'NR Pre', 'NR Post', 'NR Pre', 'NR Post', 'NR Pre', 'NR Post', 'NR Pre', 'R Post', 'R Pre', 'NR Post', 'NR Pre', 'R Post', 'R Pre')
+
+Idents(PDAC.all) <- PDAC.all$orig.ident
+gg2 <- ggplot_barcharts(PDAC.all$cluster, PDAC.all$orig.ident)
+gg2data <- data.frame(gg2$data)
+
+gg2data.append <- data.frame(Clusters = c('I11', 'H2', 'H3', 'I7', 'I16', 'H2', 'H3', 'I13', 'H3'),
+                             Batch = c('CD8+ Exhausted', 'CD8+ Exhausted', 'CD8+ Exhausted', 'CD8+ Memory', 'CD8+ Memory', 'CD8+ Memory', 'CD8+ Memory', 'CD8+ Memory', 'Tregs'),
+                             n = 0,
+                             normalize = 0,
+                             .group = c(5, 5, 5, 6, 6, 6, 6, 6, 22))
+gg2data <- rbind(gg2data, gg2data.append)
+gg2data <- gg2data[order(gg2data$Clusters),]
+
+Idents(PDAC.all) <- PDAC.all$orig.ident
+TotalCells <- data.frame(table(Idents(PDAC.all)))$Freq
+df2 <- data.frame(Total = TotalCells,
+                  CD4 = gg2data$n[gg2data$Batch == 'CD4+ T Cells'],
+                  CD8Memory = gg2data$n[gg2data$Batch == 'CD8+ Memory'],
+                  CD8Effector = gg2data$n[gg2data$Batch == 'CD8+ Effector'],
+                  CD8Exhausted = gg2data$n[gg2data$Batch == 'CD8+ Exhausted'],
+                  Tregs = gg2data$n[gg2data$Batch == 'Tregs'],
+                  Proliferating = 0)
+df2$TCells <- rowSums(df2) - df2$Total
+df2$Proportion <- df2$TCells / df2$Total
+df2$Status <- rep(c('PDAC I', 'PDAC H'), c(16, 3))
+
+df <- rbind(df1, df2)
+df <- subset(df, Status == 'PDAC I' | Status == 'PDAC H' | Status == 'R Pre' | Status == 'NR Pre',)
+
+df$Status <- factor(df$Status, levels=c('R Pre', 'NR Pre', 'PDAC H', 'PDAC I'))
+comparisons = list(c('R Pre', 'NR Pre'), c('PDAC H', 'PDAC I'), c('R Pre', 'PDAC I'), c('NR Pre', 'PDAC I'))
+ggboxplot(df, x='Status', y='Proportion', color='Status', add='jitter') +
+  stat_compare_means(comparisons=comparisons) +
+  NoLegend() + ggtitle("Proportion of T Cells") + theme_bw() +
+  theme(plot.title = element_text(color="black", size=18, face="bold", hjust=0.5)) + NoLegend()
+
+## Heatmap of differentially expressed genes for PDAC ductal cells (Figure 3A)
+
+Idents(PDAC.all) <- PDAC.all$cluster
+pdac.ductal <- subset(PDAC.all, idents=c('Ductal cells: Malignant 1', 'Ductal cells: Malignant 2', 'Ductal cells: Normal', 'Ductal cells: Healthy'))
+
+Idents(pdac.ductal) <- pdac.ductal$cluster
+
+pdac.ductal.markers <- FindAllMarkers(pdac.ductal, only.pos=TRUE, min.pct=0.25, logfc.threshold=0.25)
+top25 <- pdac.ductal.markers %>% group_by(cluster) %>% top_n(n=25, wt=avg_logFC)
+pdac.ductal$cluster <- recode_factor(pdac.ductal$cluster, `Ductal cells: Malignant 1` = 'Malignant 1',
+                              `Ductal cells: Malignant 2` = 'Malignant 2',
+                              `Ductal cells: Normal` = 'Normal',
+                              `Ductal cells: Healthy` = 'Adj/Norm')
+DoHeatmap(pdac.ductal, features=top25$gene)
+
+## Volcano plot comparing PDAC and BCC malignant cells (Figure 3B)
+
+Idents(malignant) <- malignant$imported_clusters
+bcc.pdac.malignant <- subset(malignant, idents=c('BCC Malignant 1', 'BCC Malignant 2', 'PDAC DC Malignant 1', 'PDAC DC Malignant 2'))
+
+bcc.pdac.malignant$filler <- 'everything'
+Idents(bcc.pdac.malignant) <- bcc.pdac.malignant$filler
+
+celltype.markers <- FindMarkers(bcc.pdac.malignant, subset.ident='everything', group.by='cancer', ident.1='PDAC')
+celltype.markers_tibble <- as_tibble(celltype.markers, rownames='GeneNames')
+celltype.markers_tibble <- arrange(celltype.markers_tibble, avg_logFC)
+
+hsp.genes <- c('HSP90AA1', 'HSPA1A', 'HSPA1B', 'HSPA2', 'HSPA6', 'HSPA8', 'HSPB1', 'HSPD1', 'HSPE1', 'HSPG2', 'HSPH1')
+deg.genes <- celltype.markers_tibble$GeneNames[c(1, 2, 3, 4, 5, 2374, 2375, 2376, 2377, 2378)]
+
+EnhancedVolcano(celltype.markers_tibble,
+                lab = celltype.markers_tibble$GeneNames,
+                x = 'avg_logFC', y = 'p_val_adj',
+                pCutoff = 0.05, FCcutoff = 0.5,
+                title = "BCC vs. PDAC Malignant Cells",
+                selectLab=c(mhc1.genes, mhc2.genes, hsp.genes, deg.genes),
+                subtitle='', labSize=5, drawConnectors = TRUE)
+
+## Recluster PDAC ductal cells (Figure 1I)
+
+pdac.ductal <- FindNeighbors(pdac.ductal, dims=1:30)
+pdac.ductal <- FindClusters(pdac.ductal, resolution=0.3)
+pdac.ductal <- RunUMAP(pdac.ductal, dims=1:30)
+
+DimPlot(pdac.ductal, reduction='umap', group.by='cluster')
+
+## Comparison of MHC scores between CD8+ T Cells (Figure 2B)
+
+Idents(BCCIO) <- BCCIO$seurat_clusters
+bcc.cd8effector <- subset(BCCIO, idents='CD8+ Effector')
+bcc.cd8exhausted <- subset(BCCIO, idents='CD8+ Exhausted')
+bcc.cd8memory <- subset(BCCIO, idents='CD8+ Memory')
+
+Idents(PDAC.all) <- PDAC.all$cluster
+pdac.cd8effector <- subset(PDAC.all, idents='CD8+ Effector')
+pdac.cd8exhausted <- subset(PDAC.all, idents='CD8+ Exhausted')
+pdac.cd8memory <- subset(PDAC.all, idents='CD8+ Memory')
+
+bcc.cd8effector$orig.ident <- bcc.cd8effector$patient.status
+bcc.cd8exhausted$orig.ident <- bcc.cd8exhausted$patient.status
+bcc.cd8memory$orig.ident <- bcc.cd8memory$patient.status
+
+cd8objects <- c(bcc.cd8effector, pdac.cd8effector, bcc.cd8exhausted, pdac.cd8exhausted, bcc.cd8memory, pdac.cd8memory)
+df <- data.frame(matrix(ncol=18, nrow=0))
+colnames(df) <- c(mhc1.genes, mhc2.genes)
+for (i in 1:length(cd8objects)) {
+  Idents(cd8objects[[i]]) <- cd8objects[[i]]$orig.ident
+  avg <- AverageExpression(cd8objects[[i]])[['RNA']][mhc.genes,]
+  df <- rbind(df, data.frame(t(avg)))
+}
+
+df$Celltype <- rep(c('BCC Effector', 'PDAC Effector', 'BCC Exhausted', 'PDAC Exhausted', 'BCC Memory', 'PDAC Memory'), c(21, 19, 21, 16, 22, 14))
+df$MHC1 <- rowSums(df[, 1:6])/6
+df$MHC2 <- rowSums(df[, 7:18])/12
+
+comparisons <- list(c('BCC Effector', 'PDAC Effector'), c('BCC Exhausted', 'PDAC Exhausted'), c('BCC Memory', 'PDAC Memory'))
+ggboxplot(df, x='Celltype', y='MHC1', color='Celltype', add='jitter') +
+  stat_compare_means(comparisons=comparisons) +
+  NoLegend() + ggtitle("MHC-I Expression") + theme_bw() +
+  theme(plot.title = element_text(color="black", size=18, face="bold", hjust=0.5)) + NoLegend()
+
+ggboxplot(df, x='Celltype', y='MHC2', color='Celltype', add='jitter') +
+  ylim(0, 10) + stat_compare_means(comparisons=comparisons) +
+  NoLegend() + ggtitle("MHC-II Expression") + theme_bw() +
+  theme(plot.title = element_text(color="black", size=18, face="bold", hjust=0.5)) + NoLegend()
+
+
+## Identification of similarly-expressed genes between PDAC and BCC malignant cells (Figure 4D)
+
+Idents(BCCIO) <- BCCIO$seurat_clusters
+bcc.malignant <- subset(BCCIO, idents=c('Malignant 1', 'Malignant 2'))
+
+Idents(PDAC.all) <- PDAC.all$cluster
+pdac.malignant <- subset(PDAC.all, idents=c('Ductal cells: Malignant 1', 'Ductal cells: Malignant 2'))
+
+bcc.malignant$filler <- 'everything'
+Idents(bcc.malignant) <- bcc.malignant$filler
+pdac.malignant$filler <- 'everything'
+Idents(pdac.malignant) <- pdac.malignant$filler
+
+bccavg <- AverageExpression(bcc.malignant)[['RNA']]
+pdacavg <- AverageExpression(pdac.malignant)[['RNA']]
+common.genes <- intersect(rownames(bccavg), rownames(pdacavg))
+
+bccavg$Gene <- rownames(bccavg)
+pdacavg$Gene <- rownames(pdacavg)
+bccavg <- bccavg[ order(rownames(bccavg)), ]
+pdacavg <- pdacavg[ order(rownames(pdacavg)), ]
+malignant.exp <- data.frame(BCC = bccavg[common.genes, ]$everything,
+                            PDAC = pdacavg[common.genes, ]$everything,
+                            Gene = common.genes)
+malignant.exp$Ratio <- malignant.exp$PDAC / malignant.exp$BCC
+malignant.exp$log2 <- log2(malignant.exp$Ratio)
+malignant.exp <- malignant.exp[(malignant.exp$log2 < 50 & malignant.exp$log2 > -50), ]
+malignant.exp <- malignant.exp[complete.cases(malignant.exp), ]
+
+malignant.exp$log2_norm <- (malignant.exp$log2 - mean(malignant.exp$log2)) / sd(malignant.exp$log2)
+malignant.exp <- malignant.exp[order(malignant.exp$log2_norm), ]
+malignant.exp$Color <- rep(c('NS', 'S', 'NS'), c(6726, 4000, 7380))
+
+genes <- c(mhc.genes, hsp.genes)
+ggscatter(malignant.exp, x='BCC', y='log2_norm', size=0.5, color='Color', palette=c('#000000', '#A7303099'), alpha=0.125, label='Gene', label.select=genes, repel=TRUE, max.overlaps=12) + 
+  scale_x_log10() +
+  labs(y='Normalized log2(DE)', x='BCC Expression', title='Malignant Cells') + theme_bw() +
+  theme(plot.title = element_text(color="black", size=18, face="bold", hjust=0.5)) + NoLegend()
+
+
+## Identification of similarly-expressed genes between PDAC and BCC malignant cells (Figure 2D)
+
+Idents(BCCIO) <- BCCIO$seurat_clusters
+bcc.cd8 <- subset(BCCIO, idents=c('CD8+ Exhausted', 'CD8+ Memory', 'CD8+ Effector'))
+
+Idents(PDAC.all) <- PDAC.all$cluster
+pdac.cd8 <- subset(PDAC.all, idents=c('CD8+ Exhausted', 'CD8+ Memory', 'CD8+ Effector'))
+
+bcc.cd8$filler <- 'everything'
+Idents(bcc.cd8) <- bcc.cd8$filler
+pdac.cd8$filler <- 'everything'
+Idents(pdac.cd8) <- pdac.cd8$filler
+
+bccavg <- AverageExpression(bcc.cd8)[['RNA']]
+pdacavg <- AverageExpression(pdac.cd8)[['RNA']]
+common.genes <- intersect(rownames(bccavg), rownames(pdacavg))
+
+bccavg$Gene <- rownames(bccavg)
+pdacavg$Gene <- rownames(pdacavg)
+bccavg <- bccavg[ order(rownames(bccavg)), ]
+pdacavg <- pdacavg[ order(rownames(pdacavg)), ]
+cd8.exp <- data.frame(BCC = bccavg[common.genes, ]$everything,
+                            PDAC = pdacavg[common.genes, ]$everything,
+                            Gene = common.genes)
+cd8.exp$Ratio <- cd8.exp$PDAC / cd8.exp$BCC
+cd8.exp$log2 <- log2(cd8.exp$Ratio)
+cd8.exp <- cd8.exp[(cd8.exp$log2 < 50 & cd8.exp$log2 > -50), ]
+cd8.exp <- cd8.exp[complete.cases(cd8.exp), ]
+
+cd8.exp$log2_norm <- (cd8.exp$log2 - mean(cd8.exp$log2)) / sd(cd8.exp$log2)
+cd8.exp <- cd8.exp[order(cd8.exp$log2_norm), ]
+cd8.exp$Color <- rep(c('NS', 'S', 'NS'), c(7248, 3000, 5103))
+
+genes <- c(mhc.genes, hsp.genes)
+ggscatter(cd8.exp, x='BCC', y='log2_norm', size=0.5, color='Color', palette=c('#000000', '#A7303099'), alpha=0.125, label='Gene', label.select=genes, repel=TRUE, max.overlaps=12) + 
+  scale_x_log10() +
+  labs(y='Normalized log2(DE)', x='BCC Expression', title='CD8+ T Cells') + theme_bw() +
+  theme(plot.title = element_text(color="black", size=18, face="bold", hjust=0.5)) + NoLegend()
+
+```
+
+
+
+Create Figure 5
+
+```{r}
+
+Idents(BCCIO) <- BCCIO$seurat_clusters
+bcc.cd4 <- subset(BCCIO, idents=c('CD4+ T Cells'))
+bcc.macrophages <- subset(BCCIO, idents=c('M1 Macrophages', 'M2 Macrophages'))
+bcc.bcells <- subset(BCCIO, idents=c('B cells'))
+
+Idents(PDAC.all) <- PDAC.all$cluster
+pdac.cd4 <- subset(PDAC.all, idents=c('CD4+ T Cells'))
+pdac.macrophages <- subset(PDAC.all, idents=c('M1 Macrophages', 'M2 Macrophages'))
+pdac.bcells <- subset(PDAC.all, idents=c('B cells'))
+
+bcc.cd4$cancer <- 'BCC'
+bcc.macrophages$cancer <- 'BCC'
+bcc.bcells$cancer <- 'BCC'
+
+pdac.cd4$cancer <- 'PDAC'
+pdac.macrophages$cancer <- 'PDAC'
+pdac.bcells$cancer <- 'PDAC'
+
+cd4cells <- merge(bcc.cd4, pdac.cd4)
+macrophages <- merge(bcc.macrophages, pdac.macrophages)
+bcells <- merge(bcc.bcells, pdac.bcells)
+
+cd4cells$filler <- 'everything'
+macrophages$filler <- 'everything'
+bcells$filler <- 'everything'
+
+Idents(cd4cells) <- cd4cells$filler
+Idents(macrophages) <- macrophages$filler
+Idents(bcells) <- bcells$filler
+
+cd4volcano <- bioc_volcano(dataset=cd4cells, celltype='everything', group='cancer', ident='BCC', ident2='PDAC', title='filler')
+macrophagevolcano <- bioc_volcano(dataset=macrophages, celltype='everything', group='cancer', ident='BCC', ident2='PDAC', title='filler')
+bcellvolcano <- bioc_volcano(dataset=bcells, celltype='everything', group='cancer', ident='BCC', ident2='PDAC', title='filler')
+
+
+## Calculate differences in PD-1 pathway expression between BCC and PDAC T cell subclusters (Figure 2H)
+
+bcc.pdac.merge <- merge(BCCIO, PDAC.all)
+bcc.pdac.merge$cluster[1:53029] <- bcc.pdac.merge$seurat_clusters[1:53029]
+bcc.pdac.merge$patient[53030:108189] <- bcc.pdac.merge$orig.ident[53030:108189]
+bcc.pdac.merge$treatment[53030:108189] <- bcc.pdac.merge$status[53030:108189]
+bcc.pdac.merge$response[53030:108189] <- bcc.pdac.merge$treatment[53030:108189]
+Idents(bcc.pdac.merge) <- bcc.pdac.merge$cluster
+
+bcc.pdac.merge@meta.data <- subset(bcc.pdac.merge@meta.data,
+                                   select=c(patient, cluster, treatment, response))
+
+## Create barchart of T cell composition (Figure 2A)
+
+tcellcounts <- data.frame(`CD8+ Effector` = c(302, 3390, 1883, 1372),
+                          `CD8 Exhausted` = c(3543, 371, 1350, 4),
+                          `CD8+ Memory` = c(7134, 1968, 67, 3),
+                          `CD4+` = c(3823, 3934, 3850, 311),
+                          `Tregs` = c(2874, 1508, 841, 2),
+                          `Proliferating` = c(313, 907, 0, 0),
+                          `NK` = c(611, 428, 2019, 256),
+                          `Misc.` = c(682, 2365, 0, 0))
+
+colnames(tcellcounts) <- c('CD8+ Effector', 'CD8+ Exhausted', 'CD8+ Memory', 'CD4+', 'Tregs', 'Proliferating', 'NK', 'Misc.')
+rownames(tcellcounts) <- c('BCC R', 'BCC NR', 'PDAC Can.', 'PDAC Adj.')
+
+tcellcounts$Group <- rownames(tcellcounts)
+tcellcounts <- melt(tcellcounts, id=c('Group'))
+
+colnames(tcellcounts) <- c('Group', 'Celltype', 'variable')
+colors <- c('#E64B35CC', '#4DBBD5CC', '#3C5488CC', '#00A087CC', '#F39B7FCC', '#91D1C2CC', '#DC0000CC', '#8491B4CC')
+
+ggplot(tcellcounts, aes(fill=Celltype, y=variable, x=Group)) +
+  geom_bar(position="fill", stat="identity") + labs(x='', y='Proportion of T Cells') +
+  theme_bw() + scale_fill_manual(values=colors) +
+  theme(axis.text=element_text(size=12), axis.title=element_text(size=14))
+
+
+## Create violin plots of MHC scores and PD-1 gene expression (Figure 2B, 2C, 2D, 2E)
+
+Idents(BCCIO) <- BCCIO$seurat_clusters
+bcc.cd8 <- subset(BCCIO, idents=c('CD8+ Exhausted', 'CD8+ Memory', 'CD8+ Effector'))
+
+Idents(PDAC.all) <- PDAC.all$cluster
+pdac.cd8 <- subset(PDAC.all, idents=c('CD8+ Exhausted', 'CD8+ Memory', 'CD8+ Effector'))
+
+cd8cells <- merge(bcc.cd8, pdac.cd8)
+cd8cells$cluster[1:16708] <- bcc.cd8$seurat_clusters
+cd8cells$cancer <- rep(c('BCC', 'PDAC'), c(16708, 4679))
+
+datasource <- VlnPlot(cd8cells, features=mhc.genes[1])
+mhc.cell.data <- datasource$data
+
+for (i in 2:length(mhc.genes)) {
+  datasource <- VlnPlot(cd8cells, features=mhc.genes[i])
+  mhc.cell.data <- cbind(mhc.cell.data, datasource$data)
+}
+
+mhc.cell.data <- subset(mhc.cell.data, select=-c(2, 4, 6, 8, 10, 12, 14, 16, 18, 20, 22, 24, 26, 28, 30, 32, 34))
+for (i in 1:length(mhc.genes)) {
+  mhc.cell.data[i] <- expm1(mhc.cell.data[i])
+}
+mhc.cell.scores <- data.frame(mhc.cell.data$ident)
+mhc.cell.scores$MHC1 <- rowSums(mhc.cell.data[1:6]/6)
+mhc.cell.scores$MHC2 <- rowSums(mhc.cell.data[7:18]/12)
+mhc.cell.scores$Cancer <- cd8cells@meta.data$cancer
+
+colnames(mhc.cell.scores) <- c('Celltype', 'MHC-I Score', 'MHC-II Score', 'Cancer')
+mhc.cell.scores$Color <- paste(mhc.cell.scores$Cancer, mhc.cell.scores$Celltype)
+mhc.cell.scores$Celltype <- substr(mhc.cell.scores$Celltype, 6, 100)
+
+colors <- c('#E64B3588', '#4DBBD588', '#3C548888', '#E64B35FF', '#4DBBD5FF', '#3C5488FF')
+
+ggplot(mhc.cell.scores, aes(x=Celltype, y=`MHC-I Score`, fill=Color)) + 
+  geom_violin(position=position_dodge(1)) + stat_compare_means(label='p') + 
+  scale_fill_manual(values=colors) + labs(y='MHC-I Score', x='CD8+ Subcluster') +  
+  ggtitle('Mean MHC-I Gene Expression') + theme_bw() +
+  theme(axis.text=element_text(size=12), axis.title=element_text(size=14), plot.title = element_text(color="black", size=18, face="bold", hjust=0.5))
+
+ggplot(mhc.cell.scores, aes(x=Celltype, y=`MHC-II Score`, fill=Color)) + 
+  geom_violin(position=position_dodge(1)) + stat_compare_means(label='p') + 
+  scale_fill_manual(values=colors) + labs(y='MHC-II Score', x='CD8+ Subcluster') +  
+  ggtitle('Mean MHC-II Gene Expression') + theme_bw() +
+  theme(axis.text=element_text(size=12), axis.title=element_text(size=14), plot.title = element_text(color="black", size=18, face="bold", hjust=0.5))
+
+
+pd1.genes <- c('PDCD1', 'CD274', 'PDCD1LG2')
+datasource <- VlnPlot(cd8cells, features=pd1.genes[1])
+pd1.cell.data <- datasource$data
+
+for (i in 2:length(pd1.genes)) {
+  datasource <- VlnPlot(cd8cells, features=pd1.genes[i])
+  pd1.cell.data <- cbind(pd1.cell.data, datasource$data)
+}
+
+pd1.cell.data <- subset(pd1.cell.data, select=-c(2, 4))
+for (i in 1:length(pd1.genes)) {
+  pd1.cell.data[i] <- expm1(pd1.cell.data[i])
+}
+
+mhc.cell.scores$PD1 <- rowSums(pd1.cell.data[1:1]/1) + 0.0001
+mhc.cell.scores$PDL <- rowSums(pd1.cell.data[2:3]/2) + 0.0001
+
+ggplot(mhc.cell.scores, aes(x=Celltype, y=PD1, fill=Color)) + 
+  geom_violin(position=position_dodge(1)) + stat_compare_means(label='p') + 
+  scale_fill_manual(values=colors) + labs(y='PD-1 Expression', x='CD8+ Subcluster') +  
+  ggtitle('PD-1 Gene Expression') + theme_bw() +
+  theme(axis.text=element_text(size=12), axis.title=element_text(size=14), plot.title = element_text(color="black", size=18, face="bold", hjust=0.5))
+
+ggplot(mhc.cell.scores, aes(x=Celltype, y=PDL, fill=Color)) + 
+  geom_violin(position=position_dodge(1)) + stat_compare_means(label='p') + 
+  scale_fill_manual(values=colors) + labs(y='PD-L1/PD-L2 Score', x='CD8+ Subcluster') +  
+  ggtitle('PD-L1/PD-L2 Gene Expression') + theme_bw() +
+  theme(axis.text=element_text(size=12), axis.title=element_text(size=14), plot.title = element_text(color="black", size=18, face="bold", hjust=0.5), legend.position='bottom')
+
+
+## Create dot plot comparing average PD-1 expression in different T cell clusters (Figure 2G)
+
+bcc.tcells <- subset(BCCIO, idents=c('CD4+ T Cells', 'CD8+ Effector', 'CD8+ Exhausted', 'CD8+ Memory', 'Tregs', 'NK Cells'))
+pdac.tcells <- subset(PDAC.all, idents=c('CD4+ T Cells', 'CD8+ Effector', 'CD8+ Exhausted', 'CD8+ Memory', 'Tregs', 'NK Cells'))
+
+bcc.tcells$cancer <- 'BCC'
+pdac.tcells$cancer <- 'PDAC'
+tcells <- merge(bcc.tcells, pdac.tcells)
+
+bcc.exp <- AverageExpression(bcc.tcells)$RNA[c("PDCD1", "CD274", "PDCD1LG2"),]
+pdac.exp <- AverageExpression(pdac.tcells)$RNA[c("PDCD1", "CD274", "PDCD1LG2"),]
+bcc.exp$Gene <- rownames(bcc.exp)
+pdac.exp$Gene <- rownames(pdac.exp)
+bcc.exp <- melt(bcc.exp, id='Gene')
+pdac.exp <- melt(pdac.exp, id='Gene')
+
+pd1.exp <- merge(bcc.exp, pdac.exp, by=c('Gene', 'variable'))
+colnames(pd1.exp) <- c('Gene', 'Cluster', 'BCC', 'PDAC')
+pd1.exp$log2 <- log2(pd1.exp$BCC / pd1.exp$PDAC)
+
+pd1data <- gene_cdf(datasets=list(bcc.tcells, pdac.tcells), clusternames=c('BCC', 'PDAC'), genename='PDCD1', title='Filler')
+pd1data$data$subcluster <- c(bcc.tcells$seurat_clusters, pdac.tcells$cluster)
+pdl1data <- gene_cdf(datasets=list(bcc.tcells, pdac.tcells), clusternames=c('BCC', 'PDAC'), genename='CD274', title='Filler')
+pdl1data$data$subcluster <- c(bcc.tcells$seurat_clusters, pdac.tcells$cluster)
+pdl2data <- gene_cdf(datasets=list(bcc.tcells, pdac.tcells), clusternames=c('BCC', 'PDAC'), genename='PDCD1LG2', title='Filler')
+pdl2data$data$subcluster <- c(bcc.tcells$seurat_clusters, pdac.tcells$cluster)
+
+clusternames <- levels(Idents(tcells))
+pd1.pvals <- pdl1.pvals <- pdl2.pvals <- rep(NA, length(clusternames))
+for (i in 1:length(clusternames)) {
+  pd1.pvals[i] <- wilcox.test(formula=gene~cluster, data=pd1data$data[pd1data$data$subcluster==clusternames[i], ], paired=FALSE)$p.value
+  pdl1.pvals[i] <- wilcox.test(formula=gene~cluster, data=pdl1data$data[pdl1data$data$subcluster==clusternames[i], ], paired=FALSE)$p.value
+  pdl2.pvals[i] <- wilcox.test(formula=gene~cluster, data=pdl2data$data[pdl2data$data$subcluster==clusternames[i], ], paired=FALSE)$p.value
+}
+
+pd1.exp$pvals <- c(pdl1.pvals, pd1.pvals, pdl2.pvals)
+pd1.exp$Cluster <- factor(pd1.exp$Cluster, levels=clusternames)
+pd1.exp$Gene <- rep(c('PD-L1', 'PD-1', 'PD-L2'), each=6)
+pd1.exp$Gene <- factor(pd1.exp$Gene, levels=c('PD-1', 'PD-L1', 'PD-L2'))
+pd1.exp$log2_rounded <- round(pd1.exp$log2, digits=2)
+
+mid <- 0
+ggplot(data=pd1.exp, aes(y=Gene, x=Cluster)) + 
+  geom_point(data=pd1.exp, aes(size=-log10(pvals), color=log2)) + 
+  geom_text(aes(label=log2_rounded), vjust=-2) + 
+  scale_size_continuous(range=c(4, 12), name='-log10(p-val)') + 
+  scale_color_gradient2(midpoint=mid, low='#0000FF', high='#800000', mid='gray') + 
+  labs(x='Cluster', y='Gene') + theme_bw() + 
+  theme(axis.text.x=element_text(size=12), axis.text.y=element_text(size=12))
+
+## Create heatmap comparing BCC and PDAC (Figure 1C)
+
+bccpdac.merge <- merge(BCCIO, PDAC.all)
+bccpdac.merge$cancer <- rep(c('BCC', 'PDAC'), c(53029, 55160))
+
+stored <- bccpdac.merge
+bccpdac.merge <- RenameIdents(object=bccpdac.merge, `M1 Macrophages` = 'Macrophages',
+                              `M2 Macrophages` = 'Macrophages',
+                              `Malignant 1` = 'BCC Malignant', 
+                              `Malignant 2` = 'BCC Malignant',
+                              `Ductal cells: Malignant 1` = 'PDAC Malignant', 
+                              `Ductal cells: Malignant 2` = 'PDAC Malignant', 
+                              `Endothelial Cells` = 'Endothelial cells', 
+                              `Ductal cells: Healthy` = 'Ductal cells',
+                              `Ductal cells: Normal` = 'Ductal cells', 
+                              `Plasma Cells` = 'Plasma cells')
+
+bccpdac.merge <- RenameIdents(object=bccpdac.merge, `Proliferating T Cells` = 'Prolif. T cells',
+                              `CD4+ T Cells` = 'CD4+ T cells', 
+                              `Dendritic Cells` = 'Dendritic cells',
+                              `NK Cells` = 'NK cells', 
+                              `Miscellaneous` = 'Misc. T cells')
+
+levels <- c('CD4+ T cells', 'CD8+ Effector', 'CD8+ Exhausted', 'CD8+ Memory', 'Tregs', 'Prolif. T cells', 'NK cells', 'Misc. T cells', 'BCC Malignant', 'PDAC Malignant', 'Ductal cells', 'B cells', 'Macrophages', 'Fibroblasts', 'Myofibroblasts', 'CAFs', 'Dendritic cells', 'pDCs', 'Endothelial cells', 'Acinar cells', 'Plasma cells', 'Granulocytes', 'Mast cells', 'Melanocytes', 'Monocytes', 'Perivascular cells')
+levels(bccpdac.merge) <- levels
+
+bccpdac.markers <- FindAllMarkers(bccpdac.merge, only.pos=TRUE, min.pct=0.25, logfc.threshold=0.25)
+# Do not run -- takes 18+ hours 
+
+save(bccpdac.markers, file="C:\\Users\\Ryan\\Documents\\Nie Research Project\\BCC.PDAC.merge.markers")
+
+top5markers <- bccpdac.markers %>% group_by(cluster) %>% top_n(n=5, wt=avg_logFC)
+top3markers <- bccpdac.markers %>% group_by(cluster) %>% top_n(n=3, wt=avg_logFC)
+
+
+bccpdac.merge <- ScaleData(bccpdac.merge, features=top5markers$gene)
+DoHeatmap(bccpdac.merge, features=top3markers$gene)
+
+bccpdac.merge$response[53030:108189] <- bccpdac.merge$status[53030:108189]
+bccpdac.merge$response <- as.factor(bccpdac.merge$response)
+
+bccpdac.merge$response <- recode_factor(bccpdac.merge$response, 
+                                        Responsive = 'BCC R', Nonresponsive = 'BCC NR',
+                                       I = 'PDAC Can.', H = 'PDAC Adj.')
+
+ggplot_barcharts(bccpdac.merge$response, Idents(bccpdac.merge)) +
+  coord_flip() + theme_bw() + theme(legend.position='bottom')
 
 ```
