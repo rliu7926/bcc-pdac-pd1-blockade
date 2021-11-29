@@ -4,7 +4,7 @@ Investigating the genetic basis for the inefficacy of PD-1 blockade in treating 
 
 Code for the reproduction of all main figures can be found in 01_PD1ResearchFinal.Rmd. Each panel's code is independent -- after loading all necessary packages and datasets each panel can be produced solely with the code listed under the corresponding section. 
 
-Data is available upon request. 
+Data is available upon request. Original datasets can be accessed at GSE155698 (PDAC) and GSE123813 (BCC).
 
 01: Main Figures 
 
