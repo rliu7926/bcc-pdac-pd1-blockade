@@ -24,7 +24,9 @@ Data is available upon request.
 
 22: "Lab notebook" -- full analysis of all data
 
-23: CellChat analysis of both datasets
+23: CellChat analysis of BCC and PDAC datasets
+
+24: Machine learning on BCC, melanoma, and PDAC datasets (Python notebook)
 
 
 98: Old figures and graphics (not used in paper)
