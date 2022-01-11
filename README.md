@@ -6,9 +6,7 @@ Code for the reproduction of all main figures can be found in 01_PD1ResearchFina
 
 Data is available upon request. Original datasets can be accessed at GSE155698 (PDAC) and GSE123813 (BCC).
 
-01: Main Figures 
-
-02: Supplementary Figures
+01: Manuscript figures
 
 
 10: Seurat pre-processing and clustering functions
